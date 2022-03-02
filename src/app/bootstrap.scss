@@ -1,0 +1,28 @@
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 1003px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+);
+
+$btn-border-radius-sm:0;
+
+$modal-content-border-radius:0;
+
+$modal-content-color:#fff;
+$modal-content-bg:#222;
+$input-group-addon-bg:#555;
+$input-group-addon-color: #fff;
+$input-group-addon-border-color: #222;
+$input-bg:#333;
+$input-color:#999;
+$input-border-color:#222;
+$close-color: #fff;
+$input-disabled-bg: #555;
+$breadcrumb-bg: #282c34;
+$card-bg: #222;
+
+/* import bootstrap to set changes */
+@import "~bootstrap/scss/bootstrap";
