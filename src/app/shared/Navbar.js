@@ -82,53 +82,7 @@ export const Navbar = (props) => {
                 <i className="mdi mdi-view-grid"></i>
               </a>
             </li>
-            <Dropdown alignRight as="li" className="nav-item border-left" >
-              <Dropdown.Toggle as="a" className="nav-link count-indicator cursor-pointer">
-                <i className="mdi mdi-email"></i>
-                <span className="count bg-success"></span>
-              </Dropdown.Toggle>
-              <Dropdown.Menu className="navbar-dropdown preview-list">
-                  <h6 className="p-3 mb-0"><Trans>Messages</Trans></h6>
-                  <Dropdown.Divider />
-                  <Dropdown.Item href="!#" onClick={evt =>evt.preventDefault()} className="preview-item">
-                    <div className="preview-thumbnail">
-                      <div className="preview-icon bg-dark rounded-circle">
-                        <img src={require('../../assets/images/faces/face4.jpg')} alt="profile" className="rounded-circle profile-pic" />
-                      </div>
-                    </div>
-                    <div className="preview-item-content">
-                      <p className="preview-subject ellipsis mb-1"><Trans>Mark send you a message</Trans></p>
-                      <p className="text-muted mb-0"> 1 <Trans>Minutes ago</Trans> </p>
-                    </div>
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item href="!#" onClick={evt =>evt.preventDefault()} className="preview-item">
-                    <div className="preview-thumbnail">
-                      <div className="preview-icon bg-dark rounded-circle">
-                        <img src={require('../../assets/images/faces/face2.jpg')} alt="profile" className="rounded-circle profile-pic" />
-                      </div>
-                    </div>
-                    <div className="preview-item-content">
-                      <p className="preview-subject ellipsis mb-1"><Trans>Cregh send you a message</Trans></p>
-                      <p className="text-muted mb-0"> 15 <Trans>Minutes ago</Trans> </p>
-                    </div>
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item href="!#" onClick={evt =>evt.preventDefault()} className="preview-item">
-                    <div className="preview-thumbnail">
-                      <div className="preview-icon bg-dark rounded-circle">
-                        <img src={require('../../assets/images/faces/face3.jpg')} alt="profile" className="rounded-circle profile-pic" />
-                      </div>
-                    </div>
-                    <div className="preview-item-content">
-                      <p className="preview-subject ellipsis mb-1"><Trans>Profile picture updated</Trans></p>
-                      <p className="text-muted mb-0"> 18 <Trans>Minutes ago</Trans> </p>
-                    </div>
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <p className="p-3 mb-0 text-center">4 <Trans>new messages</Trans></p>
-                </Dropdown.Menu>
-            </Dropdown>
+     
             <Dropdown alignRight as="li" className="nav-item border-left">
               <Dropdown.Toggle as="a" className="nav-link count-indicator cursor-pointer">
                 <i className="mdi mdi-bell"></i>
