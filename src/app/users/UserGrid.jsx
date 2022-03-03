@@ -20,12 +20,13 @@ export const UserGrid = () => {
 
   const { instance, accounts, inProgress } = useMsal();
   const [graphData, setGraphData] = useState([]);
-  const [groupName, setGroupName] = useState([]);
   const [token, setToken] = useState();
   const [airline, setAirline] = useState();
   const [groupId, setGroupId] = useState();
   const [objectId, setObjectId] = useState();
   const [role, setRole] = useState();
+  const [dirRole, setDirRole] = useState();
+
 
 
 
@@ -50,6 +51,9 @@ export const UserGrid = () => {
               }
               if(group.displayName.startsWith("role") == true){
                 setRole(group.displayName.replace("role-", ""));
+              }
+              if(group.displayName.includes("User Administrator") == true){
+                setDirRole(group.displayName);
               }
             });
           });
@@ -80,7 +84,7 @@ export const UserGrid = () => {
               {
                 groupId
                   ?
-                  <ListUsers groupId={groupId} token={token} airline={airline} role={role} graphData={graphData}/>
+                  <ListUsers groupId={groupId} token={token} airline={airline} role={role} groupId={groupId} dirRole={dirRole} graphData={graphData}/>
                   :
                   <div></div>
               }

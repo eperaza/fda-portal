@@ -25,10 +25,11 @@ export const Tails = (props) => {
                                         <i className="mdi mdi-airplane icon-item text-primary"> </i>
 
                                         {
-                                            data.Key
+                                            data.Key.toUpperCase()
                                         }
                                     </h6>
                                     <p className="text-muted mb-0">
+                                        <a href="/user-pages/FDR">
                                         {
 
                                             (data.Value != "")
@@ -38,6 +39,7 @@ export const Tails = (props) => {
                                                 <>No FDR files</>
 
                                         }
+                                        </a>
                                     </p>
                                 </div>
                             </div>
@@ -45,36 +47,6 @@ export const Tails = (props) => {
                     </div>
                 </div>
             </div>
-            /*
-            <Accordion>
-                <Card>
-                    <Card.Header style={{ backgroundColor: "#111" }}>
-                        <Accordion.Toggle as={Button}
-                            variant="link" eventKey="0" >
-                            <i className="mdi mdi-chevron-double-down icon-md"></i>
-                            {data.Key}
-                        </Accordion.Toggle>
-                    </Card.Header>
-                    <Accordion.Collapse eventKey="0">
-                        <Card.Body style={{ backgroundColor: "#111" }}>
-                            {<ul>
-                                {   
-                                    (data.Value != "")
-                                    ?
-                                    data.Value.map((item) => {
-                                        
-                                        return <li className=""><i className="" key={item}><a href={`https://functionfdatspdev.azurewebsites.net/api/FlightDataRecordingDownload?code=CQuWinh1G8jFhEHaCgXGMQ9v1aNafxrZEmlrLeMHebjrga4ogDouPw==&airlineId=TAV&sourceFilePath=${item}`}>{item}</a></i></li>
-                                    })
-                                    :
-                                    <>No FDR files to show.</>
-                                   
-                                }
-
-                            </ul>}
-                        </Card.Body>
-                    </Accordion.Collapse>
-                </Card>
-            </Accordion>*/
         );
     };
 

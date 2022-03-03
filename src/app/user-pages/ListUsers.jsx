@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useCallback } from "react";
 import { useEffect, useRef } from 'react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import Button from "react-bootstrap/Button";
@@ -7,7 +7,7 @@ import Alert from 'react-bootstrap/Alert';
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
-import Spinner from 'react-bootstrap/Spinner'
+import Spinner from 'react-bootstrap/Spinner';
 import { Accordion, Card } from "react-bootstrap";
 import { ProgressBar } from 'react-bootstrap';
 import { SwitchToggle } from "../users/SwitchToggle.jsx";
@@ -163,9 +163,25 @@ export const ListUsers = (props) => {
 
     const login = async () => {
         try {
-            let res = await fetch(process.env.REACT_APP_LOGIN_URI);
+            const headers = new Headers();
+
+            headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
+            headers.append("Content-Type", "application/json");
+            
+            var data = JSON.stringify({
+                "azUsername": `${process.env.REACT_APP_FDAGROUND_USER}`,
+                "azPassword": `${process.env.REACT_APP_FDAGROUND_PASS}`
+
+            });
+            const options = {
+                method: "POST",
+                headers: headers,
+                body: data
+            };
+            let res = await fetch(process.env.REACT_APP_LOGIN_URI, options);
             let token = await res.json();
-            return token;
+            console.log("el token es " + token.authenticationResult.accessToken)
+            return token.authenticationResult.accessToken;
         } catch (error) {
             console.log(error);
         }
@@ -212,7 +228,7 @@ export const ListUsers = (props) => {
         onInputPassword = ({ target: { value } }) => setPassword(value);
 
     const [mail, setMail] = useState(""),
-        onInputMail = ({ target: { value } }) => setMail(value);
+        onInputMail = ({ target: { value } }) => setMail(value.toLowerCase());
 
     const [role, setRole] = useState("role-airlinefocal")
 
@@ -225,13 +241,16 @@ export const ListUsers = (props) => {
         setShowSuccess(false);
         setShowAlert(false)
         setCreateLabel(<><Spinner animation="border" size="sm" /></>)
-        const token = await login();
-        setToken(token);
+
+        const tokenFDA = await login();
+
         const headers = new Headers();
-        const bearer = `Bearer ${token}`;
+        const bearer = `Bearer ${tokenFDA}`;
 
         headers.append("Authorization", bearer);
         headers.append("Content-Type", "application/json");
+        //headers.append("DirRole", `${props.dirRole}`);
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
         var data = JSON.stringify({
             "userPrincipalName": `${principal}`,
@@ -292,6 +311,13 @@ export const ListUsers = (props) => {
         else return "ACTIVATED";
     };
 
+    const setAutoHeight = useCallback(() => {
+        gridRef.current.api.setDomLayout('autoHeight');
+        // auto height will get the grid to fill the height of the contents,
+        // so the grid div should have no height set, the height is dynamic.
+        document.querySelector('#myGrid').style.height = '';
+      }, []);
+
     return (
         <div>
             <div className="row">
@@ -325,8 +351,8 @@ export const ListUsers = (props) => {
                                                                 type="text"
                                                                 onChange={onInputPrincipal}
                                                                 value={principal}
-                                                                style={{borderRadius:10, fontStyle:'italic'}}
-                                                                />
+                                                                style={{ borderRadius: 10, fontStyle: 'italic' }}
+                                                            />
                                                             {/*
                                                             <div class="input-group-append">
                                                                 <span class="input-group-text text-white">@flitedeckadvisor.com</span>
@@ -347,7 +373,7 @@ export const ListUsers = (props) => {
                                                                     console.log("e.target.value", e.target.value);
                                                                     setRole(e.target.value);
                                                                 }}
-                                                                style={{borderRadius:10, fontStyle:'italic'}}>
+                                                                style={{ borderRadius: 10, fontStyle: 'italic' }}>
                                                                 <option value="role-airlinefocal">Focal</option>
                                                                 <option value="role-airlinepilot">Pilot</option>
                                                                 <option value="role-airlinecheckairman">Check Airman</option>
@@ -370,14 +396,14 @@ export const ListUsers = (props) => {
                                                                 onChange={onInputGivenName}
                                                                 value={givenName}
                                                                 type="text"
-                                                                placeholder="First Name" 
-                                                                style={{borderRadius:10, fontStyle:'italic'}}
-                                                                />
+                                                                placeholder="First Name"
+                                                                style={{ borderRadius: 10, fontStyle: 'italic' }}
+                                                            />
                                                         </div>
                                                     </div>
                                                     <div className="col-md-3">
                                                         <div class="input-group">
-                                                            
+
                                                             <input
                                                                 aria-label="" type="text"
                                                                 className="inp"
@@ -385,8 +411,8 @@ export const ListUsers = (props) => {
                                                                 placeholder="Last Name"
                                                                 onChange={onInputSurname}
                                                                 value={surname}
-                                                                type="text" 
-                                                                style={{borderRadius:10, fontStyle:'italic'}}/>
+                                                                type="text"
+                                                                style={{ borderRadius: 10, fontStyle: 'italic' }} />
                                                         </div>
                                                     </div>
                                                     <div className="col-md-5">
@@ -401,8 +427,8 @@ export const ListUsers = (props) => {
                                                                 type="text"
                                                                 onChange={onInputMail}
                                                                 value={mail}
-                                                                type="text" placeholder="eMail" 
-                                                                style={{borderRadius:10, fontStyle:'italic'}}/>
+                                                                type="text" placeholder="eMail"
+                                                                style={{ borderRadius: 10, fontStyle: 'italic' }} />
 
                                                         </div>
                                                     </div>
@@ -479,7 +505,7 @@ export const ListUsers = (props) => {
                                 <div className="row">
                                     <div className="col-md-4">
                                         <div className="row">
-                                            <p className="card-description"> Airline <code>{props.airline}</code></p>
+                                            <p className="card-description"> Airline <code>{props.airline.toUpperCase()}</code></p>
                                         </div>
                                     </div>
                                     <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">
@@ -493,7 +519,7 @@ export const ListUsers = (props) => {
                                 </div>
                             </div>
 
-                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 500, marginTop:-15 }}>
+                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 500, marginTop: -15 }}>
 
                                 <Button variant="danger" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={handleShow}><i class="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
 

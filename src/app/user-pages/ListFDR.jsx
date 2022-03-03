@@ -59,7 +59,7 @@ export const ListFDR = (props) => {
                                 <div className="col-12 grid-margin">
                                     <div className="row">
                                         <div className="col-md-9">
-                                            <h4 className="card-title">Tails</h4>
+                                            <h4 className="card-title">Aircraft Tails</h4>
 
                                         </div>
                                         <div className="col-md-3">
@@ -76,7 +76,7 @@ export const ListFDR = (props) => {
                                 <div className="row">
                                     <div className="col-md-4">
                                         <div className="row">
-                                            <p className="card-description"> Airline <code>{props.airline}</code></p>
+                                            <p className="card-description"> Airline <code>{props.airline.toUpperCase()}</code></p>
                                         </div>
                                     </div>
                                     <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">

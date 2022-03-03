@@ -58,12 +58,10 @@ export const BulkLoad = (props) => {
     const [showProgressBar, setShowProgressBar] = useState(false);
     const [showDeleteProgressBar, setShowDeleteProgressBar] = useState(false);
 
-
-
     let accessToken = null;
 
     useEffect(() => {
-        getUsers();
+        getPreUsers();
     }, [])
 
     const readExcel = (file) => {
@@ -102,12 +100,11 @@ export const BulkLoad = (props) => {
         setShowProgressBar(true);
         setUploadLoader(<>
             <Spinner animation="border" size="sm" /></>)
-        var accessToken = await login();
         let count = 0
         let increment = (100 / items.length);
         let countProgress = 0;
         items.forEach(async (element) => {
-            let res = await createPreUser(accessToken, element);
+            let res = await createPreUser(element);
             /*if(res === "Internal Server Error") {
                 alert("Bad File Format");
                 return;
@@ -118,7 +115,7 @@ export const BulkLoad = (props) => {
 
             if (count == items.length) {
                 setUploadLoader("Upload");
-                getUsers();
+                getPreUsers();
                 setTimeout(() => {
                     setShowProgressBar(false);
                 }, 1000);
@@ -129,13 +126,15 @@ export const BulkLoad = (props) => {
 
     }
 
-    const createPreUser = async (token, element) => {
+    const createPreUser = async (element) => {
 
         const headers = new Headers();
-        const bearer = `Bearer ${token}`;
+        const bearer = `Bearer ${props.token}`;
 
         headers.append("Authorization", bearer);
         headers.append("Content-Type", "application/json");
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
+
 
         var data = JSON.stringify({
             "userId": `${element.user}`,
@@ -152,7 +151,7 @@ export const BulkLoad = (props) => {
             headers: headers,
             body: data
         };
-        
+
         let res = await fetch(process.env.REACT_APP_PREUSERS_CREATE_URI, options);
         let x = await res.text();
         return x;
@@ -183,7 +182,7 @@ export const BulkLoad = (props) => {
         }
         selectedData.forEach(async (node) => {
             let status = await createUser(node, accessToken);
-            let statusDelete = await deleteUsers(node.userId, accessToken);
+            let statusDelete = await deletePreUsers(node.userId);
             console.log(status.errorDescription)
             if (status.objectId) {
                 setCheck("true")
@@ -223,7 +222,7 @@ export const BulkLoad = (props) => {
                 setDisable(false);
                 setLoader("Send Registration");
                 setLoader2("");
-                getUsers();
+                getPreUsers();
                 //callback();
             }
         });
@@ -232,9 +231,25 @@ export const BulkLoad = (props) => {
 
     const login = async () => {
         try {
-            let res = await fetch(process.env.REACT_APP_LOGIN_URI);
+            const headers = new Headers();
+
+            headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
+            headers.append("Content-Type", "application/json");
+            
+            var data = JSON.stringify({
+                "azUsername": `${process.env.REACT_APP_FDAGROUND_USER}`,
+                "azPassword": `${process.env.REACT_APP_FDAGROUND_PASS}`
+
+            });
+            const options = {
+                method: "POST",
+                headers: headers,
+                body: data
+            };
+            let res = await fetch(process.env.REACT_APP_LOGIN_URI, options);
             let token = await res.json();
-            return token;
+            console.log("el token es " + token.authenticationResult.accessToken)
+            return token.authenticationResult.accessToken;
         } catch (error) {
             console.log(error);
         }
@@ -244,8 +259,10 @@ export const BulkLoad = (props) => {
 
         const headers = new Headers();
         const bearer = `Bearer ${accessToken}`;
+
         headers.append("Authorization", bearer);
         headers.append("Content-Type", "application/json");
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
         var body = JSON.stringify({
             "userPrincipalName": `${data.userId}`,
@@ -282,7 +299,7 @@ export const BulkLoad = (props) => {
     /**
      * Auto-size all columns once the initial data is rendered.
      */
-    const autoSizeColumns = params => {
+     const autoSizeColumns = params => {
         const colIds = params.columnApi
             .getAllDisplayedColumns()
             .map(col => col.getColId());
@@ -290,23 +307,19 @@ export const BulkLoad = (props) => {
         params.columnApi.autoSizeColumns(colIds);
     };
 
-    const getUsers = async () => {
-        const token = await login();
-        setToken(token);
+    const getPreUsers = async () => {
+
         const headers = new Headers();
-        const bearer = `Bearer ${token}`;
+        const bearer = `Bearer ${props.token}`;
 
         headers.append("Authorization", bearer);
         headers.append("Airline", `airline-${props.airline}`);
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
         var requestOptions = {
             method: "GET",
-            headers: {
-                "Authorization": `${bearer}`,
-                "Airline": `airline-${props.airline}`
-            }
+            headers: headers
         };
-        console.log(requestOptions)
 
         const options = {
             method: "GET",
@@ -348,15 +361,14 @@ export const BulkLoad = (props) => {
 
         selectedData.forEach(async (node) => {
             console.log(node.userId)
-            console.log(token);
-            let status = await deleteUsers(node.userId, token);
+            let status = await deletePreUsers(node.userId);
 
             count++;
             countProgress = countProgress + increment;
             setDeleteProgressBarCount(countProgress);
 
             if (count == gridRef.current.api.getSelectedNodes().length) {
-                getUsers();
+                getPreUsers();
                 setDeleteLoader("Delete");
 
                 setTimeout(() => {
@@ -367,25 +379,21 @@ export const BulkLoad = (props) => {
         });
     }
 
-    const deleteUsers = async (user, token) => {
+    const deletePreUsers = async (user) => {
         const headers = new Headers();
-        const bearer = `Bearer ${token}`;
+        const bearer = `Bearer ${props.token}`;
 
         headers.append("Authorization", bearer);
-        headers.append("User", user);
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
         const options = {
-            method: "GET",
+            method: "DELETE",
             headers: headers,
         };
 
-        let res = await fetch(process.env.REACT_APP_PREUSERS_DELETE_URI, options);
-        let x = await res.text();
-        if (x == "")
-            return 204;
-        else {
-            return 500;
-        }
+        let res = await fetch(`${process.env.REACT_APP_PREUSERS_DELETE_URI}/${user}/`, options);
+        let x = await res.status;
+        return x;
 
     }
 
@@ -409,13 +417,13 @@ export const BulkLoad = (props) => {
     }
 
     const editPreUser = async (data) => {
-        const token = await login();
-        setToken(token);
+        
         const headers = new Headers();
-        const bearer = `Bearer ${token}`;
+        const bearer = `Bearer ${props.token}`;
 
         headers.append("Authorization", bearer);
         headers.append("Content-Type", "application/json");
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
         var body = JSON.stringify({
             "userId": `${data.userId}`,
@@ -424,11 +432,10 @@ export const BulkLoad = (props) => {
             "email": `${data.email}`,
             "role": `${data.role}`,
             "airline": `airline-${props.airline}`,
-
         });
 
         const options = {
-            method: "POST",
+            method: "PUT",
             headers: headers,
             body: body
         };
@@ -520,9 +527,9 @@ export const BulkLoad = (props) => {
                                     </div>
                                 </div>
                             </div>
-                            <p className="card-description"> Airline <code>{props.airline}</code></p>
+                            <p className="card-description"> Airline <code>{props.airline.toUpperCase()}</code></p>
 
-                            <Button variant="danger" style={{ borderRadius: 1, marginLeft: 3, fontWeight:"bold" }} size="sm" onClick={handleShowDelete}><i class="mdi mdi-delete-forever"></i>{deleteLoader}</Button>
+                            <Button variant="danger" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={handleShowDelete}><i class="mdi mdi-delete-forever"></i>{deleteLoader}</Button>
                             <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 475 }}>
                                 <AgGridReact
                                     ref={gridRef}
@@ -534,7 +541,7 @@ export const BulkLoad = (props) => {
                                     gridOptions={gridOptions}
                                     //onFirstDataRendered={autoSizeColumns}
                                     enableCellTextSelection={false}>
-                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true}></AgGridColumn>
+                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} editable={false}></AgGridColumn>
                                     <AgGridColumn field="last" sortable={true} filter={true}></AgGridColumn>
                                     <AgGridColumn field="first" sortable={true} filter={true} hide={false}></AgGridColumn>
                                     <AgGridColumn field="role" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{

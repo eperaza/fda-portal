@@ -232,7 +232,7 @@ export const Dashboard = (props) => {
                       <div className="preview-item-content d-sm-flex flex-grow">
                         <div className="flex-grow">
                           <h6 className="preview-subject">{
-                            props.airline
+                            props.airline.toUpperCase()
                           }</h6>
                           <p className="text-muted mb-0">Airline</p>
                         </div>
@@ -251,7 +251,7 @@ export const Dashboard = (props) => {
                           }</h6>
                           <p className="text-muted mb-0">Name</p>
                         </div>
-
+                          
                       </div>
                     </div>
                     <div className="preview-item border-bottom">

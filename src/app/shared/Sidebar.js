@@ -68,8 +68,8 @@ class Sidebar extends Component {
                   <span className="count bg-success"></span>
                 </div>
                 <div className="profile-name">
-                  <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>
-                  <span><Trans>{this.props.membership}</Trans></span>
+                  <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>                
+                    <span className='text-warning'>airline-<Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>                  
                 </div>
               </div>
               <Dropdown alignRight>

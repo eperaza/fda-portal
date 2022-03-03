@@ -18,7 +18,7 @@ export const AccordionFDR = (props) => {
                         <Accordion.Toggle as={Button}
                             variant="link" eventKey="0" >
                             <i className="mdi mdi-chevron-double-down icon-md"></i>
-                            {data.Key}
+                            {data.Key.toUpperCase()}
                         </Accordion.Toggle>
                     </Card.Header>
                     <Accordion.Collapse eventKey="0">

@@ -36,3 +36,20 @@ export async function getGroupNames(accessToken) {
     .catch(error => console.log(error));
         
 }
+
+export async function getDirectoryRoles(accessToken) {
+    const headers = new Headers();
+    const bearer = `Bearer ${accessToken}`;
+
+    headers.append("Authorization", bearer);
+    
+    const options = {
+        method: "GET",
+        headers: headers,
+    };
+
+    return fetch("https://graph.microsoft.com/v1.0/directoryRoles", options)
+    .then(response => response.json())
+    .catch(error => console.log(error));
+        
+}
