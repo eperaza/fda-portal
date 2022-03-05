@@ -36,7 +36,11 @@ export const ListUsers = (props) => {
     const [showDeleteProgressBar, setShowDeleteProgressBar] = useState(false);
     const [deleteProgressBarCount, setDeleteProgressBarCount] = useState(0);
     const [disableDeleteButton, setDisableDeleteButton] = useState(false);
-    
+    const [count, setCount] = useState(0);
+    const [filterVal, setFilterVal] = useState();
+
+
+
     const handleClose = () => {
         setShow(false);
         setShowAlert(false);
@@ -105,19 +109,18 @@ export const ListUsers = (props) => {
 
         selectedData.forEach(async (node) => {
             let status = await deleteUsers(node.objectId);
-
+            console.log(status)
             countProgress = countProgress + increment;
             setDeleteProgressBarCount(countProgress);
             count++;
-
-            if (status == 201) {
+            if (status == 204) {
                 deleted.push(node);
-                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.objectId + '] -> Success</br>'
+                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.mailNickname + '] -> Deleted Success</br>'
                 setStatusText(x)
             }
             else {
                 notDeleted.push(node);
-                x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> [' + node.objectId + '] -> Error</br>'
+                x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> [' + node.mailNickname + '] -> Error, user not found!</br>'
                 setStatusText(x)
             }
 
@@ -126,6 +129,8 @@ export const ListUsers = (props) => {
                 setDeleteLabel("Delete");
                 setStatusText(`${x} </br>`);
                 setDeleteUsersLabel("Done");
+                let rows = gridRef.current.api.getDisplayedRowCount();
+                setCount(rows);
                 setTimeout(() => {
                     setShowDeleteProgressBar(false);
                     //setShow(false);
@@ -154,12 +159,8 @@ export const ListUsers = (props) => {
         };
 
         let res = await fetch(`${process.env.REACT_APP_USERS_DELETE_URI}/${user}`, options);
-        let x = await res.text();
-        if (x == "")
-            return 201;
-        else {
-            return 500;
-        }
+        let x = await res.status;
+        return x;
     }
 
     const login = async () => {
@@ -205,8 +206,10 @@ export const ListUsers = (props) => {
             .then(data => {
                 setTimeout(() => {
                     setRowData(data);
+                    let rows = gridRef.current.api.getDisplayedRowCount();
+                    setCount(rows);
                 }, 0);
-                console.log(data);
+                
             }
             )
             .catch(error => console.log('error', error));
@@ -241,6 +244,7 @@ export const ListUsers = (props) => {
     const createUser = async () => {
         setShowSuccess(false);
         setShowAlert(false)
+        setShowAlertText();
         setCreateLabel(<><Spinner animation="border" size="sm" /></>)
 
         const tokenFDA = await login();
@@ -297,11 +301,13 @@ export const ListUsers = (props) => {
                 console.log('error', error);
                 setShowAlert(true);
             });
-
     }
 
     const onFilterTextBoxChanged = e => {
+        setFilterVal(e.target.value)
         gridRef.current.api.setQuickFilter(e.target.value);
+        let rows = gridRef.current.api.getDisplayedRowCount();
+        setCount(rows);
     }
 
     const accountStateFormatter = (params) => {
@@ -493,16 +499,17 @@ export const ListUsers = (props) => {
                                                         <i class="mdi mdi-account-search"></i>
                                                     </span>
                                                 </div>
-                                                <input aria-label="" style={{ color: "#fff" }} placeholder="Search..." type="text" class="form-control form-control"
+                                                <input value={filterVal} aria-label="" style={{ color: "#fff" }} placeholder="Search..." type="text" class="form-control form-control"
                                                     onChange={onFilterTextBoxChanged}
                                                 />
+
                                             </div>
                                         </div>
 
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-12 grid-margin">
+                            <div className="col-12 grid-margin" style={{ marginBottom: 0 }}>
                                 <div className="row">
                                     <div className="col-md-4">
                                         <div className="row">
@@ -511,7 +518,31 @@ export const ListUsers = (props) => {
                                     </div>
                                     <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">
                                         <div className="row">
-                                            <SwitchToggle values={["pending", "all", "activated"]} selected="all" gridRef={gridRef} />
+                                            <SwitchToggle values={["pending", "all", "activated"]} selected="all" gridRef={gridRef} setCount={setCount} setFilterVal={setFilterVal} />
+
+                                        </div>
+                                        <div className="row" >
+                                            <div className="col-12 ">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-4">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-12 grid-margin" style={{ marginTop: 0 }}>
+                                <div className="row">
+                                    <div className="col-md-4">
+
+                                    </div>
+                                    <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">
+
+                                        <div className="">
+                                            <div className="col-12 ">
+                                                <h4><i className='text-primary'>{count}</i></h4>
+
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="col-md-4">

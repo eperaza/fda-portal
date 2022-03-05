@@ -12,19 +12,22 @@ export const SwitchToggle = (props) => {
         if (val == "all") {
             props.gridRef.current.api.setQuickFilter();
             let rows = props.gridRef.current.api.getDisplayedRowCount();
-            setCount(rows);
+            props.setCount(rows);
+            props.setFilterVal("")
         }
         if (val == "activated") {
             props.gridRef.current.api.setQuickFilter("activated");
             let rows = props.gridRef.current.api.getDisplayedRowCount();
-            setCount(rows);
+            props.setCount(rows);
+            props.setFilterVal("")
+
         }
         if (val == "pending") {
             props.gridRef.current.api.setQuickFilter("pending");
             let rows = props.gridRef.current.api.getDisplayedRowCount();
-            setCount(rows);
+            props.setCount(rows);
+            props.setFilterVal("")
         }
-
 
     };
 
@@ -57,13 +60,10 @@ export const SwitchToggle = (props) => {
                             </span>
                         );
                     })}
-                <SwitchSelection style={{left: `${(props.values.indexOf(selected) / 3) * 100}%`}
-            } />
+                <SwitchSelection style={{ left: `${(props.values.indexOf(selected) / 3) * 100}%` }
+                } />
             </Switch>
-            <div className="col-12 grid-margin align-self-center d-flex align-items-center justify-content-center">
-            <h4><i className='text-primary'>{count}</i></h4>
-
-                            </div>
+            
         </div>
     )
 }
