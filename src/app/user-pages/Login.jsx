@@ -37,13 +37,13 @@ export const Login = () => {
               <h6 className="font-weight-light">PLease follow instructions in your email to get started.</h6>
               <Form className="pt-3">
                 <Form.Group className="d-flex search-field">
-                  <Form.Control type="email" placeholder="Username" size="lg" className="h-auto" />
+                  <Form.Control type="email" placeholder="Username" size="lg" className="h-auto" disabled="true" />
                 </Form.Group>
                 <Form.Group className="d-flex search-field">
-                  <Form.Control type="password" placeholder="Activation Code" size="lg" className="h-auto" />
+                  <Form.Control type="password" placeholder="Activation Code" size="lg" className="h-auto" disabled="true"/>
                 </Form.Group>
                 <div className="mt-3">
-                  <Button className="btn btn-block btn-facebook auth-form-btn">Register</Button>
+                  <Button className="btn btn-block btn-facebook auth-form-btn" >Register</Button>
                   <br/>
                   <h6 className="font-weight-light">Or Sign In if you are registered.</h6>
                   <br/>

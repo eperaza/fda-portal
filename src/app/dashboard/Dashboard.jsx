@@ -158,12 +158,12 @@ export const Dashboard = (props) => {
                 <div className="col-9">
                   <div className="d-flex align-items-center align-self-start">
                     <h3 className="mb-0">FDA</h3>
-                    <p className="text-success ml-2 mb-0 font-weight-medium">newest</p>
+                    <p className="text-info ml-2 mb-0 font-weight-medium"></p>
                   </div>
                 </div>
                 <div className="col-3">
-                  <div className="icon icon-box-success ">
-                    <span className="mdi mdi-new-box icon-item"></span>
+                  <div className="icon icon-box-info ">
+                    <span className="mdi mdi-alert-decagram icon-item"></span>
                   </div>
                 </div>
               </div>
@@ -177,17 +177,17 @@ export const Dashboard = (props) => {
               <div className="row">
                 <div className="col-9">
                   <div className="d-flex align-items-center align-self-start">
-                    <h3 className="mb-0">Aircraft</h3>
+                    <h3 className="mb-0">User Mgmt</h3>
                     <p className="text-danger ml-2 mb-0 font-weight-medium"></p>
                   </div>
                 </div>
                 <div className="col-3">
                   <div className="icon icon-box-primary ">
-                    <span className="mdi mdi-new-box icon-item"></span>
+                    <span className="mdi mdi mdi-beta icon-item"></span>
                   </div>
                 </div>
               </div>
-              <h6 className="text-muted font-weight-normal">b787</h6>
+              <h6 className="text-muted font-weight-normal">BETA v.1.1</h6>
             </div>
           </div>
         </div>

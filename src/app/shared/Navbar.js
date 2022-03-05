@@ -27,6 +27,10 @@ export const Navbar = (props) => {
   }
   
     return (
+      
+
+      
+
       <nav className="navbar p-0 fixed-top d-flex flex-row">
         
         <div className="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
@@ -158,7 +162,7 @@ export const Navbar = (props) => {
                   </div>
                 </Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item href="!#" onClick={() => handleLogout("redirect")}  className="preview-item">
+                <Dropdown.Item onClick={() => handleLogout("redirect")}  className="preview-item">
                   <div className="preview-thumbnail">
                     <div className="preview-icon bg-dark rounded-circle">
                       <i className="mdi mdi-logout text-danger"></i>
@@ -178,6 +182,8 @@ export const Navbar = (props) => {
           </button>
         </div>
       </nav>
+      
+      
     );
   
 }

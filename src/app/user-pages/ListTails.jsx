@@ -29,7 +29,7 @@ export const ListTails = (props) => {
         const code = "rFbNmcU3UYhSKS8awX7vIs5YgvmEF5cQHNWdR9YMAaSHIV3CUTENTw==";
         //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=${props.airline.toUpperCase()}`, options)
         //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=TAV`, options)
-        fetch(`https://functionfdatspdev.azurewebsites.net/api/FlightDataRecordingList?code=${code}&airlineId=${props.airline.toUpperCase()}`, options)
+        fetch(`https://functionfdatspdev.azurewebsites.net/api/FlightDataRecordingList?code=${code}&airlineId=${props.airline.toUpperCase()}&monthSpan=2`, options)
             .then(response => response.json())
             .then(data => {
                 console.log(data);

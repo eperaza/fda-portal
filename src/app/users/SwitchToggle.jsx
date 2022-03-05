@@ -60,20 +60,9 @@ export const SwitchToggle = (props) => {
                 <SwitchSelection style={{left: `${(props.values.indexOf(selected) / 3) * 100}%`}
             } />
             </Switch>
-            <div className="col-12 grid-margin">
-                                <div className="row">
-                                    <div className="col-md-4">
-                                        
-                                    </div>
-                                    <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">
-                                        <div className="row">
-                                        <h4><i className='text-primary'>{count}</i></h4>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-4">
+            <div className="col-12 grid-margin align-self-center d-flex align-items-center justify-content-center">
+            <h4><i className='text-primary'>{count}</i></h4>
 
-                                    </div>
-                                </div>
                             </div>
         </div>
     )

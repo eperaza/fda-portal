@@ -1,4 +1,4 @@
-import React, { useState , useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useEffect, useRef } from 'react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import Button from "react-bootstrap/Button";
@@ -35,8 +35,8 @@ export const ListUsers = (props) => {
     const [showSuccessText, setShowSuccessText] = useState();
     const [showDeleteProgressBar, setShowDeleteProgressBar] = useState(false);
     const [deleteProgressBarCount, setDeleteProgressBarCount] = useState(0);
-
-
+    const [disableDeleteButton, setDisableDeleteButton] = useState(false);
+    
     const handleClose = () => {
         setShow(false);
         setShowAlert(false);
@@ -46,7 +46,9 @@ export const ListUsers = (props) => {
         const selectedNodes = gridRef.current.api.getSelectedNodes()
         const selectedData = selectedNodes.map(node => node.data);
         const principalName = selectedData.map(node => `${node.mailNickname}`).join(', ');
-        setDeleteUsersLabel(principalName);
+        setDeleteUsersLabel(`Do you really want to delete: ${principalName} ?`);
+        setDisableDeleteButton(false);
+        setStatusText();
         if (principalName.length != 0) {
             setShow(true)
         }
@@ -59,10 +61,6 @@ export const ListUsers = (props) => {
         pagination: true,
 
     }
-
-    const handleShowAdd = e => {
-        setShowAdd(true)
-    };
 
     useEffect(() => {
         getUsers();
@@ -87,7 +85,9 @@ export const ListUsers = (props) => {
 
     const deleteHandler = e => {
         e.preventDefault();
+        setDisableDeleteButton(true);
         setShowDeleteProgressBar(true)
+        setDeleteUsersLabel("Deleting Users...");
         setDeleteProgressBarCount(0);
         setDeleteLabel(<><Spinner animation="border" size="sm" /></>);
         let selected = [];
@@ -112,7 +112,7 @@ export const ListUsers = (props) => {
 
             if (status == 201) {
                 deleted.push(node);
-                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.objectId + ']</br>'
+                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.objectId + '] -> Success</br>'
                 setStatusText(x)
             }
             else {
@@ -124,6 +124,8 @@ export const ListUsers = (props) => {
             if (count == gridRef.current.api.getSelectedNodes().length) {
                 getUsers();
                 setDeleteLabel("Delete");
+                setStatusText(`${x} </br>`);
+                setDeleteUsersLabel("Done");
                 setTimeout(() => {
                     setShowDeleteProgressBar(false);
                     //setShow(false);
@@ -146,7 +148,6 @@ export const ListUsers = (props) => {
         headers.append("ObjectID", `${props.graphData.id}`);
         headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
-        console.log(props.graphData.id)
         const options = {
             method: "DELETE",
             headers: headers,
@@ -167,7 +168,7 @@ export const ListUsers = (props) => {
 
             headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
             headers.append("Content-Type", "application/json");
-            
+
             var data = JSON.stringify({
                 "azUsername": `${process.env.REACT_APP_FDAGROUND_USER}`,
                 "azPassword": `${process.env.REACT_APP_FDAGROUND_PASS}`
@@ -316,7 +317,7 @@ export const ListUsers = (props) => {
         // auto height will get the grid to fill the height of the contents,
         // so the grid div should have no height set, the height is dynamic.
         document.querySelector('#myGrid').style.height = '';
-      }, []);
+    }, []);
 
     return (
         <div>
@@ -542,9 +543,8 @@ export const ListUsers = (props) => {
                                     <AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"}></AgGridColumn>
                                     <AgGridColumn field="userRole" sortable={true} filter={true}></AgGridColumn>
-                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} valueGetter={accountStateFormatter} headerName={"Status"}></AgGridColumn>
                                     <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"}></AgGridColumn>
-
+                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} valueGetter={accountStateFormatter} headerName={"Status"}></AgGridColumn>
                                 </AgGridReact>
 
                                 <Modal scrollable="true" show={show} onHide={handleClose}>
@@ -564,7 +564,7 @@ export const ListUsers = (props) => {
                                                 :
                                                 <></>
                                         }
-                                        Do you really want to delete: {deleteUsersLabel} ?
+                                        {deleteUsersLabel}
                                     </Modal.Body>
                                     {
                                         showDeleteProgressBar
@@ -577,9 +577,9 @@ export const ListUsers = (props) => {
 
                                     <Modal.Footer>
                                         <Button variant="secondary" size="sm" onClick={handleClose}>
-                                            Cancel
+                                            Close
                                         </Button>
-                                        <Button variant="danger" size="sm" onClick={deleteHandler}>
+                                        <Button variant="danger" size="sm" onClick={deleteHandler} disabled={disableDeleteButton}>
                                             {deleteLabel}
                                         </Button>
                                     </Modal.Footer>

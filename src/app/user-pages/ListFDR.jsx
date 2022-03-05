@@ -14,7 +14,6 @@ import { SwitchToggle } from "../users/SwitchToggle.jsx";
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
-
 const axios = require('axios');
 
 export const ListFDR = (props) => {
@@ -38,7 +37,7 @@ export const ListFDR = (props) => {
         const code = "rFbNmcU3UYhSKS8awX7vIs5YgvmEF5cQHNWdR9YMAaSHIV3CUTENTw==";
         //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=${props.airline.toUpperCase()}`, options)
         //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=TAV`, options)
-        fetch(`https://functionfdatspdev.azurewebsites.net/api/FlightDataRecordingList?code=${code}&airlineId=${props.airline.toUpperCase()}`, options)
+        fetch(`https://functionfdatspdev.azurewebsites.net/api/FlightDataRecordingList?code=${code}&airlineId=${props.airline.toUpperCase()}&monthSpan=2`, options)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -88,7 +87,7 @@ export const ListFDR = (props) => {
                                     </div>
                                 </div>
                             </div>
-
+                            
                             {
                                 rowData
                                     ?
@@ -96,8 +95,6 @@ export const ListFDR = (props) => {
                                     :
                                     <></>
                             }
-
-
                         </div>
                     </div>
                 </div>

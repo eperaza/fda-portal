@@ -43,7 +43,6 @@ const App = () => {
         if (response.accessToken) {
           callMsGraph(response.accessToken).then(response => setGraphData(response));
           getGroupNames(response.accessToken).then(response => {
-            console.log(response)
             response.value.forEach(group => {
               if (group.displayName.startsWith("airline") == true) {
                 setAirline(group.displayName.replace("airline-", ""));
@@ -174,7 +173,8 @@ const App = () => {
         </AuthenticatedTemplate>
 
         <UnauthenticatedTemplate>
-
+          {/* default redirect to home page */}
+          <Redirect from="*" to="/" />
           <Route path="/" exact render={() => {
             return (
               <div>

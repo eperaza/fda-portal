@@ -13,11 +13,13 @@ import Spinner from 'react-bootstrap/Spinner'
 import Modal from "react-bootstrap/Modal";
 import { Accordion, Card } from "react-bootstrap";
 import Alert from 'react-bootstrap/Alert';
-
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
-
 import { composeInitialProps } from 'react-i18next';
+import Ajv, { JSONSchemaType } from "ajv"
+import addFormats from "ajv-formats"
+const ajv = new Ajv()
+addFormats(ajv)
 
 export const BulkLoad = (props) => {
 
@@ -57,6 +59,9 @@ export const BulkLoad = (props) => {
 
     const [showProgressBar, setShowProgressBar] = useState(false);
     const [showDeleteProgressBar, setShowDeleteProgressBar] = useState(false);
+    const [showAlertText, setShowAlertText] = useState();
+    const file = useRef();
+
 
     let accessToken = null;
 
@@ -97,32 +102,71 @@ export const BulkLoad = (props) => {
         //setRowData(items);
         setProgressBarCount(0);
 
-        setShowProgressBar(true);
-        setUploadLoader(<>
-            <Spinner animation="border" size="sm" /></>)
-        let count = 0
-        let increment = (100 / items.length);
-        let countProgress = 0;
-        items.forEach(async (element) => {
-            let res = await createPreUser(element);
-            /*if(res === "Internal Server Error") {
-                alert("Bad File Format");
-                return;
-            }*/
-            count++;
-            countProgress = countProgress + increment;
-            setProgressBarCount(countProgress);
-
-            if (count == items.length) {
-                setUploadLoader("Upload");
-                getPreUsers();
-                setTimeout(() => {
-                    setShowProgressBar(false);
-                }, 1000);
-
+        const schema = {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    first: {
+                        type: ["string", "null"]
+                    },
+                    last: {
+                        type: ["string", "null"]
+                    },
+                    user: {
+                        type: "string"
+                    },
+                    email: {
+                        type: "string", format: "email"
+                    },
+                    role: {
+                        type: "string",
+                        enum: ["role-airlinefocal", "role-airlinepilot", "role-airlinecheckairman", "role-airlineefbadmin", "role-airlinemaintenance"]
+                    }
+                },
+                required: [
+                    "user", "email", "role"
+                ]
             }
+        }
 
-        });
+        const valid = ajv.validate(schema, items)
+
+        if (valid) {
+            setShowProgressBar(true);
+            setUploadLoader(<>
+                <Spinner animation="border" size="sm" /></>)
+            let count = 0
+            let increment = (100 / items.length);
+            let countProgress = 0;
+            items.forEach(async (element) => {
+                let res = await createPreUser(element);
+                /*if(res === "Internal Server Error") {
+                    alert("Bad File Format");
+                    return;
+                }*/
+                count++;
+                countProgress = countProgress + increment;
+                setProgressBarCount(countProgress);
+
+                if (count == items.length) {
+                    setUploadLoader("Upload");
+                    getPreUsers();
+                    setTimeout(() => {
+                        setShowProgressBar(false);
+                    }, 1000);
+
+                }
+            });
+        }
+        else {
+            setShowAlert(true);
+            console.log(JSON.stringify(ajv.errors[0].params))
+            setShowAlertText(`Error: ${JSON.stringify(ajv.errors[0].params)} </br> Message: ${ajv.errors[0].message}.`);
+        }
+
+        //setFile("");
+        file.current.value = "";
 
     }
 
@@ -235,7 +279,7 @@ export const BulkLoad = (props) => {
 
             headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
             headers.append("Content-Type", "application/json");
-            
+
             var data = JSON.stringify({
                 "azUsername": `${process.env.REACT_APP_FDAGROUND_USER}`,
                 "azPassword": `${process.env.REACT_APP_FDAGROUND_PASS}`
@@ -292,14 +336,14 @@ export const BulkLoad = (props) => {
 
     const onGridReady = params => {
         params.api.sizeColumnsToFit();
-        params.api.showLoadingOverlay();
+        //params.api.showLoadingOverlay();
 
     };
 
     /**
      * Auto-size all columns once the initial data is rendered.
      */
-     const autoSizeColumns = params => {
+    const autoSizeColumns = params => {
         const colIds = params.columnApi
             .getAllDisplayedColumns()
             .map(col => col.getColId());
@@ -417,7 +461,7 @@ export const BulkLoad = (props) => {
     }
 
     const editPreUser = async (data) => {
-        
+
         const headers = new Headers();
         const bearer = `Bearer ${props.token}`;
 
@@ -475,11 +519,12 @@ export const BulkLoad = (props) => {
                                         <Form.Label>Please upload an excel file to bulk load users.</Form.Label>
                                         <Form.Control
                                             type="file"
+                                            ref={file}
                                             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                             onChange={(e) => {
                                                 setDisable(false);
-                                                const file = e.target.files[0];
-                                                readExcel(file);
+                                                const uploadedFile = e.target.files[0];
+                                                readExcel(uploadedFile);
                                             }}
                                         />
                                         <Form.Text >
@@ -497,6 +542,18 @@ export const BulkLoad = (props) => {
                             showProgressBar
                                 ?
                                 <ProgressBar animated now={progressBarCount} />
+                                :
+                                <></>
+                        }
+                        {
+                            showAlert == true
+                                ?
+                                <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
+                                    <Alert.Heading>Error parsing file!</Alert.Heading>
+                                    <p>
+                                        <div dangerouslySetInnerHTML={{ __html: showAlertText }} />
+                                    </p>
+                                </Alert>
                                 :
                                 <></>
                         }
