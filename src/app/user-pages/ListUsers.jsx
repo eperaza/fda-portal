@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useEffect, useRef } from 'react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import Button from "react-bootstrap/Button";
@@ -14,6 +14,8 @@ import { SwitchToggle } from "../users/SwitchToggle.jsx";
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
+import UserCellRenderer from "../components/UserCellRenderer.jsx";
+import CustomNoRowsOverlay from "../components/CustomNoRowsOverlay.jsx";
 
 const axios = require('axios');
 
@@ -38,8 +40,7 @@ export const ListUsers = (props) => {
     const [disableDeleteButton, setDisableDeleteButton] = useState(false);
     const [count, setCount] = useState(0);
     const [filterVal, setFilterVal] = useState();
-
-
+    const [deleteDisabled, setDeleteDisabled] = useState(true);
 
     const handleClose = () => {
         setShow(false);
@@ -73,7 +74,6 @@ export const ListUsers = (props) => {
     const onGridReady = params => {
         params.api.sizeColumnsToFit();
         params.api.showLoadingOverlay();
-
     };
 
     /**
@@ -115,7 +115,7 @@ export const ListUsers = (props) => {
             count++;
             if (status == 204) {
                 deleted.push(node);
-                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.mailNickname + '] -> Deleted Success</br>'
+                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.mailNickname + '] -> Deleted successfully</br>'
                 setStatusText(x)
             }
             else {
@@ -209,7 +209,7 @@ export const ListUsers = (props) => {
                     let rows = gridRef.current.api.getDisplayedRowCount();
                     setCount(rows);
                 }, 0);
-                
+
             }
             )
             .catch(error => console.log('error', error));
@@ -285,7 +285,7 @@ export const ListUsers = (props) => {
                     setShowAdd(false);
                     getUsers();
                     setShowSuccess(true);
-                    setShowSuccessText(data.objectId);
+                    setShowSuccessText(data.mailNickname);
                     setCreateLabel("Create User");
 
                 }
@@ -304,19 +304,37 @@ export const ListUsers = (props) => {
     }
 
     const onFilterTextBoxChanged = e => {
+        //gridRef.current.api.showNoRowsOverlay();
         setFilterVal(e.target.value)
         gridRef.current.api.setQuickFilter(e.target.value);
         let rows = gridRef.current.api.getDisplayedRowCount();
         setCount(rows);
+
     }
 
     const accountStateFormatter = (params) => {
         console.log(params.data.accountEnabled)
         if (params.data.accountEnabled == "false") {
-            return "PENDING";
+            return "USER PENDING ACTIVATION";
         }
-        else return "ACTIVATED";
+        else return "USER ACTIVATED";
     };
+
+    const rowClassRules = {
+        'row-activated': function (params) { return params.data.accountEnabled == "true"; },
+        'row-pending': function (params) { return params.data.accountEnabled == "false"; }
+    };
+
+    const cellClassRules = {
+        'text-success': function (params) { return params.data.accountEnabled == "true"; },
+        'text-warning': function (params) { return params.data.accountEnabled == "false"; }
+
+    };
+
+    const onRowSelected = useCallback((event) => {
+        setDeleteDisabled(false)
+        return { background: '#ff9998 !important'}; 
+    }, []);
 
     const setAutoHeight = useCallback(() => {
         gridRef.current.api.setDomLayout('autoHeight');
@@ -324,6 +342,10 @@ export const ListUsers = (props) => {
         // so the grid div should have no height set, the height is dynamic.
         document.querySelector('#myGrid').style.height = '';
     }, []);
+
+    const noRowsOverlayComponent = useMemo(() => {
+        return CustomNoRowsOverlay;
+      }, []);
 
     return (
         <div>
@@ -333,7 +355,7 @@ export const ListUsers = (props) => {
                         <div className="card-body">
                             <Accordion >
                                 <Card>
-                                    <Card.Header style={{ backgroundColor: "#111" }}>
+                                    <Card.Header style={{ backgroundColor: "rgb(17, 17, 17)" }}>
                                         <Accordion.Toggle as={Button}
                                             variant="link" eventKey="0">
 
@@ -341,7 +363,7 @@ export const ListUsers = (props) => {
                                         </Accordion.Toggle>
                                     </Card.Header>
                                     <Accordion.Collapse eventKey="0">
-                                        <Card.Body style={{ backgroundColor: "#111" }}>
+                                        <Card.Body style={{ backgroundColor: "rgb(17, 17, 17)" }}>
                                             <div className="col-12 grid-margin" >
                                                 <div className="row">
                                                     <div className="col-md-5">
@@ -464,7 +486,7 @@ export const ListUsers = (props) => {
                                                     showSuccess == true
                                                         ?
                                                         <Alert variant="success" onClose={() => setShowSuccess(false)} dismissible>
-                                                            <Alert.Heading>User with Object ID: {showSuccessText} created.</Alert.Heading>
+                                                            <Alert.Heading>User with ID [{showSuccessText}] created successfully!</Alert.Heading>
                                                             <p>
                                                                 {showAlertText}
                                                             </p>
@@ -551,10 +573,15 @@ export const ListUsers = (props) => {
                                 </div>
                             </div>
 
-                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 500, marginTop: -15 }}>
+                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 530, marginTop: -15 }}>
 
-                                <Button variant="danger" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={handleShow}><i class="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
-
+                                {
+                                    deleteDisabled
+                                        ?
+                                        <></>
+                                        :
+                                        <Button variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={handleShow}><i class="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
+                                }
                                 <AgGridReact
                                     ref={gridRef}
                                     rowData={rowData}
@@ -565,17 +592,21 @@ export const ListUsers = (props) => {
                                     enableCellTextSelection={false}
                                     gridOptions={gridOptions}
                                     animateRows={true}
+                                    //rowClassRules={rowClassRules}
+                                    onRowSelected={onRowSelected}
+                                    //noRowsOverlayComponent={noRowsOverlayComponent}
+
                                 >
                                     <AgGridColumn field="objectId" sortable={true} filter={true} hide={true}></AgGridColumn>
-                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true}></AgGridColumn>
+                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true} cellRenderer={UserCellRenderer}></AgGridColumn>
                                     <AgGridColumn field="displayName" sortable={true} filter={true} hide={true} ></AgGridColumn>
                                     <AgGridColumn field="givenName" sortable={true} filter={true}></AgGridColumn>
                                     <AgGridColumn field="surname" sortable={true} filter={true}></AgGridColumn>
                                     <AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"}></AgGridColumn>
                                     <AgGridColumn field="userRole" sortable={true} filter={true}></AgGridColumn>
+                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} valueGetter={accountStateFormatter} cellClassRules={cellClassRules} headerName={"Status"}></AgGridColumn>
                                     <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"}></AgGridColumn>
-                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} valueGetter={accountStateFormatter} headerName={"Status"}></AgGridColumn>
                                 </AgGridReact>
 
                                 <Modal scrollable="true" show={show} onHide={handleClose}>

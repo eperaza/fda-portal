@@ -133,24 +133,56 @@ export const BulkLoad = (props) => {
         const valid = ajv.validate(schema, items)
 
         if (valid) {
+            setDisable(true);
+            setShow(true);
+            setStatusText();
+            setnotCreatedCount(0);
+            setCreatedCount(0)
             setShowProgressBar(true);
-            setUploadLoader(<>
-                <Spinner animation="border" size="sm" /></>)
+            setUploadLoader(<><Spinner animation="border" size="sm" /></>)
             let count = 0
             let increment = (100 / items.length);
             let countProgress = 0;
-            items.forEach(async (element) => {
-                let res = await createPreUser(element);
-                /*if(res === "Internal Server Error") {
-                    alert("Bad File Format");
-                    return;
-                }*/
+
+            let created = [];
+            let notCreated = [];
+            let label;
+            let countRows = 0;
+            var x = "";
+            setLoader(<>
+                <Spinner animation="border" size="sm" /></>);
+            setLoader2(<>
+                <Spinner animation="border" size="sm" /></>);
+
+            items.every(async (node) => {
+
+                let status = await createPreUser(node);
+
+                if (status == 1) {
+                    created.push(node);
+                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.user + '] -> Created successfully</br>'
+                    setStatusText(x);
+                }
+                else {
+                    let error = status;
+                    if (error.includes("PreparedStatementCallback; SQL [INSERT INTO user_account_preregistrations (user_id, first, last, email, role, account_state, airline) VALUES (?, ?, ?, ?, ?, ?, ?)];")) {
+                        error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
+                    }
+                    notCreated.push(node.user);
+                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> [' + node.user + '] -> ' + error + '</br>'
+                    setStatusText(x);
+                    console.log(error);
+                }
                 count++;
                 countProgress = countProgress + increment;
                 setProgressBarCount(countProgress);
 
                 if (count == items.length) {
+                    setnotCreatedCount(notCreated.length);
+                    setCreatedCount(created.length);
                     setUploadLoader("Upload");
+                    setLoader("Send Registration");
+                    setLoader2("");
                     getPreUsers();
                     setTimeout(() => {
                         setShowProgressBar(false);
@@ -197,9 +229,14 @@ export const BulkLoad = (props) => {
         };
 
         let res = await fetch(process.env.REACT_APP_PREUSERS_CREATE_URI, options);
-        let x = await res.text();
-        return x;
-
+        let message = await res.json();
+        let status = await res.status;
+        if (status == 500) {
+            return message.errorDescription;
+        }
+        else {
+            return 1;
+        }
     }
 
     const bulkLoad = async () => {
@@ -231,7 +268,7 @@ export const BulkLoad = (props) => {
             if (status.objectId) {
                 setCheck("true")
                 created.push(node);
-                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.userId + '] -> Success</br>'
+                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.userId + '] -> Created successfully.</br>'
                 setStatusText(x)
             }
             else {
@@ -239,8 +276,6 @@ export const BulkLoad = (props) => {
                 x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> [' + node.userId + '] -> ' + status.errorDescription + '</br>'
                 setStatusText(x)
             }
-            console.log(created)
-            console.log(notCreated)
             count--;
             if (count == 0) {
                 setNotCreated(notCreated);
@@ -373,9 +408,13 @@ export const BulkLoad = (props) => {
         fetch(process.env.REACT_APP_PREUSERS_GET_URI, requestOptions)
             .then(response => response.json())
             .then(data => {
-                setTimeout(() => {
+                try{
                     setRowData(data);
-                }, 0);
+                }
+                catch(error){
+                    window.location.reload(); 
+                }
+                
             }
             )
             .catch(error => console.log('error', error));
@@ -539,13 +578,6 @@ export const BulkLoad = (props) => {
 
                         </div>
                         {
-                            showProgressBar
-                                ?
-                                <ProgressBar animated now={progressBarCount} />
-                                :
-                                <></>
-                        }
-                        {
                             showAlert == true
                                 ?
                                 <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
@@ -639,6 +671,7 @@ export const BulkLoad = (props) => {
                             <br></br>
                             Users with errors: {notCreatedCount}
                         </>
+                        {/*
                         <Accordion>
 
                             <Accordion.Toggle as={Button}
@@ -666,9 +699,20 @@ export const BulkLoad = (props) => {
                                 </Card.Body>
                             </Accordion.Collapse>
                         </Accordion>
+                        */}
+                        <br></br>
+
                     </Modal.Body>
+                    {
+                        showProgressBar
+                            ?
+                            <ProgressBar animated now={progressBarCount} />
+                            :
+                            <></>
+                    }
 
                     <Modal.Footer>
+
                         <Button variant="secondary" onClick={handleClose}>
                             Close
                         </Button>

@@ -61,7 +61,7 @@ class Sidebar extends Component {
                 
         </div>
         <ul className="nav">
-          <li className="nav-item profile">
+        <li className="nav-item profile">
             <div className="profile-desc">
               <div className="profile-pic">
                 <div className="">
@@ -72,6 +72,7 @@ class Sidebar extends Component {
                     <span className='text-warning'>airline-<Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>                  
                 </div>
               </div>
+              {/*
               <Dropdown alignRight>
                 <Dropdown.Toggle as="a" className="cursor-pointer no-caret">
                   <i className="mdi mdi-dots-vertical"></i>
@@ -111,10 +112,11 @@ class Sidebar extends Component {
                   </a>
                 </Dropdown.Menu>
               </Dropdown>
+            */}
             </div>
           </li>
           <li className="nav-item nav-category">
-            <span className="nav-link"><Trans>Menu</Trans></span>
+            <span className="nav-link"><Trans>Navigation</Trans></span>
           </li>
           <li className={ this.isPathActive('/') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
             <Link className="nav-link" to="/">
@@ -122,74 +124,40 @@ class Sidebar extends Component {
               <span className="menu-title"><Trans>Dashboard</Trans></span>
             </Link>
           </li>
-         
-         
-          <li className={ this.isPathActive('/users/UserGrid') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <div className={ this.state.tablesMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('tablesMenuOpen') } data-toggle="collapse">
+          
+          <li className={ this.isPathActive('/users') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
+            <div className={ this.state.basicUiMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('basicUiMenuOpen') } data-toggle="collapse">
               <span className="menu-icon">
-                <i className="mdi mdi-account-group"></i>
+                <i className="mdi mdi-account-multiple text-warning"></i>
               </span>
               <span className="menu-title"><Trans>User Management</Trans></span>
               <i className="menu-arrow"></i>
             </div>
-            <Collapse in={ this.state.tablesMenuOpen }>
+            <Collapse in={ this.state.basicUiMenuOpen }>
               <div>
                 <ul className="nav flex-column sub-menu">
                   <li className="nav-item"> <Link className={ this.isPathActive('/users/UserGrid') ? 'nav-link active' : 'nav-link' } to="/users/UserGrid"><Trans>Users</Trans></Link></li>
-                </ul>
-                <ul className="nav flex-column sub-menu">
                   <li className="nav-item"> <Link className={ this.isPathActive('/users/BulkLoad') ? 'nav-link active' : 'nav-link' } to="/users/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>
           </li>
           <li className={ this.isPathActive('/user-pages/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <div className={ this.state.chartsMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('chartsMenuOpen') } data-toggle="collapse">
+            <div className={ this.state.formElementsMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('formElementsMenuOpen') } data-toggle="collapse">
               <span className="menu-icon">
-                <i className="mdi mdi-file-chart"></i>
+                <i className="mdi mdi-file-tree text-danger"></i>
               </span>
               <span className="menu-title"><Trans>FDR Files</Trans></span>
               <i className="menu-arrow"></i>
             </div>
-            <Collapse in={ this.state.chartsMenuOpen }>
+            <Collapse in={ this.state.formElementsMenuOpen }>
               <div>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"> <Link className={ this.isPathActive('/user-pages/FDR') ? 'nav-link active' : 'nav-link' } to="/user-pages/FDR"><Trans>File Download</Trans></Link></li>
+                  <li className="nav-item"> <Link className={ this.isPathActive('/user-pages/FDR') ? 'nav-link active' : 'nav-link' } to="/user-pages/FDR"><Trans>Download</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>
           </li>
-        
-          {/*
-          <li className="nav-item nav-category">
-            <span className="nav-link"><Trans>More</Trans></span>
-          </li>
-          <li className={ this.isPathActive('/error-pages') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <div className={ this.state.errorPagesMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('errorPagesMenuOpen') } data-toggle="collapse">
-              <span className="">
-                <i className=""></i>
-              </span>
-              <span className="menu-title"><Trans>Error Pages</Trans></span>
-              <i className="menu-arrow"></i>
-            </div>
-            <Collapse in={ this.state.errorPagesMenuOpen }>
-              <div>
-                <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"> <Link className={ this.isPathActive('/error-pages/error-404') ? 'nav-link active' : 'nav-link' } to="/error-pages/error-404">404</Link></li>
-                  <li className="nav-item"> <Link className={ this.isPathActive('/error-pages/error-500') ? 'nav-link active' : 'nav-link' } to="/error-pages/error-500">500</Link></li>
-                </ul>
-              </div>
-            </Collapse>
-          </li>
-          <li className="nav-item menu-items">
-            <a className="nav-link" href="" rel="noopener noreferrer" target="_blank">
-              <span className="">
-                <i className=""></i>
-              </span>
-              <span className="menu-title"><Trans>Documentation</Trans></span>
-            </a>
-          </li>
-          */} 
         </ul>
       </nav>
     );

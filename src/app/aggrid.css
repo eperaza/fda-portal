@@ -169,8 +169,8 @@
     content: "\f128";
   }
   .ag-theme-alpine-dark .ag-root-wrapper {
-    background-color: #191c24;
-    background-color: var(--ag-background-color, #191c24);
+    background-color: rgb(17, 17, 17);
+    background-color: var(--ag-background-color, rgb(17, 17, 17));
   }
   .ag-theme-alpine-dark [class^=ag-], .ag-theme-alpine-dark [class^=ag-]:focus, .ag-theme-alpine-dark [class^=ag-]:after, .ag-theme-alpine-dark [class^=ag-]:before {
     box-sizing: border-box;
@@ -313,8 +313,8 @@
     text-overflow: ellipsis;
   }
   .ag-theme-alpine-dark .ag-list-item.ag-active-item {
-    background-color: rgba(33, 150, 243, 0.1);
-    background-color: var(--ag-row-hover-color, rgba(33, 150, 243, 0.1));
+    background-color: #222;
+    background-color: var(--ag-row-hover-color, #222);
   }
   .ag-theme-alpine-dark .ag-select-list-item {
     padding-left: 4px;
@@ -376,15 +376,15 @@
     height: 24px;
   }
   .ag-theme-alpine-dark .ag-rich-select-virtual-list-item:hover {
-    background-color: rgba(33, 150, 243, 0.1);
-    background-color: var(--ag-row-hover-color, rgba(33, 150, 243, 0.1));
+    background-color: #222;
+    background-color: var(--ag-row-hover-color, #222);
   }
   .ag-theme-alpine-dark .ag-rich-select-row {
     padding-left: 18px;
   }
   .ag-theme-alpine-dark .ag-rich-select-row-selected {
-    background-color: rgba(33, 150, 243, 0.3);
-    background-color: var(--ag-selected-row-background-color, rgba(33, 150, 243, 0.3));
+    background-color: #222;
+    background-color: var(--ag-selected-row-background-color, #222);
   }
   .ag-theme-alpine-dark .ag-row-drag,
   .ag-theme-alpine-dark .ag-selection-checkbox,
@@ -3202,6 +3202,7 @@
     background-color: #2196f3 !important;
     background-color: var(--ag-range-selection-highlight-color, var(--ag-range-selection-border-color, #2196f3)) !important;
   }
+  /*row color*/
   .ag-theme-alpine-dark .ag-row {
     height: 42px;
     color: #fff;
@@ -3210,6 +3211,7 @@
     border-color: rgba(88, 86, 82, 0.5);
     border-color: var(--ag-row-border-color, var(--ag-secondary-border-color, rgba(88, 86, 82, 0.5)));
     border-bottom-style: solid;
+    background-color: rgb(17, 17, 17);
   }
   .ag-theme-alpine-dark .ag-row-highlight-above::after, .ag-theme-alpine-dark .ag-row-highlight-below::after {
     content: "";
@@ -3229,10 +3231,12 @@
   .ag-theme-alpine-dark .ag-row-highlight-below::after {
     bottom: 0px;
   }
+  /*odd row
   .ag-theme-alpine-dark .ag-row-odd {
     background-color: rgb(17, 17, 17);
     background-color: var(--ag-odd-row-background-color, rgb(17, 17, 17));
   }
+  */
   .ag-theme-alpine-dark .ag-body-horizontal-scroll:not(.ag-scrollbar-invisible) .ag-horizontal-left-spacer:not(.ag-scroller-corner) {
     border-right: solid 1px;
     border-right-color: #68686e;
@@ -3244,12 +3248,12 @@
     border-left-color: var(--ag-border-color, #68686e);
   }
   .ag-theme-alpine-dark .ag-row-hover {
-    background-color: rgba(33, 150, 243, 0.1);
-    background-color: var(--ag-row-hover-color, rgba(33, 150, 243, 0.1));
+    background-color: #222;
+    background-color: var(--ag-row-hover-color, #222);
   }
   .ag-theme-alpine-dark .ag-column-hover {
-    background-color: rgba(33, 150, 243, 0.1);
-    background-color: var(--ag-column-hover-color, rgba(33, 150, 243, 0.1));
+    background-color: #222;
+    background-color: var(--ag-column-hover-color, #222);
   }
   .ag-theme-alpine-dark .ag-ltr .ag-right-aligned-cell {
     text-align: right;
@@ -3414,8 +3418,8 @@
     border-right-color: var(--ag-border-color, #68686e);
   }
   .ag-theme-alpine-dark .ag-row-selected {
-    background-color: rgba(33, 150, 243, 0.3);
-    background-color: var(--ag-selected-row-background-color, rgba(33, 150, 243, 0.3));
+    background-color: #222;
+    background-color: var(--ag-selected-row-background-color, #222);
   }
   .ag-theme-alpine-dark .ag-cell-range-selected:not(.ag-cell-focus),
   .ag-theme-alpine-dark .ag-body-viewport:not(.ag-has-focus) .ag-cell-range-single-cell:not(.ag-cell-inline-editing) {
@@ -3476,6 +3480,7 @@
   .ag-theme-alpine-dark .ag-rtl .ag-context-menu-open .ag-cell-focus:not(.ag-cell-range-selected),
   .ag-theme-alpine-dark .ag-rtl .ag-has-focus .ag-full-width-row.ag-row-focus .ag-cell-wrapper.ag-row-group,
   .ag-theme-alpine-dark .ag-rtl .ag-cell-range-single-cell,
+  /*
   .ag-theme-alpine-dark .ag-rtl .ag-cell-range-single-cell.ag-cell-range-handle {
     border: 1px solid;
     border-color: #2196f3;
@@ -3525,7 +3530,7 @@
     bottom: -1px;
     background-color: #2196f3;
     background-color: var(--ag-range-selection-border-color, #2196f3);
-  }
+  }*/
   .ag-theme-alpine-dark .ag-ltr .ag-range-handle, .ag-theme-alpine-dark .ag-ltr .ag-fill-handle {
     right: -1px;
   }
@@ -3570,8 +3575,8 @@
     border-top-color: var(--ag-border-color, #68686e);
   }
   .ag-theme-alpine-dark .ag-menu-option-active, .ag-theme-alpine-dark .ag-compact-menu-option-active {
-    background-color: rgba(33, 150, 243, 0.1);
-    background-color: var(--ag-row-hover-color, rgba(33, 150, 243, 0.1));
+    background-color: #222;
+    background-color: var(--ag-row-hover-color, #222);
   }
   .ag-theme-alpine-dark .ag-menu-option-part, .ag-theme-alpine-dark .ag-compact-menu-option-part {
     line-height: 16px;
@@ -4482,8 +4487,8 @@
     padding-left: 12px;
   }
   .ag-theme-alpine-dark .ag-select-agg-func-virtual-list-item:hover {
-    background-color: rgba(33, 150, 243, 0.3);
-    background-color: var(--ag-selected-row-background-color, rgba(33, 150, 243, 0.3));
+    background-color: #222;
+    background-color: var(--ag-selected-row-background-color, #222);
   }
   .ag-theme-alpine-dark .ag-chart-menu {
     border-radius: 3px;
@@ -5051,8 +5056,8 @@
   .ag-theme-alpine-dark .ag-standard-button:hover {
     border-color: #2196f3;
     border-color: var(--ag-alpine-active-color, #2196f3);
-    background-color: rgba(33, 150, 243, 0.1);
-    background-color: var(--ag-row-hover-color, rgba(33, 150, 243, 0.1));
+    background-color: #222;
+    background-color: var(--ag-row-hover-color, #222);
   }
   .ag-theme-alpine-dark .ag-standard-button:active {
     border-color: #2196f3;
@@ -5165,4 +5170,22 @@
     background-color: #2196f3;
     background-color: var(--ag-alpine-active-color, #2196f3);
   }
+
+  .row-pending {
+    background-color: rgb(17, 17, 17) !important;
+  }
+  .row-pending:hover {
+    background-color: #222 !important;
+  }
   
+  .row-activated {
+    background-color: #191c24 !important;
+  }
+
+  .row-activated:hover {
+    background-color: #222 !important;
+  }
+  /*
+  rgba(33, 150, 243, 0.3)
+  rgba(33, 150, 243, 0.1)
+  */

@@ -86,7 +86,7 @@ export const Navbar = (props) => {
                 <i className="mdi mdi-view-grid"></i>
               </a>
             </li>
-     
+            {/*
             <Dropdown alignRight as="li" className="nav-item border-left">
               <Dropdown.Toggle as="a" className="nav-link count-indicator cursor-pointer">
                 <i className="mdi mdi-bell"></i>
@@ -140,6 +140,7 @@ export const Navbar = (props) => {
                 <p className="p-3 mb-0 text-center"><Trans>See all notifications</Trans></p>
               </Dropdown.Menu>
             </Dropdown>
+            */}
             <Dropdown alignRight as="li" className="nav-item">
               <Dropdown.Toggle as="a" className="nav-link cursor-pointer no-caret">
                 <div className="navbar-profile">
