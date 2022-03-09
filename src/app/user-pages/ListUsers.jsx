@@ -25,6 +25,7 @@ export const ListUsers = (props) => {
     const [gridApi, setGridApi] = useState(null);
     const [gridColumnApi, setGridColumnApi] = useState(null);
     const [token, setToken] = useState();
+    const [loader2, setLoader2] = useState("");
     const [showAlert, setShowAlert] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [show, setShow] = useState(false);
@@ -41,23 +42,15 @@ export const ListUsers = (props) => {
     const [count, setCount] = useState(0);
     const [filterVal, setFilterVal] = useState();
     const [deleteDisabled, setDeleteDisabled] = useState(true);
+    const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
+
+    const abort = useRef(0);
 
     const handleClose = () => {
         setShow(false);
         setShowAlert(false);
         setShowAdd(false)
     }
-    const handleShow = e => {
-        const selectedNodes = gridRef.current.api.getSelectedNodes()
-        const selectedData = selectedNodes.map(node => node.data);
-        const principalName = selectedData.map(node => `${node.mailNickname}`).join(', ');
-        setDeleteUsersLabel(`Do you really want to delete: ${principalName} ?`);
-        setDisableDeleteButton(false);
-        setStatusText();
-        if (principalName.length != 0) {
-            setShow(true)
-        }
-    };
 
     const gridOptions = {
         // PROPERTIES
@@ -87,13 +80,35 @@ export const ListUsers = (props) => {
         params.columnApi.autoSizeColumns(colIds);
     };
 
-    const deleteHandler = e => {
+    const handleShow = e => {
+        let users = [];
+        var x = "<br></br>";
+        const selectedNodes = gridRef.current.api.getSelectedNodes()
+        const selectedData = selectedNodes.map(node => node.data);
+        const deleteUsers = selectedData.map(node => {
+            users.push(node);
+        });
+        setDisableDeleteButton(false);
+        setLoader2();
+        setStatusText();
+        if (deleteUsers.length != 0) {
+            setShow(true)
+        }
+        users.forEach(user => {
+            x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.mailNickname + '] ' + user.surname + ', ' + user.givenName + '</br>'
+
+        });
+        setDeleteUsersLabel(`Do you really want to delete: ${x}`);
+    };
+
+    const deleteHandler = async (e) => {
         e.preventDefault();
         setDisableDeleteButton(true);
         setShowDeleteProgressBar(true)
         setDeleteUsersLabel("Deleting Users...");
         setDeleteProgressBarCount(0);
         setDeleteLabel(<><Spinner animation="border" size="sm" /></>);
+        setLoader2(<><Spinner animation="border" size="sm" /></>);
         let selected = [];
         const selectedNodes = gridRef.current.api.getSelectedNodes()
         const selectedData = selectedNodes.map(node => node.data);
@@ -106,29 +121,52 @@ export const ListUsers = (props) => {
         let deleted = [];
         let notDeleted = [];
         var x = "";
+        abort.current = 0;
 
-        selectedData.forEach(async (node) => {
-            let status = await deleteUsers(node.objectId);
-            console.log(status)
-            countProgress = countProgress + increment;
-            setDeleteProgressBarCount(countProgress);
-            count++;
-            if (status == 204) {
-                deleted.push(node);
-                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.mailNickname + '] -> Deleted successfully</br>'
-                setStatusText(x)
+        for (let node of selectedData) {
+            if (abort.current == 0) {
+                let status = await deleteUsers(node.objectId);
+                console.log(status)
+                countProgress = countProgress + increment;
+                setDeleteProgressBarCount(countProgress);
+                count++;
+                if (status == 204) {
+                    deleted.push(node);
+                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Deleted [' + node.mailNickname + '] successfully.</br>'
+                    setDeleteUsersLabel(x)
+                }
+                else {
+                    notDeleted.push(node);
+                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.mailNickname + '] -> User not found!</br>'
+                    setDeleteUsersLabel(x)
+                }
+
+                if (count == gridRef.current.api.getSelectedNodes().length) {
+                    getUsers();
+                    setDeleteLabel("Delete");
+                    setLoader2(": Done");
+
+                    setCancelButtonEnabled(false);
+                    //setStatusText(`${x} </br>`);
+                    //setDeleteUsersLabel("Done");
+                    let rows = gridRef.current.api.getDisplayedRowCount();
+                    setCount(rows);
+                    setTimeout(() => {
+                        setShowDeleteProgressBar(false);
+                        //setShow(false);
+                        //setStatusText();
+
+                    }, 1000);
+
+                }
             }
             else {
-                notDeleted.push(node);
-                x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> [' + node.mailNickname + '] -> Error, user not found!</br>'
-                setStatusText(x)
-            }
-
-            if (count == gridRef.current.api.getSelectedNodes().length) {
                 getUsers();
                 setDeleteLabel("Delete");
-                setStatusText(`${x} </br>`);
-                setDeleteUsersLabel("Done");
+                setLoader2(": Aborted");
+
+                //setStatusText(`${x} </br>`);
+                //setDeleteUsersLabel("Done");
                 let rows = gridRef.current.api.getDisplayedRowCount();
                 setCount(rows);
                 setTimeout(() => {
@@ -137,9 +175,8 @@ export const ListUsers = (props) => {
                     //setStatusText();
 
                 }, 1000);
-
             }
-        });
+        }
     }
 
     const deleteUsers = async (user) => {
@@ -204,11 +241,11 @@ export const ListUsers = (props) => {
         fetch(process.env.REACT_APP_USERS_GET_URI, requestOptions)
             .then(response => response.json())
             .then(data => {
-                setTimeout(() => {
-                    setRowData(data);
-                    let rows = gridRef.current.api.getDisplayedRowCount();
-                    setCount(rows);
-                }, 0);
+                //setTimeout(() => {
+                setRowData(data);
+                let rows = gridRef.current.api.getDisplayedRowCount();
+                setCount(rows);
+                //}, 0);
 
             }
             )
@@ -313,27 +350,25 @@ export const ListUsers = (props) => {
     }
 
     const accountStateFormatter = (params) => {
-        console.log(params.data.accountEnabled)
         if (params.data.accountEnabled == "false") {
-            return "USER PENDING ACTIVATION";
+            return "PENDING";
         }
-        else return "USER ACTIVATED";
+        else return "ACTIVATED";
     };
 
     const rowClassRules = {
         'row-activated': function (params) { return params.data.accountEnabled == "true"; },
-        'row-pending': function (params) { return params.data.accountEnabled == "false"; }
+        //'row-pending': function (params) { return params.data.accountEnabled == "false"; }
     };
 
     const cellClassRules = {
         'text-success': function (params) { return params.data.accountEnabled == "true"; },
         'text-warning': function (params) { return params.data.accountEnabled == "false"; }
-
     };
 
     const onRowSelected = useCallback((event) => {
-        setDeleteDisabled(false)
-        return { background: '#ff9998 !important'}; 
+        setDeleteDisabled(false);
+        //return { background: '#ff9998 !important'}; 
     }, []);
 
     const setAutoHeight = useCallback(() => {
@@ -345,7 +380,7 @@ export const ListUsers = (props) => {
 
     const noRowsOverlayComponent = useMemo(() => {
         return CustomNoRowsOverlay;
-      }, []);
+    }, []);
 
     return (
         <div>
@@ -359,7 +394,7 @@ export const ListUsers = (props) => {
                                         <Accordion.Toggle as={Button}
                                             variant="link" eventKey="0">
 
-                                            <h4> <i class="mdi mdi-chevron-double-down icon-md"></i>Create User</h4>
+                                            <h4> <i className="mdi mdi-chevron-double-down icon-md"></i>Create User</h4>
                                         </Accordion.Toggle>
                                     </Card.Header>
                                     <Accordion.Collapse eventKey="0">
@@ -367,9 +402,9 @@ export const ListUsers = (props) => {
                                             <div className="col-12 grid-margin" >
                                                 <div className="row">
                                                     <div className="col-md-5">
-                                                        <div class="input-group">
-                                                            {/*<div class="input-group-prepend">
-                                                                <span class="input-group-text bg-primary text-white">User</span>
+                                                        <div className="input-group">
+                                                            {/*<div className="input-group-prepend">
+                                                                <span className="input-group-text bg-primary text-white">User</span>
                                                             </div>*/
                                                             }
 
@@ -383,8 +418,8 @@ export const ListUsers = (props) => {
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}
                                                             />
                                                             {/*
-                                                            <div class="input-group-append">
-                                                                <span class="input-group-text text-white">@flitedeckadvisor.com</span>
+                                                            <div className="input-group-append">
+                                                                <span className="input-group-text text-white">@flitedeckadvisor.com</span>
                                                                 </div>
                                                                 */}
                                                         </div>
@@ -392,7 +427,7 @@ export const ListUsers = (props) => {
                                                     <div className="col-md-3">
                                                     </div>
                                                     <div className="col-md-4">
-                                                        <div class="input-group">
+                                                        <div className="input-group">
                                                             <select
                                                                 name="cars"
                                                                 id="cars"
@@ -415,9 +450,9 @@ export const ListUsers = (props) => {
                                                 <br></br>
                                                 <div className="row">
                                                     <div className="col-md-4">
-                                                        <div class="input-group">
-                                                            {/*<div class="input-group-prepend">
-                                                                <span class="input-group-text bg-primary text-white">First Name</span>
+                                                        <div className="input-group">
+                                                            {/*<div className="input-group-prepend">
+                                                                <span className="input-group-text bg-primary text-white">First Name</span>
                                                             </div>*/}
                                                             <input
                                                                 aria-label="" type="text"
@@ -431,7 +466,7 @@ export const ListUsers = (props) => {
                                                         </div>
                                                     </div>
                                                     <div className="col-md-3">
-                                                        <div class="input-group">
+                                                        <div className="input-group">
 
                                                             <input
                                                                 aria-label="" type="text"
@@ -445,9 +480,9 @@ export const ListUsers = (props) => {
                                                         </div>
                                                     </div>
                                                     <div className="col-md-5">
-                                                        <div class="input-group">
-                                                            {/*<div class="input-group-prepend">
-                                                                <span class="input-group-text bg-primary text-white">eMail</span>
+                                                        <div className="input-group">
+                                                            {/*<div className="input-group-prepend">
+                                                                <span className="input-group-text bg-primary text-white">eMail</span>
                                                         </div>*/}
                                                             <input
                                                                 aria-label="Amount (to the nearest dollar)" type="text"
@@ -515,13 +550,13 @@ export const ListUsers = (props) => {
 
                                         </div>
                                         <div className="col-md-3">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary text-white">
-                                                        <i class="mdi mdi-account-search"></i>
+                                            <div className="input-group">
+                                                <div className="input-group-prepend">
+                                                    <span className="input-group-text bg-primary text-white">
+                                                        <i className="mdi mdi-account-search"></i>
                                                     </span>
                                                 </div>
-                                                <input value={filterVal} aria-label="" style={{ color: "#fff" }} placeholder="Search..." type="text" class="form-control form-control"
+                                                <input value={filterVal} aria-label="" style={{ color: "#fff" }} placeholder="Search..." type="text" className="form-control form-control"
                                                     onChange={onFilterTextBoxChanged}
                                                 />
 
@@ -535,7 +570,7 @@ export const ListUsers = (props) => {
                                 <div className="row">
                                     <div className="col-md-4">
                                         <div className="row">
-                                            <p className="card-description"> Airline <code>{props.airline.toUpperCase()}</code></p>
+                                            <p className="card-description"> Airline <code className="text-warning">{props.airline.toUpperCase()}</code></p>
                                         </div>
                                     </div>
                                     <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">
@@ -573,14 +608,17 @@ export const ListUsers = (props) => {
                                 </div>
                             </div>
 
-                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 530, marginTop: -15 }}>
+                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 550, marginTop: -15 }}>
 
                                 {
                                     deleteDisabled
                                         ?
                                         <></>
                                         :
-                                        <Button variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={handleShow}><i class="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
+                                        <Button variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e=>{
+                                            handleShow();
+                                            setCancelButtonEnabled(false);
+                                        }}><i className="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
                                 }
                                 <AgGridReact
                                     ref={gridRef}
@@ -592,41 +630,32 @@ export const ListUsers = (props) => {
                                     enableCellTextSelection={false}
                                     gridOptions={gridOptions}
                                     animateRows={true}
-                                    //rowClassRules={rowClassRules}
+                                    rowClassRules={rowClassRules}
                                     onRowSelected={onRowSelected}
-                                    //noRowsOverlayComponent={noRowsOverlayComponent}
+                                    selectionChanged={e=>console.log("cambio")}
+                                //noRowsOverlayComponent={noRowsOverlayComponent}
 
                                 >
                                     <AgGridColumn field="objectId" sortable={true} filter={true} hide={true}></AgGridColumn>
-                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true} cellRenderer={UserCellRenderer}></AgGridColumn>
+                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true} headerCheckboxSelection={true} ></AgGridColumn>
                                     <AgGridColumn field="displayName" sortable={true} filter={true} hide={true} ></AgGridColumn>
                                     <AgGridColumn field="givenName" sortable={true} filter={true}></AgGridColumn>
-                                    <AgGridColumn field="surname" sortable={true} filter={true}></AgGridColumn>
-                                    <AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
+                                    <AgGridColumn field="surname" sortable={true} filter={true} headerName={"Last Name"}></AgGridColumn>
+                                    {
+                                        //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
+                                    }
                                     <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"}></AgGridColumn>
                                     <AgGridColumn field="userRole" sortable={true} filter={true}></AgGridColumn>
                                     <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} valueGetter={accountStateFormatter} cellClassRules={cellClassRules} headerName={"Status"}></AgGridColumn>
                                     <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"}></AgGridColumn>
                                 </AgGridReact>
 
-                                <Modal scrollable="true" show={show} onHide={handleClose}>
+                                <Modal scrollable="true" show={show} onHide={handleClose} contentClassName={"modal"}>
                                     <Modal.Header closeButton>
-                                        <Modal.Title>Delete User</Modal.Title>
+                                        <Modal.Title>Delete Users {loader2}</Modal.Title>
                                     </Modal.Header>
                                     <Modal.Body>
-                                        {
-                                            showAlert == true
-                                                ?
-                                                <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
-                                                    <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
-                                                    <p>
-                                                        The User could not be deleted. Not Found (404).
-                                                    </p>
-                                                </Alert>
-                                                :
-                                                <></>
-                                        }
-                                        {deleteUsersLabel}
+                                        <div dangerouslySetInnerHTML={{ __html: deleteUsersLabel }} />
                                     </Modal.Body>
                                     {
                                         showDeleteProgressBar
@@ -638,10 +667,32 @@ export const ListUsers = (props) => {
                                     <div dangerouslySetInnerHTML={{ __html: statusText }} />
 
                                     <Modal.Footer>
-                                        <Button variant="secondary" size="sm" onClick={handleClose}>
+                                        {
+                                            cancelButtonEnabled
+                                                ?
+                                                <Button variant="warning" size="sm" onClick={e => {
+                                                    abort.current = 1;
+                                                    setCancelButtonEnabled(false);
+                                                    //setGridDeleteButtonEnabled(true);
+                                                }
+                                                }>
+                                                    Abort
+                                                </Button>
+                                                :
+                                                <></>
+                                        }
+                                        <Button variant="secondary" size="sm" onClick={e => {
+                                            handleClose();
+                                            setCancelButtonEnabled(false);
+
+                                        }}>
                                             Close
                                         </Button>
-                                        <Button variant="danger" size="sm" onClick={deleteHandler} disabled={disableDeleteButton}>
+
+                                        <Button variant="danger" size="sm" onClick={e=>{
+                                            deleteHandler(e);
+                                            setCancelButtonEnabled(true);
+                                        }} disabled={disableDeleteButton}>
                                             {deleteLabel}
                                         </Button>
                                     </Modal.Footer>

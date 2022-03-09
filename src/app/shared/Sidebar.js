@@ -69,7 +69,7 @@ class Sidebar extends Component {
                 </div>
                 <div className="profile-name">
                   <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>                
-                    <span className='text-warning'>airline-<Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>                  
+                    <span className='text-warning'><Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>                  
                 </div>
               </div>
               {/*
@@ -118,8 +118,8 @@ class Sidebar extends Component {
           <li className="nav-item nav-category">
             <span className="nav-link"><Trans>Navigation</Trans></span>
           </li>
-          <li className={ this.isPathActive('/') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <Link className="nav-link" to="/">
+          <li className={ this.isPathActive('/dashboard/Dashboard') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
+            <Link className="nav-link" to="/dashboard/Dashboard">
               <span className="menu-icon"><i className="mdi mdi-speedometer text-primary"></i></span>
               <span className="menu-title"><Trans>Dashboard</Trans></span>
             </Link>

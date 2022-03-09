@@ -169,8 +169,8 @@
     content: "\f128";
   }
   .ag-theme-alpine-dark .ag-root-wrapper {
-    background-color: rgb(17, 17, 17);
-    background-color: var(--ag-background-color, rgb(17, 17, 17));
+    background-color: #191c24;
+    background-color: var(--ag-background-color, #191c24);
   }
   .ag-theme-alpine-dark [class^=ag-], .ag-theme-alpine-dark [class^=ag-]:focus, .ag-theme-alpine-dark [class^=ag-]:after, .ag-theme-alpine-dark [class^=ag-]:before {
     box-sizing: border-box;
@@ -3211,7 +3211,7 @@
     border-color: rgba(88, 86, 82, 0.5);
     border-color: var(--ag-row-border-color, var(--ag-secondary-border-color, rgba(88, 86, 82, 0.5)));
     border-bottom-style: solid;
-    background-color: rgb(17, 17, 17);
+    background-color: #191c24;
   }
   .ag-theme-alpine-dark .ag-row-highlight-above::after, .ag-theme-alpine-dark .ag-row-highlight-below::after {
     content: "";
@@ -3417,10 +3417,11 @@
     border-right-color: #68686e;
     border-right-color: var(--ag-border-color, #68686e);
   }
+  /*
   .ag-theme-alpine-dark .ag-row-selected {
     background-color: #222;
     background-color: var(--ag-selected-row-background-color, #222);
-  }
+  }*/
   .ag-theme-alpine-dark .ag-cell-range-selected:not(.ag-cell-focus),
   .ag-theme-alpine-dark .ag-body-viewport:not(.ag-has-focus) .ag-cell-range-single-cell:not(.ag-cell-inline-editing) {
     background-color: rgba(33, 150, 243, 0.2);
@@ -5171,18 +5172,18 @@
     background-color: var(--ag-alpine-active-color, #2196f3);
   }
 
-  .row-pending {
+  .row-activated {
     background-color: rgb(17, 17, 17) !important;
   }
-  .row-pending:hover {
+  .row-activated:hover {
     background-color: #222 !important;
   }
   
-  .row-activated {
+  .row-pending {
     background-color: #191c24 !important;
   }
 
-  .row-activated:hover {
+  .row-pending:hover {
     background-color: #222 !important;
   }
   /*

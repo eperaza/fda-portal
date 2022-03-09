@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { ProgressBar } from 'react-bootstrap';
 import { ListUsers } from "../user-pages/ListUsers";
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
@@ -29,8 +29,6 @@ export const BulkLoad = (props) => {
     const [token, setToken] = useState();
     const [items, setItems] = useState([]);
     const [rowData, setRowData] = useState([]);
-    const [gridApi, setGridApi] = useState(null);
-    const [gridColumnApi, setGridColumnApi] = useState(null);
     const gridRef = useRef(null);
     const [groupId, setGroupId] = useState();
     const [created, setCreated] = useState();
@@ -56,14 +54,15 @@ export const BulkLoad = (props) => {
     const [statusText, setStatusText] = useState();
     const [progressBarCount, setProgressBarCount] = useState(0);
     const [deleteProgressBarCount, setDeleteProgressBarCount] = useState(0);
-
+    const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
+    const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(false);
+    const [gridDeleteButtonEnabled, setGridDeleteButtonEnabled] = useState(false);
     const [showProgressBar, setShowProgressBar] = useState(false);
     const [showDeleteProgressBar, setShowDeleteProgressBar] = useState(false);
     const [showAlertText, setShowAlertText] = useState();
     const file = useRef();
-
-
-    let accessToken = null;
+    const abort = useRef(0);
+    const [createCancelButtonEnabled, setCreateCancelButtonEnabled] = useState();
 
     useEffect(() => {
         getPreUsers();
@@ -127,7 +126,9 @@ export const BulkLoad = (props) => {
                 required: [
                     "user", "email", "role"
                 ]
-            }
+            },
+            minItems: 1,
+            maxItems: 300
         }
 
         const valid = ajv.validate(schema, items)
@@ -139,57 +140,66 @@ export const BulkLoad = (props) => {
             setnotCreatedCount(0);
             setCreatedCount(0)
             setShowProgressBar(true);
-            setUploadLoader(<><Spinner animation="border" size="sm" /></>)
+            setUploadLoader(<><Spinner animation="border" size="sm" /></>);
+            setCreateCancelButtonEnabled(true);
             let count = 0
             let increment = (100 / items.length);
             let countProgress = 0;
-
             let created = [];
             let notCreated = [];
-            let label;
-            let countRows = 0;
             var x = "";
-            setLoader(<>
-                <Spinner animation="border" size="sm" /></>);
-            setLoader2(<>
-                <Spinner animation="border" size="sm" /></>);
+            setLoader(<><Spinner animation="border" size="sm" /></>);
+            setLoader2(<><Spinner animation="border" size="sm" /></>);
+            abort.current = 0;
+            for (let node of items) {
+                if (abort.current == 0) {
+                    let status = await createPreUser(node);
+                    if (status == 1) {
+                        created.push(node);
+                        x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.user + '] successfully</br>'
+                        setStatusText(x);
+                        setCreatedCount(created.length);
+                    }
+                    else {
+                        let error = status;
+                        if (error.includes("PreparedStatementCallback; SQL [INSERT INTO user_account_preregistrations (user_id, first, last, email, role, account_state, airline) VALUES (?, ?, ?, ?, ?, ?, ?)];")) {
+                            error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
+                        }
+                        notCreated.push(node.user);
+                        x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.user + '] -> ' + error + '</br>'
+                        setStatusText(x);
+                        setnotCreatedCount(notCreated.length);
+                    }
+                    count++;
+                    countProgress = countProgress + increment;
+                    setProgressBarCount(countProgress);
 
-            items.every(async (node) => {
-
-                let status = await createPreUser(node);
-
-                if (status == 1) {
-                    created.push(node);
-                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.user + '] -> Created successfully</br>'
-                    setStatusText(x);
+                    if (count == items.length) {
+                        setnotCreatedCount(notCreated.length);
+                        setCreatedCount(created.length);
+                        setUploadLoader("Upload");
+                        setLoader("Send Registration");
+                        setLoader2("");
+                        setCreateCancelButtonEnabled(false);
+                        getPreUsers();
+                        setTimeout(() => {
+                            setShowProgressBar(false);
+                        }, 1000);
+                    }
                 }
                 else {
-                    let error = status;
-                    if (error.includes("PreparedStatementCallback; SQL [INSERT INTO user_account_preregistrations (user_id, first, last, email, role, account_state, airline) VALUES (?, ?, ?, ?, ?, ?, ?)];")) {
-                        error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
-                    }
-                    notCreated.push(node.user);
-                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> [' + node.user + '] -> ' + error + '</br>'
-                    setStatusText(x);
-                    console.log(error);
-                }
-                count++;
-                countProgress = countProgress + increment;
-                setProgressBarCount(countProgress);
-
-                if (count == items.length) {
                     setnotCreatedCount(notCreated.length);
                     setCreatedCount(created.length);
                     setUploadLoader("Upload");
                     setLoader("Send Registration");
-                    setLoader2("");
+                    setLoader2(": Aborted");
+                    setCreateCancelButtonEnabled(false);
                     getPreUsers();
                     setTimeout(() => {
                         setShowProgressBar(false);
                     }, 1000);
-
                 }
-            });
+            }
         }
         else {
             setShowAlert(true);
@@ -211,7 +221,6 @@ export const BulkLoad = (props) => {
         headers.append("Content-Type", "application/json");
         headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
-
         var data = JSON.stringify({
             "userId": `${element.user}`,
             "first": `${element.first}`,
@@ -219,7 +228,6 @@ export const BulkLoad = (props) => {
             "email": `${element.email}`,
             "role": `${element.role}`,
             "airline": `airline-${props.airline}`,
-
         });
 
         const options = {
@@ -227,10 +235,10 @@ export const BulkLoad = (props) => {
             headers: headers,
             body: data
         };
-
         let res = await fetch(process.env.REACT_APP_PREUSERS_CREATE_URI, options);
         let message = await res.json();
-        let status = await res.status;
+        let status = res.status;
+
         if (status == 500) {
             return message.errorDescription;
         }
@@ -239,73 +247,113 @@ export const BulkLoad = (props) => {
         }
     }
 
+    const handleBulkLoad = () => {
+        let rows = gridRef.current.api.getSelectedNodes().length;
+        if (rows != 0) {
+            setCreateCancelButtonEnabled(true);
+            bulkLoad();
+
+        }
+    }
+
     const bulkLoad = async () => {
         //reset counters
         setDisable(true);
         setShow(true);
-        setStatusText();
+        setStatusText("Creating Users...");
+        setShowProgressBar(true);
+        setProgressBarCount(0);
         setnotCreatedCount(0);
-        setCreatedCount(0)
-            ;
+        setCreatedCount(0);
+        let countProgress = 0;
         let created = [];
         let notCreated = [];
         let label;
         var accessToken = await login();
-        let count = gridRef.current.api.getSelectedNodes().length
+        let count = 0;
         const selectedNodes = gridRef.current.api.getSelectedNodes()
         const selectedData = selectedNodes.map(node => node.data);
-        if (count != 0) {
+        let rows = gridRef.current.api.getSelectedNodes().length;
+        let increment = (100 / rows);
+
+        if (count != rows) {
             setLoader(<>
                 <Spinner animation="border" size="sm" /></>);
             setLoader2(<>
                 <Spinner animation="border" size="sm" /></>);
             var x = "";
         }
-        selectedData.forEach(async (node) => {
-            let status = await createUser(node, accessToken);
-            let statusDelete = await deletePreUsers(node.userId);
-            console.log(status.errorDescription)
-            if (status.objectId) {
-                setCheck("true")
-                created.push(node);
-                x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> [' + node.userId + '] -> Created successfully.</br>'
-                setStatusText(x)
+
+        abort.current = 0;
+        for (let node of selectedData) {
+            if (abort.current == 0) {
+                let status = await createUser(node, accessToken);
+                let statusDelete = await deletePreUsers(node.userId);
+                if (status.objectId) {
+                    setCheck("true")
+                    created.push(node);
+                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.userId + '] successfully.</br>'
+                    setStatusText(x);
+                    setCreatedCount(created.length);
+                }
+                else {
+                    notCreated.push(node);
+                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.userId + '] -> ' + status.errorDescription + '</br>'
+                    setStatusText(x)
+                    setnotCreatedCount(notCreated.length);
+                }
+
+                count++;
+                countProgress = countProgress + increment;
+                setProgressBarCount(countProgress);
+
+                if (count == rows) {
+                    setNotCreated(notCreated);
+                    setCreated(created);
+                    setnotCreatedCount(notCreated.length);
+                    setCreatedCount(created.length);
+                    setCreateCancelButtonEnabled(false);
+                    /*
+                    const DisplayData = notCreated.map(
+                        (info) => {
+                            return (
+                                <tr key={(info.userId)} className="table-danger">
+                                    <td>{info.userId}</td>
+                                    <td>{info.first}</td>
+                                    <td>{info.last}</td>
+                                    <td>{info.email}</td>
+                                    <td>{info.role}</td>
+                                </tr>
+                            )
+                        }
+                    )
+                    console.log(DisplayData);
+                    setErrorUsers(DisplayData);
+                    */
+                    setShow(true);
+                    setDisable(false);
+                    setLoader("Send Registration");
+                    setLoader2("");
+                    getPreUsers();
+                    setTimeout(() => {
+                        setShowProgressBar(false);
+                    }, 1000);
+                    //callback();
+                }
             }
             else {
-                notCreated.push(node);
-                x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> [' + node.userId + '] -> ' + status.errorDescription + '</br>'
-                setStatusText(x)
-            }
-            count--;
-            if (count == 0) {
-                setNotCreated(notCreated);
-                setCreated(created);
                 setnotCreatedCount(notCreated.length);
                 setCreatedCount(created.length);
-                const DisplayData = notCreated.map(
-                    (info) => {
-                        return (
-                            <tr key={(info.userId)} className="table-danger">
-                                <td>{info.userId}</td>
-                                <td>{info.first}</td>
-                                <td>{info.last}</td>
-                                <td>{info.email}</td>
-                                <td>{info.role}</td>
-                            </tr>
-                        )
-                    }
-                )
-                console.log(DisplayData);
-                setErrorUsers(DisplayData);
-                setShow(true);
-                setDisable(false);
+                setUploadLoader("Upload");
                 setLoader("Send Registration");
-                setLoader2("");
+                setLoader2(": Aborted");
                 getPreUsers();
-                //callback();
+                setTimeout(() => {
+                    setShowProgressBar(false);
+                }, 1000);
+                return;
             }
-        });
-
+        }
     }
 
     const login = async () => {
@@ -327,7 +375,6 @@ export const BulkLoad = (props) => {
             };
             let res = await fetch(process.env.REACT_APP_LOGIN_URI, options);
             let token = await res.json();
-            console.log("el token es " + token.authenticationResult.accessToken)
             return token.authenticationResult.accessToken;
         } catch (error) {
             console.log(error);
@@ -366,7 +413,6 @@ export const BulkLoad = (props) => {
         let res = await fetch(process.env.REACT_APP_USERS_CREATE_URI, options);
         let x = await res.json();
         return x;
-
     }
 
     const onGridReady = params => {
@@ -408,29 +454,41 @@ export const BulkLoad = (props) => {
         fetch(process.env.REACT_APP_PREUSERS_GET_URI, requestOptions)
             .then(response => response.json())
             .then(data => {
-                try{
+                try {
                     setRowData(data);
                 }
-                catch(error){
-                    window.location.reload(); 
+                catch (error) {
+                    window.location.reload();
                 }
-                
+
             }
             )
             .catch(error => console.log('error', error));
     }
 
     const handleShowDelete = e => {
+        setLoader2();
+        let users = [];
+        var x = "<br></br>";
         const selectedNodes = gridRef.current.api.getSelectedNodes()
         const selectedData = selectedNodes.map(node => node.data);
-        const deleteUsers = selectedData.map(node => `${node.userId}`).join(', ');
-        setDeleteLabel(deleteUsers);
+        const deleteUsers = selectedData.map(node => {
+            users.push(node);
+        })
+
+        users.forEach(user => {
+            x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.userId + '] ' + user.last + ', ' + user.first + '</br>'
+
+        });
+
+        setDeleteLabel(`Do you really want to delete: ${x}`);
         if (deleteUsers.length != 0) {
             setShowDelete(true)
         }
     };
 
-    const deleteHandler = () => {
+    const deleteHandler = async () => {
+        setLoader2(<><Spinner animation="border" size="sm" /></>);
         setShowDeleteProgressBar(true)
         setDeleteProgressBarCount(0);
         setDeleteLoader(<><Spinner animation="border" size="sm" /></>);
@@ -441,25 +499,54 @@ export const BulkLoad = (props) => {
         let count = 0
         let increment = (100 / gridRef.current.api.getSelectedNodes().length);
         let countProgress = 0;
+        let deleted = [];
+        let notDeleted = [];
+        var x = "";
+        abort.current = 0;
+        for (let node of selectedData) {
+            if (abort.current == 0) {
+                let status = await deletePreUsers(node.userId);
 
-        selectedData.forEach(async (node) => {
-            console.log(node.userId)
-            let status = await deletePreUsers(node.userId);
+                if (status == 204) {
+                    setCheck("true")
+                    deleted.push(node);
+                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Deleted [' + node.userId + '] successfully.</br>'
+                    setDeleteLabel(x)
+                }
+                else {
+                    notDeleted.push(node);
+                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.userId + '] -> ' + status.errorDescription + '</br>'
+                    setDeleteLabel(x)
+                }
 
-            count++;
-            countProgress = countProgress + increment;
-            setDeleteProgressBarCount(countProgress);
 
-            if (count == gridRef.current.api.getSelectedNodes().length) {
+                count++;
+                countProgress = countProgress + increment;
+                setDeleteProgressBarCount(countProgress);
+
+                if (count == gridRef.current.api.getSelectedNodes().length) {
+                    getPreUsers();
+                    setDeleteLoader("Delete");
+
+                    setTimeout(() => {
+                        setShowDeleteProgressBar(false);
+                        setLoader2();
+                        setCancelButtonEnabled(false)
+                        //setShowDelete(false);
+                    }, 1000);
+                }
+            }
+            else {
                 getPreUsers();
                 setDeleteLoader("Delete");
+                setLoader2(": Aborted");
 
                 setTimeout(() => {
                     setShowDeleteProgressBar(false);
-                    setShowDelete(false);
                 }, 1000);
+
             }
-        });
+        }
     }
 
     const deletePreUsers = async (user) => {
@@ -484,7 +571,7 @@ export const BulkLoad = (props) => {
         // PROPERTIES
         // Objects like myRowData and myColDefs would be created in your application
 
-        pagination: false,
+        pagination: true,
         onCellEditingStopped: function (event) {
             console.log("ask the server to update changed data in back end", event);
             let data = { rowIndex: event.rowIndex, id: event.data.userId, col: event.column.colId, value: event.value }
@@ -532,6 +619,11 @@ export const BulkLoad = (props) => {
             .catch(error => console.log('error', error));
     }
 
+    const onRowSelected = useCallback((event) => {
+        setGridDeleteButtonEnabled(true);
+        //return { background: '#ff9998 !important'}; 
+    }, []);
+
     const [selected, setSelected] = useState("active");
     const values = ["active", "pending", "na"];
 
@@ -541,7 +633,7 @@ export const BulkLoad = (props) => {
                 <h3 className="page-title">Bulk Load</h3>
                 <nav aria-label="breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item"><a href="!#" onClick={event => event.preventDefault()}>User Management</a></li>
+                        <li className="breadcrumb-item"><a onClick={event => event.preventDefault()}>User Management</a></li>
                         <li className="breadcrumb-item active" aria-current="page">Bulk Load</li>
                     </ol>
                 </nav>
@@ -602,13 +694,13 @@ export const BulkLoad = (props) => {
                                             <h4 className="card-title">Pre Registration Table</h4>
                                         </div>
                                         <div className="col-md-4">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary text-white">
-                                                        <i class="mdi mdi-account-search"></i>
+                                            <div className="input-group">
+                                                <div className="input-group-prepend">
+                                                    <span className="input-group-text bg-primary text-white">
+                                                        <i className="mdi mdi-account-search"></i>
                                                     </span>
                                                 </div>
-                                                <input aria-label="Amount (to the nearest dollar)" style={{ color: "#fff" }} placeholder="Search..." type="text" class="form-control form-control"
+                                                <input aria-label="Amount (to the nearest dollar)" style={{ color: "#fff" }} placeholder="Search..." type="text" className="form-control form-control"
                                                     onChange={onFilterTextBoxChanged}
                                                 />
                                             </div>
@@ -616,10 +708,22 @@ export const BulkLoad = (props) => {
                                     </div>
                                 </div>
                             </div>
-                            <p className="card-description"> Airline <code>{props.airline.toUpperCase()}</code></p>
+                            <p className="card-description"> Airline <code className="text-warning">{props.airline.toUpperCase()}</code></p>
+                            {
+                                gridDeleteButtonEnabled
+                                    ?
+                                    <Button variant="danger" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e => {
+                                        handleShowDelete();
+                                        setDeleteButtonDisabled(false);
+                                        setCancelButtonEnabled(false);
 
-                            <Button variant="danger" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={handleShowDelete}><i class="mdi mdi-delete-forever"></i>{deleteLoader}</Button>
-                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 475 }}>
+                                    }}>
+                                        <i className="mdi mdi-delete-forever"></i>{deleteLoader}
+                                    </Button>
+                                    :
+                                    <></>
+                            }
+                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 530 }}>
                                 <AgGridReact
                                     ref={gridRef}
                                     rowData={rowData}
@@ -629,8 +733,9 @@ export const BulkLoad = (props) => {
                                     onGridReady={onGridReady}
                                     gridOptions={gridOptions}
                                     //onFirstDataRendered={autoSizeColumns}
+                                    onRowSelected={onRowSelected}
                                     enableCellTextSelection={false}>
-                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} headerCheckboxSelection={true} editable={false}></AgGridColumn>
                                     <AgGridColumn field="last" sortable={true} filter={true}></AgGridColumn>
                                     <AgGridColumn field="first" sortable={true} filter={true} hide={false}></AgGridColumn>
                                     <AgGridColumn field="role" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
@@ -649,14 +754,14 @@ export const BulkLoad = (props) => {
                 <div className="col-sm-12 grid-margin stretch-card">
                     <div className="card">
                         <div className="card-body">
-                            <button type="submit" disabled={false} size="sm" className="btn btn-primary btn-lg btn-block" onClick={bulkLoad}>
+                            <button type="submit" disabled={false} size="sm" className="btn btn-primary btn-lg btn-block" onClick={handleBulkLoad}>
                                 {loader}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <Modal show={show} size="lg" onHide={handleClose} scrollable="true" backdrop="static"
+                <Modal show={show} size="lg" onHide={handleClose} scrollable="true" backdrop="static" contentClassName={"modal"}
                     keyboard={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>Bulk Load Status {loader2}</Modal.Title>
@@ -712,37 +817,74 @@ export const BulkLoad = (props) => {
                     }
 
                     <Modal.Footer>
+                        {
+                            createCancelButtonEnabled
+                                ?
+                                <Button variant="warning" onClick={e => {
+                                    abort.current = 1;
+                                    setCreateCancelButtonEnabled(false);
+                                }
+                                }>
+                                    Abort
+                                </Button>
+                                :
+                                <></>
+                        }
 
-                        <Button variant="secondary" onClick={handleClose}>
-                            Close
-                        </Button>
-                        <Button variant="primary" onClick={handleClose}>
+                        <Button variant="secondary" onClick={e => {
+                            handleClose();
+                        }
+                        }>
                             OK
                         </Button>
                     </Modal.Footer>
                 </Modal>
-                <Modal scrollable="true" show={showDelete} onHide={handleClose}>
+                <Modal scrollable="true" show={showDelete} contentClassName={"modal"} onHide={handleClose}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Delete User</Modal.Title>
+                        <Modal.Title><i className='mdi mdi-alert-octagon text-warning'></i> Delete Users {loader2}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
 
-                        Do you really want to delete: {deleteLabel} ?
+                        <div dangerouslySetInnerHTML={{ __html: deleteLabel }} />
 
                     </Modal.Body>
                     {
                         showDeleteProgressBar
                             ?
-                            <ProgressBar variant="danger" animated now={deleteProgressBarCount} />
+                            <ProgressBar variant="warning" animated now={deleteProgressBarCount} />
                             :
                             <></>
                     }
                     <Modal.Footer>
-
-                        <Button variant="secondary" size="sm" onClick={handleClose}>
-                            Cancel
+                        {
+                            cancelButtonEnabled
+                                ?
+                                <Button variant="warning" size="sm" onClick={e => {
+                                    abort.current = 1;
+                                    setCancelButtonEnabled(false);
+                                    //setGridDeleteButtonEnabled(true);
+                                }
+                                }>
+                                    Cancel
+                                </Button>
+                                :
+                                <></>
+                        }
+                        <Button variant="secondary" size="sm" onClick={e => {
+                            handleClose();
+                            setCancelButtonEnabled(false);
+                            //setGridDeleteButtonEnabled(true);
+                        }
+                        }>
+                            Close
                         </Button>
-                        <Button variant="danger" size="sm" onClick={deleteHandler}>
+                        <Button disabled={deleteButtonDisabled} variant="danger" size="sm" onClick={e => {
+                            deleteHandler();
+                            setCancelButtonEnabled(true);
+                            setDeleteButtonDisabled(true);
+                            //setGridDeleteButtonEnabled(true)
+                        }
+                        }>
                             {deleteLoader}
                         </Button>
                     </Modal.Footer>

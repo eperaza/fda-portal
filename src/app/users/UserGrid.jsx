@@ -27,11 +27,6 @@ export const UserGrid = () => {
   const [role, setRole] = useState();
   const [dirRole, setDirRole] = useState();
 
-
-
-
-
-
   let accessToken = null;
   React.useEffect(() => {
     console.log("fired...")
@@ -76,7 +71,7 @@ export const UserGrid = () => {
         <h3 className="page-title">Users</h3>
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
-            <li className="breadcrumb-item"><a href="!#" onClick={event => event.preventDefault()}>User Management</a></li>
+            <li className="breadcrumb-item"><a onClick={event => event.preventDefault()}>User Management</a></li>
             <li className="breadcrumb-item active" aria-current="page">Users</li>
           </ol>
         </nav>
