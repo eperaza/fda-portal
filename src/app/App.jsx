@@ -57,16 +57,15 @@ const App = () => {
         return null;
       });
     }
-
-
-
   }, [inProgress, accounts, instance, token]);
 
   return (
     <div className="App">
       <Router>
         <AuthenticatedTemplate>
-          <Route path="/" exact render={() => {
+        <Switch>
+
+          <Route path="/" exact component={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -98,7 +97,7 @@ const App = () => {
             );
           }}
           />
-          <Route path="/dashboard/Dashboard" exact render={() => {
+          <Route path="/dashboard/Dashboard" exact component={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -130,7 +129,7 @@ const App = () => {
             );
           }}
           />
-          <Route path="/usermanagement/UserGrid" exact render={() => {
+          <Route path="/usermanagement/UserGrid" exact component={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -151,7 +150,7 @@ const App = () => {
             );
           }}
           />
-          <Route path="/usermanagement/BulkLoad" exact render={() => {
+          <Route path="/usermanagement/BulkLoad" exact component={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -178,7 +177,7 @@ const App = () => {
             );
           }}
           />
-          <Route path="/fdrfiles/FDR" exact render={() => {
+          <Route path="/fdrfiles/FDR" exact component={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -199,14 +198,17 @@ const App = () => {
             );
           }}
           />
-          <Route path="*" exact render={() => {
+
+           <Route path="*" exact component={() => {
             return (
               <div>
-                <Error404 />
+                <Error404 style={{}}/>
               </div>
             );
           }}
           />
+        </Switch>
+
         </AuthenticatedTemplate>
 
         <UnauthenticatedTemplate>
@@ -225,7 +227,7 @@ const App = () => {
         </UnauthenticatedTemplate>
 
 
-
+        
       </Router>
     </div>
   );
