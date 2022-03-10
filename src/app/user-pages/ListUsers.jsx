@@ -242,9 +242,11 @@ export const ListUsers = (props) => {
             .then(response => response.json())
             .then(data => {
                 //setTimeout(() => {
-                setRowData(data);
-                let rows = gridRef.current.api.getDisplayedRowCount();
-                setCount(rows);
+                    if (data.objectId != "undefined"){
+                        setRowData(data);
+                        let rows = gridRef.current.api.getDisplayedRowCount();
+                        setCount(rows);
+                    }
                 //}, 0);
 
             }
@@ -409,10 +411,10 @@ export const ListUsers = (props) => {
                                                             }
 
                                                             <input
-                                                                aria-label="" type="text" className="inp"
+                                                                type="text" 
+                                                                className="inp"
                                                                 placeholder="User ID"
                                                                 aria-label="User Principal"
-                                                                type="text"
                                                                 onChange={onInputPrincipal}
                                                                 value={principal}
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}
@@ -455,11 +457,11 @@ export const ListUsers = (props) => {
                                                                 <span className="input-group-text bg-primary text-white">First Name</span>
                                                             </div>*/}
                                                             <input
-                                                                aria-label="" type="text"
+                                                                aria-label="" 
+                                                                type="text"
                                                                 className="inp"
                                                                 onChange={onInputGivenName}
                                                                 value={givenName}
-                                                                type="text"
                                                                 placeholder="First Name"
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}
                                                             />
@@ -469,13 +471,12 @@ export const ListUsers = (props) => {
                                                         <div className="input-group">
 
                                                             <input
-                                                                aria-label="" type="text"
-                                                                className="inp"
+                                                                aria-label="" 
                                                                 type="text"
+                                                                className="inp"
                                                                 placeholder="Last Name"
                                                                 onChange={onInputSurname}
                                                                 value={surname}
-                                                                type="text"
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }} />
                                                         </div>
                                                     </div>
@@ -485,13 +486,12 @@ export const ListUsers = (props) => {
                                                                 <span className="input-group-text bg-primary text-white">eMail</span>
                                                         </div>*/}
                                                             <input
-                                                                aria-label="Amount (to the nearest dollar)" type="text"
                                                                 className="inp"
                                                                 aria-label="First name"
                                                                 type="text"
                                                                 onChange={onInputMail}
                                                                 value={mail}
-                                                                type="text" placeholder="eMail"
+                                                                placeholder="eMail"
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }} />
 
                                                         </div>

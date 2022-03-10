@@ -79,7 +79,7 @@ export const UserGrid = () => {
               {
                 groupId
                   ?
-                  <ListUsers groupId={groupId} token={token} airline={airline} role={role} groupId={groupId} dirRole={dirRole} graphData={graphData}/>
+                  <ListUsers groupId={groupId} token={token} airline={airline} role={role} dirRole={dirRole} graphData={graphData}/>
                   :
                   <div></div>
               }

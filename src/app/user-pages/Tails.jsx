@@ -5,7 +5,6 @@ import Button from "react-bootstrap/Button";
 export const Tails = (props) => {
 
     useEffect(() => {
-        console.log("data es" + props.rowData)
     }, []);
 
     const renderTails = (data) => {
