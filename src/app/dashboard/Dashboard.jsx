@@ -57,10 +57,10 @@ export const Dashboard = (props) => {
     fetch(`https://fdalitewebfunctiontest.azurewebsites.net/api/getTSP?code=${code}&airline=${props.airline}`)
       .then(response => response.text())
       .then(data => {
-        if(data != ""){
+        if (data != "") {
           setTSP(data);
         }
-        else{
+        else {
           setTSP("TSP Not Found");
         }
       }
@@ -158,42 +158,50 @@ export const Dashboard = (props) => {
         </div>
         <div className="col-xl-3 col-sm-6 grid-margin stretch-card">
           <div className="card">
-            <div className="card-body">
-              <div className="row">
-                <div className="col-9">
-                  <div className="d-flex align-items-center align-self-start">
-                    <h3 className="mb-0">FDA</h3>
-                    <p className="text-info ml-2 mb-0 font-weight-medium"></p>
+            {
+              /* 
+              <div className="card-body">
+                  <div className="row">
+                    <div className="col-9">
+                      <div className="d-flex align-items-center align-self-start">
+                        <h3 className="mb-0">FDA</h3>
+                        <p className="text-info ml-2 mb-0 font-weight-medium"></p>
+                      </div>
+                    </div>
+                    <div className="col-3">
+                      <div className="icon icon-box-info ">
+                        <span className="mdi mdi-alert-decagram icon-item"></span>
+                      </div>
+                    </div>
                   </div>
+                  <h6 className="text-muted font-weight-normal">v.6.3</h6>
                 </div>
-                <div className="col-3">
-                  <div className="icon icon-box-info ">
-                    <span className="mdi mdi-alert-decagram icon-item"></span>
-                  </div>
-                </div>
-              </div>
-              <h6 className="text-muted font-weight-normal">v.6.3</h6>
-            </div>
+                */
+            }
           </div>
         </div>
         <div className="col-xl-3 col-sm-6 grid-margin stretch-card">
           <div className="card">
-            <div className="card-body">
-              <div className="row">
-                <div className="col-9">
-                  <div className="d-flex align-items-center align-self-start">
-                    <h3 className="mb-0">User Mgmt</h3>
-                    <p className="text-danger ml-2 mb-0 font-weight-medium"></p>
+            {
+              /*
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-9">
+                      <div className="d-flex align-items-center align-self-start">
+                        <h3 className="mb-0">User Mgmt</h3>
+                        <p className="text-danger ml-2 mb-0 font-weight-medium"></p>
+                      </div>
+                    </div>
+                    <div className="col-3">
+                      <div className="icon icon-box-primary ">
+                        <span className="mdi mdi mdi-beta icon-item"></span>
+                      </div>
+                    </div>
                   </div>
+                  <h6 className="text-muted font-weight-normal">BETA v.1.1</h6>
                 </div>
-                <div className="col-3">
-                  <div className="icon icon-box-primary ">
-                    <span className="mdi mdi mdi-beta icon-item"></span>
-                  </div>
-                </div>
-              </div>
-              <h6 className="text-muted font-weight-normal">BETA v.1.1</h6>
-            </div>
+              */
+            }
           </div>
         </div>
         <div className="col-xl-2 col-sm-6 grid-margin stretch-card">
@@ -256,7 +264,7 @@ export const Dashboard = (props) => {
                           }</h6>
                           <p className="text-muted mb-0">Name</p>
                         </div>
-                          
+
                       </div>
                     </div>
                     <div className="preview-item border-bottom">
@@ -286,7 +294,7 @@ export const Dashboard = (props) => {
                           <h6 className="preview-subject">{
                             props.graphData.userPrincipalName
                           }</h6>
-                          <p className="text-muted mb-0">Email</p>
+                          <p className="text-muted mb-0">User ID</p>
                         </div>
 
                       </div>
@@ -314,7 +322,7 @@ export const Dashboard = (props) => {
 
         <div className="col-md-4 grid-margin stretch-card">
           <div className="card">
-            <div className="card-body" style={{overflowY:'scroll', height:450, marginBottom: 20}} >
+            <div className="card-body" style={{ overflowY: 'scroll', height: 450, marginBottom: 20 }} >
               <div className="d-flex flex-row justify-content-between">
                 <h4 className="card-title mb-1">Tails:</h4>
                 <p className="text-muted mb-1">FDR files</p>
@@ -323,7 +331,7 @@ export const Dashboard = (props) => {
 
                 props.groupId
                   ?
-                  
+
                   <ListTails groupId={props.groupId} token={props.token} airline={props.airline} />
                   :
                   <div></div>

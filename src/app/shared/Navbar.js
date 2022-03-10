@@ -152,7 +152,7 @@ export const Navbar = (props) => {
               <Dropdown.Menu className="navbar-dropdown preview-list navbar-profile-dropdown-menu">
                 <h6 className="p-3 mb-0"><Trans>Profile</Trans></h6>
                 <Dropdown.Divider />
-                <Dropdown.Item href="!#" onClick={evt =>evt.preventDefault()} className="preview-item">
+                {/*<Dropdown.Item href="!#" onClick={evt =>evt.preventDefault()} className="preview-item">
                   <div className="preview-thumbnail">
                     <div className="preview-icon bg-dark rounded-circle">
                       <i className="mdi mdi-settings text-success"></i>
@@ -161,7 +161,7 @@ export const Navbar = (props) => {
                   <div className="preview-item-content">
                     <p className="preview-subject mb-1"><Trans>Settings</Trans></p>
                   </div>
-                </Dropdown.Item>
+                  </Dropdown.Item>*/}
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={() => handleLogout("redirect")}  className="preview-item">
                   <div className="preview-thumbnail">
@@ -174,7 +174,9 @@ export const Navbar = (props) => {
                   </div>
                 </Dropdown.Item>
                 <Dropdown.Divider />
-                <p className="p-3 mb-0 text-center"><Trans>Advanced settings</Trans></p>
+               {
+                // <p className="p-3 mb-0 text-center"><Trans>Advanced settings</Trans></p>
+               }
               </Dropdown.Menu>
             </Dropdown>
           </ul>
