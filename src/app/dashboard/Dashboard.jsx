@@ -57,7 +57,12 @@ export const Dashboard = (props) => {
     fetch(`https://fdalitewebfunctiontest.azurewebsites.net/api/getTSP?code=${code}&airline=${props.airline}`)
       .then(response => response.text())
       .then(data => {
-        setTSP(data);
+        if(data != ""){
+          setTSP(data);
+        }
+        else{
+          setTSP("TSP Not Found");
+        }
       }
       )
       .catch(error => console.log('error', error));

@@ -13,11 +13,11 @@ import { Login } from './user-pages/Login';
 import { Switch, Redirect } from 'react-router-dom';
 import { useIsAuthenticated } from "@azure/msal-react";
 import Spinner from 'react-bootstrap/Spinner';
-
 import { Dashboard } from "./dashboard/Dashboard";
-import { BulkLoad } from "./users/BulkLoad";
-import { UserGrid } from "./users/UserGrid";
-import { FDR } from "./user-pages/FDR";
+import { BulkLoad } from "./usermanagement/BulkLoad";
+import { UserGrid } from "./usermanagement/UserGrid";
+import { FDR } from "./fdrfiles/FDR";
+import { Error404 } from "./error-pages/Error404";
 
 const App = () => {
 
@@ -66,17 +66,17 @@ const App = () => {
     <div className="App">
       <Router>
         <AuthenticatedTemplate>
-        <Route path="/" exact render={() => {
+          <Route path="/" exact render={() => {
             return (
               <div>
                 <div className="container-scroller">
                   {
                     accounts[0]
-                    ?
-                    <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
-                    :
-                    <></>
-                    }
+                      ?
+                      <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
+                      :
+                      <></>
+                  }
                   <div className="container-fluid page-body-wrapper">
                     {<Navbar account={accounts[0].name} />}
                     <div className="main-panel">
@@ -104,11 +104,11 @@ const App = () => {
                 <div className="container-scroller">
                   {
                     accounts[0]
-                    ?
-                    <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
-                    :
-                    <></>
-                    }
+                      ?
+                      <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
+                      :
+                      <></>
+                  }
                   <div className="container-fluid page-body-wrapper">
                     {<Navbar account={accounts[0].name} />}
                     <div className="main-panel">
@@ -130,7 +130,7 @@ const App = () => {
             );
           }}
           />
-          <Route path="/users/UserGrid" exact render={() => {
+          <Route path="/usermanagement/UserGrid" exact render={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -151,7 +151,7 @@ const App = () => {
             );
           }}
           />
-          <Route path="/users/BulkLoad" exact render={() => {
+          <Route path="/usermanagement/BulkLoad" exact render={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -178,7 +178,7 @@ const App = () => {
             );
           }}
           />
-          <Route path="/user-pages/FDR" exact render={() => {
+          <Route path="/fdrfiles/FDR" exact render={() => {
             return (
               <div>
                 <div className="container-scroller">
@@ -199,8 +199,14 @@ const App = () => {
             );
           }}
           />
-
-
+          <Route path="*" exact render={() => {
+            return (
+              <div>
+                <Error404 />
+              </div>
+            );
+          }}
+          />
         </AuthenticatedTemplate>
 
         <UnauthenticatedTemplate>

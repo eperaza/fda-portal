@@ -10,7 +10,7 @@ import FormControl from "react-bootstrap/FormControl";
 import Spinner from 'react-bootstrap/Spinner';
 import { Accordion, Card } from "react-bootstrap";
 import { ProgressBar } from 'react-bootstrap';
-import { SwitchToggle } from "../users/SwitchToggle.jsx";
+import { SwitchToggle } from "../usermanagement/SwitchToggle";
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
@@ -242,13 +242,12 @@ export const ListUsers = (props) => {
             .then(response => response.json())
             .then(data => {
                 //setTimeout(() => {
-                    if (data.objectId != "undefined"){
-                        setRowData(data);
-                        let rows = gridRef.current.api.getDisplayedRowCount();
-                        setCount(rows);
-                    }
+                if (data.objectId != "undefined") {
+                    setRowData(data);
+                    let rows = gridRef.current.api.getDisplayedRowCount();
+                    setCount(rows);
+                }
                 //}, 0);
-
             }
             )
             .catch(error => console.log('error', error));
@@ -411,7 +410,7 @@ export const ListUsers = (props) => {
                                                             }
 
                                                             <input
-                                                                type="text" 
+                                                                type="text"
                                                                 className="inp"
                                                                 placeholder="User ID"
                                                                 aria-label="User Principal"
@@ -457,7 +456,7 @@ export const ListUsers = (props) => {
                                                                 <span className="input-group-text bg-primary text-white">First Name</span>
                                                             </div>*/}
                                                             <input
-                                                                aria-label="" 
+                                                                aria-label=""
                                                                 type="text"
                                                                 className="inp"
                                                                 onChange={onInputGivenName}
@@ -471,7 +470,7 @@ export const ListUsers = (props) => {
                                                         <div className="input-group">
 
                                                             <input
-                                                                aria-label="" 
+                                                                aria-label=""
                                                                 type="text"
                                                                 className="inp"
                                                                 placeholder="Last Name"
@@ -615,7 +614,7 @@ export const ListUsers = (props) => {
                                         ?
                                         <></>
                                         :
-                                        <Button variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e=>{
+                                        <Button variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e => {
                                             handleShow();
                                             setCancelButtonEnabled(false);
                                         }}><i className="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
@@ -632,7 +631,7 @@ export const ListUsers = (props) => {
                                     animateRows={true}
                                     rowClassRules={rowClassRules}
                                     onRowSelected={onRowSelected}
-                                    selectionChanged={e=>console.log("cambio")}
+                                    selectionChanged={e => console.log("cambio")}
                                 //noRowsOverlayComponent={noRowsOverlayComponent}
 
                                 >
@@ -689,7 +688,7 @@ export const ListUsers = (props) => {
                                             Close
                                         </Button>
 
-                                        <Button variant="danger" size="sm" onClick={e=>{
+                                        <Button variant="danger" size="sm" onClick={e => {
                                             deleteHandler(e);
                                             setCancelButtonEnabled(true);
                                         }} disabled={disableDeleteButton}>

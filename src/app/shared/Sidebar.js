@@ -125,7 +125,7 @@ class Sidebar extends Component {
             </Link>
           </li>
           
-          <li className={ this.isPathActive('/users') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
+          <li className={ this.isPathActive('/usermanagement') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
             <div className={ this.state.basicUiMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('basicUiMenuOpen') } data-toggle="collapse">
               <span className="menu-icon">
                 <i className="mdi mdi-account-multiple text-warning"></i>
@@ -136,13 +136,13 @@ class Sidebar extends Component {
             <Collapse in={ this.state.basicUiMenuOpen }>
               <div>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"> <Link className={ this.isPathActive('/users/UserGrid') ? 'nav-link active' : 'nav-link' } to="/users/UserGrid"><Trans>Users</Trans></Link></li>
-                  <li className="nav-item"> <Link className={ this.isPathActive('/users/BulkLoad') ? 'nav-link active' : 'nav-link' } to="/users/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
+                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/UserGrid') ? 'nav-link active' : 'nav-link' } to="/usermanagement/UserGrid"><Trans>Users</Trans></Link></li>
+                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/BulkLoad') ? 'nav-link active' : 'nav-link' } to="/usermanagement/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>
           </li>
-          <li className={ this.isPathActive('/user-pages/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
+          <li className={ this.isPathActive('/fdrfiles/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
             <div className={ this.state.formElementsMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('formElementsMenuOpen') } data-toggle="collapse">
               <span className="menu-icon">
                 <i className="mdi mdi-file-tree text-danger"></i>
@@ -153,7 +153,7 @@ class Sidebar extends Component {
             <Collapse in={ this.state.formElementsMenuOpen }>
               <div>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"> <Link className={ this.isPathActive('/user-pages/FDR') ? 'nav-link active' : 'nav-link' } to="/user-pages/FDR"><Trans>Download</Trans></Link></li>
+                  <li className="nav-item"> <Link className={ this.isPathActive('/fdrfiles/FDR') ? 'nav-link active' : 'nav-link' } to="/fdrfiles/FDR"><Trans>Download</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>

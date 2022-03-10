@@ -10,7 +10,7 @@ import FormControl from "react-bootstrap/FormControl";
 import Spinner from 'react-bootstrap/Spinner'
 import { AccordionFDR } from "./Accordion";
 import { ProgressBar } from 'react-bootstrap';
-import { SwitchToggle } from "../users/SwitchToggle.jsx";
+import { SwitchToggle } from "../usermanagement/SwitchToggle.jsx";
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";

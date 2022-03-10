@@ -4,7 +4,7 @@ import { ListUsers } from "../user-pages/ListUsers";
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
 import { callMsGraph, getGroupNames } from "../../graph";
-import { ListFDR } from "./ListFDR"
+import { ListFDR } from "../user-pages/ListFDR"
 
 //import '../bootstrap.scss';
 
