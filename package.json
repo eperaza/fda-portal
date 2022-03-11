@@ -23,6 +23,7 @@
     "cogo-toast": "^4.2.3",
     "compass-mixins": "^0.12.10",
     "d3": "^7.3.0",
+    "env-cmd": "^10.1.0",
     "flag-icon-css": "^3.5.0",
     "font-awesome": "^4.7.0",
     "i18next": "^19.9.2",
@@ -75,6 +76,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "build:staging": "env-cmd -f .env.staging react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

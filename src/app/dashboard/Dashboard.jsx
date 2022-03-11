@@ -1,6 +1,5 @@
 import React, { Component, useState, useEffect } from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import Slider from "react-slick";
 import { Line, Bar, Pie, Scatter } from 'react-chartjs-2';
 import { ListTails } from "../user-pages/ListTails";
 

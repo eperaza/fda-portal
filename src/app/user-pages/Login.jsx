@@ -5,7 +5,6 @@ import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import Button from "react-bootstrap/Button";
-import Dropdown from "react-bootstrap/esm/Dropdown";
 import { FaSignInAlt } from "react-icons/fa";
 
 export const Login = () => {
