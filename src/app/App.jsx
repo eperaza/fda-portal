@@ -66,6 +66,38 @@ const App = () => {
 
 
           <Switch>
+          <Route path="/" exact component={() => {
+              return (
+                <div>
+                  <div className="container-scroller">
+                    {
+                      accounts[0]
+                        ?
+                        <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
+                        :
+                        <></>
+                    }
+                    <div className="container-fluid page-body-wrapper">
+                      {<Navbar account={accounts[0].name} />}
+                      <div className="main-panel">
+                        <div className="content-wrapper">
+                          {
+                            airline
+                              ?
+                              <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId}></Dashboard>
+                              :
+                              <></>
+                          }
+                        </div>
+                        {<Footer />
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }}
+            />
             <Route path="/dashboard/Dashboard" exact component={() => {
               return (
                 <div>
@@ -178,7 +210,6 @@ const App = () => {
             />
 
           </Switch>
-          <Redirect from="*" to="/dashboard/Dashboard" />
 
         </AuthenticatedTemplate>
 

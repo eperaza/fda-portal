@@ -254,108 +254,116 @@ export const BulkLoad = (props) => {
             bulkLoad();
 
         }
-        else{
+        else {
             alert("No users selected!");
         }
     }
 
     const bulkLoad = async () => {
-        //reset counters
-        setDisable(true);
-        setShow(true);
-        setStatusText("Creating Users...");
-        setShowProgressBar(true);
-        setProgressBarCount(0);
-        setnotCreatedCount(0);
-        setCreatedCount(0);
-        let countProgress = 0;
-        let created = [];
-        let notCreated = [];
-        let label;
-        var accessToken = await login();
-        let count = 0;
-        const selectedNodes = gridRef.current.api.getSelectedNodes()
-        const selectedData = selectedNodes.map(node => node.data);
+
         let rows = gridRef.current.api.getSelectedNodes().length;
-        let increment = (100 / rows);
 
-        if (count != rows) {
-            setLoader(<>
-                <Spinner animation="border" size="sm" /></>);
-            setLoader2(<>
-                <Spinner animation="border" size="sm" /></>);
-            var x = "";
-        }
+        if (rows <= process.env.REACT_APP_MAX_BATCH_SIZE) {
+            //reset counters
+            setDisable(true);
+            setShow(true);
+            setStatusText("Creating Users...");
+            setShowProgressBar(true);
+            setProgressBarCount(0);
+            setnotCreatedCount(0);
+            setCreatedCount(0);
+            let countProgress = 0;
+            let created = [];
+            let notCreated = [];
+            let label;
+            var accessToken = await login();
+            let count = 0;
+            const selectedNodes = gridRef.current.api.getSelectedNodes()
+            const selectedData = selectedNodes.map(node => node.data);
+            let increment = (100 / rows);
 
-        abort.current = 0;
-        for (let node of selectedData) {
-            if (abort.current == 0) {
-                let status = await createUser(node, accessToken);
-                let statusDelete = await deletePreUsers(node.userId);
-                if (status.objectId) {
-                    setCheck("true")
-                    created.push(node);
-                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.userId + '] successfully.</br>'
-                    setStatusText(x);
-                    setCreatedCount(created.length);
+            if (count != rows) {
+                setLoader(<>
+                    <Spinner animation="border" size="sm" /></>);
+                setLoader2(<>
+                    <Spinner animation="border" size="sm" /></>);
+                var x = "";
+            }
+
+            abort.current = 0;
+
+            for (let node of selectedData) {
+                if (abort.current == 0) {
+                    let status = await createUser(node, accessToken);
+                    let statusDelete = await deletePreUsers(node.userId);
+                    if (status.objectId) {
+                        setCheck("true")
+                        created.push(node);
+                        x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.userId + '] successfully.</br>'
+                        setStatusText(x);
+                        setCreatedCount(created.length);
+                    }
+                    else {
+                        notCreated.push(node);
+                        x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.userId + '] -> ' + status.errorDescription + '</br>'
+                        setStatusText(x)
+                        setnotCreatedCount(notCreated.length);
+                    }
+
+                    count++;
+                    countProgress = countProgress + increment;
+                    setProgressBarCount(countProgress);
+
+                    if (count == rows) {
+                        setNotCreated(notCreated);
+                        setCreated(created);
+                        setnotCreatedCount(notCreated.length);
+                        setCreatedCount(created.length);
+                        setCreateCancelButtonEnabled(false);
+                        /*
+                        const DisplayData = notCreated.map(
+                            (info) => {
+                                return (
+                                    <tr key={(info.userId)} className="table-danger">
+                                        <td>{info.userId}</td>
+                                        <td>{info.first}</td>
+                                        <td>{info.last}</td>
+                                        <td>{info.email}</td>
+                                        <td>{info.role}</td>
+                                    </tr>
+                                )
+                            }
+                        )
+                        console.log(DisplayData);
+                        setErrorUsers(DisplayData);
+                        */
+                        setShow(true);
+                        setDisable(false);
+                        setLoader("Send Registration");
+                        setLoader2("");
+                        getPreUsers();
+                        setTimeout(() => {
+                            setShowProgressBar(false);
+                        }, 1000);
+                        //callback();
+                    }
                 }
                 else {
-                    notCreated.push(node);
-                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.userId + '] -> ' + status.errorDescription + '</br>'
-                    setStatusText(x)
-                    setnotCreatedCount(notCreated.length);
-                }
-
-                count++;
-                countProgress = countProgress + increment;
-                setProgressBarCount(countProgress);
-
-                if (count == rows) {
-                    setNotCreated(notCreated);
-                    setCreated(created);
                     setnotCreatedCount(notCreated.length);
                     setCreatedCount(created.length);
-                    setCreateCancelButtonEnabled(false);
-                    /*
-                    const DisplayData = notCreated.map(
-                        (info) => {
-                            return (
-                                <tr key={(info.userId)} className="table-danger">
-                                    <td>{info.userId}</td>
-                                    <td>{info.first}</td>
-                                    <td>{info.last}</td>
-                                    <td>{info.email}</td>
-                                    <td>{info.role}</td>
-                                </tr>
-                            )
-                        }
-                    )
-                    console.log(DisplayData);
-                    setErrorUsers(DisplayData);
-                    */
-                    setShow(true);
-                    setDisable(false);
+                    setUploadLoader("Upload");
                     setLoader("Send Registration");
-                    setLoader2("");
+                    setLoader2(": Aborted");
                     getPreUsers();
                     setTimeout(() => {
                         setShowProgressBar(false);
                     }, 1000);
-                    //callback();
+                    return;
                 }
             }
-            else {
-                setnotCreatedCount(notCreated.length);
-                setCreatedCount(created.length);
-                setUploadLoader("Upload");
-                setLoader("Send Registration");
-                setLoader2(": Aborted");
-                getPreUsers();
-                setTimeout(() => {
-                    setShowProgressBar(false);
-                }, 1000);
-                return;
-            }
+        }
+        else {
+            alert("Maximum batch size of " + process.env.REACT_APP_MAX_BATCH_SIZE + " users exceeded. Users selected: " + rows);
         }
     }
 

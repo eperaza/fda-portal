@@ -43,6 +43,7 @@ export const ListUsers = (props) => {
     const [filterVal, setFilterVal] = useState();
     const [deleteDisabled, setDeleteDisabled] = useState(true);
     const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
+    const [titleWarning, setTitleWarning] = useState();
 
     const abort = useRef(0);
 
@@ -81,6 +82,7 @@ export const ListUsers = (props) => {
     };
 
     const handleShow = e => {
+        
         let users = [];
         var x = "<br></br>";
         const selectedNodes = gridRef.current.api.getSelectedNodes()
@@ -88,8 +90,9 @@ export const ListUsers = (props) => {
         const deleteUsers = selectedData.map(node => {
             users.push(node);
         });
+        setLoader2(": Warning");
+        setTitleWarning(" <i class='mdi mdi-alert-octagon text-danger'></i>");
         setDisableDeleteButton(false);
-        setLoader2();
         setStatusText();
         if (deleteUsers.length != 0) {
             setShow(true);
@@ -111,6 +114,7 @@ export const ListUsers = (props) => {
         setShowDeleteProgressBar(true)
         setDeleteUsersLabel("Deleting Users...");
         setDeleteProgressBarCount(0);
+        setTitleWarning();
         setDeleteLabel(<><Spinner animation="border" size="sm" /></>);
         setLoader2(<><Spinner animation="border" size="sm" /></>);
         let selected = [];
@@ -149,7 +153,6 @@ export const ListUsers = (props) => {
                     getUsers();
                     setDeleteLabel("Delete");
                     setLoader2(": Done");
-
                     setCancelButtonEnabled(false);
                     //setStatusText(`${x} </br>`);
                     //setDeleteUsersLabel("Done");
@@ -655,7 +658,9 @@ export const ListUsers = (props) => {
 
                                 <Modal scrollable="true" show={show} onHide={handleClose} contentClassName={"modal"}>
                                     <Modal.Header closeButton>
-                                        <Modal.Title>Delete Users {loader2}</Modal.Title>
+                                        <Modal.Title>Delete Users {loader2}   
+                                                <a dangerouslySetInnerHTML={{ __html: titleWarning }} />
+</Modal.Title>
                                     </Modal.Header>
                                     <Modal.Body>
                                         <div dangerouslySetInnerHTML={{ __html: deleteUsersLabel }} />
