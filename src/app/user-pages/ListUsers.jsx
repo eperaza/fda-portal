@@ -92,13 +92,17 @@ export const ListUsers = (props) => {
         setLoader2();
         setStatusText();
         if (deleteUsers.length != 0) {
-            setShow(true)
+            setShow(true);
+            users.forEach(user => {
+                x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.mailNickname + '] ' + user.surname + ', ' + user.givenName + '</br>'
+    
+            });
+            setDeleteUsersLabel(`You are about to delete: ${x}`);
         }
-        users.forEach(user => {
-            x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.mailNickname + '] ' + user.surname + ', ' + user.givenName + '</br>'
-
-        });
-        setDeleteUsersLabel(`Do you really want to delete: ${x}`);
+        else{
+            alert("No users selected!")
+        }
+        
     };
 
     const deleteHandler = async (e) => {

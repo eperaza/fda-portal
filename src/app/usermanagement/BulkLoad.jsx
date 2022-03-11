@@ -254,6 +254,9 @@ export const BulkLoad = (props) => {
             bulkLoad();
 
         }
+        else{
+            alert("No users selected!");
+        }
     }
 
     const bulkLoad = async () => {
