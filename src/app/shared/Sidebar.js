@@ -34,14 +34,8 @@ class Sidebar extends Component {
     });
 
     const dropdownPaths = [
-      {path:'/apps', state: 'appsMenuOpen'},
-      {path:'/basic-ui', state: 'basicUiMenuOpen'},
-      {path:'/form-elements', state: 'formElementsMenuOpen'},
-      {path:'/tables', state: 'tablesMenuOpen'},
-      {path:'/icons', state: 'iconsMenuOpen'},
-      {path:'/charts', state: 'chartsMenuOpen'},
-      {path:'/user-pages', state: 'userPagesMenuOpen'},
-      {path:'/error-pages', state: 'errorPagesMenuOpen'},
+      {path:'/usermanagement', state: 'userManagementOpen'},
+      {path:'/fdrfiles', state: 'fdrFilesOpen'}
     ];
 
     dropdownPaths.forEach((obj => {
@@ -126,14 +120,14 @@ class Sidebar extends Component {
           </li>
           
           <li className={ this.isPathActive('/usermanagement') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <div className={ this.state.basicUiMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('basicUiMenuOpen') } data-toggle="collapse">
+            <div className={ this.state.userManagementOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('userManagementOpen') } data-toggle="collapse">
               <span className="menu-icon">
                 <i className="mdi mdi-account-multiple text-warning"></i>
               </span>
               <span className="menu-title"><Trans>User Management</Trans></span>
               <i className="menu-arrow"></i>
             </div>
-            <Collapse in={ this.state.basicUiMenuOpen }>
+            <Collapse in={ this.state.userManagementOpen }>
               <div>
                 <ul className="nav flex-column sub-menu">
                   <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/UserGrid') ? 'nav-link active' : 'nav-link' } to="/usermanagement/UserGrid"><Trans>Users</Trans></Link></li>
@@ -143,14 +137,14 @@ class Sidebar extends Component {
             </Collapse>
           </li>
           <li className={ this.isPathActive('/fdrfiles/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <div className={ this.state.formElementsMenuOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('formElementsMenuOpen') } data-toggle="collapse">
+            <div className={ this.state.fdrFilesOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('fdrFilesOpen') } data-toggle="collapse">
               <span className="menu-icon">
                 <i className="mdi mdi-file-tree text-danger"></i>
               </span>
               <span className="menu-title"><Trans>FDR Files</Trans></span>
               <i className="menu-arrow"></i>
             </div>
-            <Collapse in={ this.state.formElementsMenuOpen }>
+            <Collapse in={ this.state.fdrFilesOpen }>
               <div>
                 <ul className="nav flex-column sub-menu">
                   <li className="nav-item"> <Link className={ this.isPathActive('/fdrfiles/FDR') ? 'nav-link active' : 'nav-link' } to="/fdrfiles/FDR"><Trans>Download</Trans></Link></li>
