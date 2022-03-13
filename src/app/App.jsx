@@ -86,7 +86,9 @@ const App = () => {
                               ?
                               <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId}></Dashboard>
                               :
-                              <></>
+                              <>
+                                No airline membership (Unauthorized).
+                              </>
                           }
                         </div>
                         {<Footer />

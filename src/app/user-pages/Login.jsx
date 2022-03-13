@@ -33,7 +33,7 @@ export const Login = () => {
                 <img src={require('../../assets/images/logo.png')} alt="logo" />
               </div>
               <h4>Welcome to Boeing FliteDeck Advisor</h4>
-              <h6 className="font-weight-light">PLease follow instructions in your email to get started.</h6>
+              <h6 className="font-weight-light">Please follow instructions in your email to get started.</h6>
               <Form className="pt-3">
                 <Form.Group className="d-flex search-field">
                   <Form.Control type="email" placeholder="Username" size="lg" className="h-auto" disabled="true" />

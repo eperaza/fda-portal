@@ -63,6 +63,7 @@ export const BulkLoad = (props) => {
     const file = useRef();
     const abort = useRef(0);
     const [createCancelButtonEnabled, setCreateCancelButtonEnabled] = useState();
+    const [titleWarning, setTitleWarning] = useState();
 
     useEffect(() => {
         getPreUsers();
@@ -179,7 +180,7 @@ export const BulkLoad = (props) => {
                         setCreatedCount(created.length);
                         setUploadLoader("Upload");
                         setLoader("Send Registration");
-                        setLoader2("");
+                        setLoader2(": Done");
                         setCreateCancelButtonEnabled(false);
                         getPreUsers();
                         setTimeout(() => {
@@ -295,9 +296,9 @@ export const BulkLoad = (props) => {
             for (let node of selectedData) {
                 if (abort.current == 0) {
                     let status = await createUser(node, accessToken);
-                    let statusDelete = await deletePreUsers(node.userId);
                     if (status.objectId) {
-                        setCheck("true")
+                        //setCheck("true")
+                        let statusDelete = await deletePreUsers(node.userId);
                         created.push(node);
                         x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.userId + '] successfully.</br>'
                         setStatusText(x);
@@ -478,7 +479,8 @@ export const BulkLoad = (props) => {
     }
 
     const handleShowDelete = e => {
-        setLoader2();
+        setLoader2(": Warning");
+        setTitleWarning(" <i class='mdi mdi-alert-octagon text-danger'></i>");
         let users = [];
         var x = "<br></br>";
         const selectedNodes = gridRef.current.api.getSelectedNodes()
@@ -499,10 +501,13 @@ export const BulkLoad = (props) => {
     };
 
     const deleteHandler = async () => {
+        setStatusText("Creating Users...");
+        setDeleteLabel("Deleting users...")
         setLoader2(<><Spinner animation="border" size="sm" /></>);
         setShowDeleteProgressBar(true)
         setDeleteProgressBarCount(0);
         setDeleteLoader(<><Spinner animation="border" size="sm" /></>);
+        setTitleWarning();
         let selected = [];
         const selectedNodes = gridRef.current.api.getSelectedNodes()
         const selectedData = selectedNodes.map(node => node.data);
@@ -538,10 +543,9 @@ export const BulkLoad = (props) => {
                 if (count == gridRef.current.api.getSelectedNodes().length) {
                     getPreUsers();
                     setDeleteLoader("Delete");
-
+                    setLoader2(": Done")
                     setTimeout(() => {
                         setShowDeleteProgressBar(false);
-                        setLoader2();
                         setCancelButtonEnabled(false)
                         //setShowDelete(false);
                     }, 1000);
@@ -606,10 +610,13 @@ export const BulkLoad = (props) => {
         headers.append("Content-Type", "application/json");
         headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
+        let first = data.first == "" ? null : data.first; 
+        let last = data.last == "" ? null : data.last; 
+
         var body = JSON.stringify({
             "userId": `${data.userId}`,
-            "first": `${data.first}`,
-            "last": `${data.last}`,
+            "first": first,
+            "last": last,
             "email": `${data.email}`,
             "role": `${data.role}`,
             "airline": `airline-${props.airline}`,
@@ -637,6 +644,10 @@ export const BulkLoad = (props) => {
 
     const [selected, setSelected] = useState("active");
     const values = ["active", "pending", "na"];
+
+    const onCellValueChanged = useCallback((event) => {
+        console.log('Data after change is', event.data);
+      }, []);
 
     return (
         <div>
@@ -745,15 +756,69 @@ export const BulkLoad = (props) => {
                                     gridOptions={gridOptions}
                                     //onFirstDataRendered={autoSizeColumns}
                                     onRowSelected={onRowSelected}
+                                    stopEditingWhenCellsLoseFocus={true}
+                                    onCellValueChanged={onCellValueChanged}
                                     enableCellTextSelection={false}>
                                     <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} headerCheckboxSelection={true} editable={false}></AgGridColumn>
-                                    <AgGridColumn field="last" sortable={true} filter={true}></AgGridColumn>
-                                    <AgGridColumn field="first" sortable={true} filter={true} hide={false}></AgGridColumn>
+                                    <AgGridColumn field="last" sortable={true} filter={true}
+                                        valueGetter={params => {
+                                            if (params.data.last == null) {
+                                                return ""
+                                            }
+                                            else return params.data.last;
+                                        }}
+                                        valueSetter={params => {
+                                            if (params.newValue == ""){
+                                                params.data.last = "";
+                                            } 
+                                            else {
+                                                params.data.last = params.newValue;
+                                            }
+                                            return true;
+                                        }}
+                                    >
+                                    </AgGridColumn>
+                                    <AgGridColumn field="first" sortable={true} filter={true} hide={false}
+                                        valueGetter={params => {
+                                            if (params.data.first == null) {
+                                                return ""
+                                            }
+                                            else return params.data.first;
+                                        }}
+                                        valueSetter={params => {
+                                            if (params.newValue == ""){
+                                                params.data.first = "";
+                                            } 
+                                            else {
+                                                params.data.first = params.newValue;
+                                            }
+                                            return true;
+                                        }}
+                                    >
+                                    </AgGridColumn>
                                     <AgGridColumn field="role" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
                                         values: ['role-airlinepilot', 'role-airlinefocal', 'role-airlineefbadmin', 'role-airlinecheckairman', 'role-airlinemaintenance'],
                                     }}></AgGridColumn>
-                                    <AgGridColumn field="email" sortable={true} filter={true}></AgGridColumn>
-
+                                    <AgGridColumn field="email" sortable={true} filter={true}
+                                        valueGetter={params => {
+                                            if (params.data.email == "" || params.data.email == "undefined") {
+                                                return ""
+                                            }
+                                            else return params.data.email;
+                                        }}
+                                        valueSetter={params => {
+                                            let regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
+                                            if (!regex.test(params.newValue)){
+                                                alert("Missing or invalid email format!")
+                                                return false;
+                                            } 
+                                            else {
+                                                params.data.email = params.newValue;
+                                            }
+                                            return true;
+                                        }}
+                                    >
+                                    </AgGridColumn>
 
                                 </AgGridReact>
 
@@ -852,7 +917,9 @@ export const BulkLoad = (props) => {
                 </Modal>
                 <Modal scrollable="true" show={showDelete} contentClassName={"modal"} onHide={handleClose}>
                     <Modal.Header closeButton>
-                        <Modal.Title><i className='mdi mdi-alert-octagon text-warning'></i> Delete Users {loader2}</Modal.Title>
+                        <Modal.Title> Delete Users {loader2}
+                            <a dangerouslySetInnerHTML={{ __html: titleWarning }} />
+                        </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
 
@@ -862,7 +929,7 @@ export const BulkLoad = (props) => {
                     {
                         showDeleteProgressBar
                             ?
-                            <ProgressBar variant="warning" animated now={deleteProgressBarCount} />
+                            <ProgressBar variant="danger" animated now={deleteProgressBarCount} />
                             :
                             <></>
                     }
@@ -876,7 +943,7 @@ export const BulkLoad = (props) => {
                                     //setGridDeleteButtonEnabled(true);
                                 }
                                 }>
-                                    Cancel
+                                    Abort
                                 </Button>
                                 :
                                 <></>

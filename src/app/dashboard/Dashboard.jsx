@@ -9,42 +9,33 @@ export const Dashboard = (props) => {
   const [token, setToken] = useState();
 
   useEffect(() => {
-    getTSPAF();
+    getTSP();
   }, []);
 
-
-  const login = async () => {
-    try {
-      let res = await fetch(process.env.REACT_APP_LOGIN_URI);
-      let token = await res.json();
-      return token;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   const getTSP = async () => {
-    const token = await login();
-    setToken(token);
+    //const token = await login();
     const headers = new Headers();
-    const bearer = `Bearer ${token}`;
+    const bearer = `Bearer ${props.token}`;
 
     headers.append("Authorization", bearer);
     headers.append("Airline", `airline-${props.airline}`);
+    headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
+
     var requestOptions = {
       method: "GET",
-      headers: {
-        "Authorization": `${bearer}`,
-        "Airline": `airline-${props.airline}`
-      }
+      headers: headers
     };
     console.log(requestOptions)
 
     fetch(process.env.REACT_APP_TSP_GET_URI, requestOptions)
       .then(response => response.text())
       .then(data => {
-        setTSP(data);
-        //console.log(data);
+        if (data != "") {
+          setTSP(data);
+        }
+        else {
+          setTSP("TSP Not Found");
+        }
       }
       )
       .catch(error => console.log('error', error));
@@ -67,69 +58,7 @@ export const Dashboard = (props) => {
       .catch(error => console.log('error', error));
   }
 
-  const data = {
-    labels: ["2013", "2014", "2014", "2015", "2016", "2017"],
-    datasets: [{
-      label: '# of Votes',
-      data: [10, 19, 3, 5, 2, 3],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)'
-      ],
-      borderColor: [
-        'rgba(255,99,132,1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-      ],
-      borderWidth: 1,
-      fill: false
-    }]
-  };
-
-  const options = {
-    scales: {
-      yAxes: [{
-        ticks: {
-          beginAtZero: true
-        },
-        gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
-        }
-      }],
-      xAxes: [{
-        gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
-        }
-      }]
-    },
-    legend: {
-      display: false
-    },
-    elements: {
-      point: {
-        radius: 0
-      }
-    }
-  }
-
-  const sliderSettings = {
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1
-  }
-
-  const toggleProBanner = () => {
-    document.querySelector('.proBanner').classList.toggle("hide");
-  }
-
+  
 
   return (
     <div>

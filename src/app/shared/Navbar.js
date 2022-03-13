@@ -161,11 +161,13 @@ export const Navbar = (props) => {
                   <div className="preview-item-content">
                     <p className="preview-subject mb-1"><Trans>Settings</Trans></p>
                   </div>
-                  </Dropdown.Item>*/}
-                <Dropdown.Divider />
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+
+                  */}
                 <Dropdown.Item onClick={() => handleLogout("redirect")}  className="preview-item">
                   <div className="preview-thumbnail">
-                    <div className="preview-icon bg-dark rounded-circle">
+                    <div className="preview-icon bg-dark ">
                       <i className="mdi mdi-logout text-danger"></i>
                     </div>
                   </div>
@@ -173,8 +175,9 @@ export const Navbar = (props) => {
                     <p className="preview-subject mb-1"><Trans>Log Out</Trans></p>
                   </div>
                 </Dropdown.Item>
-                <Dropdown.Divider />
+                
                {
+                // <Dropdown.Divider />
                 // <p className="p-3 mb-0 text-center"><Trans>Advanced settings</Trans></p>
                }
               </Dropdown.Menu>
