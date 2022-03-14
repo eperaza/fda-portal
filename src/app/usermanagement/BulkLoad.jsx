@@ -155,22 +155,30 @@ export const BulkLoad = (props) => {
             for (let node of items) {
                 if (abort.current == 0) {
                     let status = await createPreUser(node);
-                    if (status == 1) {
+                    console.log(status);
+                    if (status == 201) {
                         created.push(node);
                         x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.user + '] successfully</br>'
                         setStatusText(x);
                         setCreatedCount(created.length);
                     }
                     else {
-                        let error = status;
-                        if (error.includes("PreparedStatementCallback; SQL [INSERT INTO user_account_preregistrations (user_id, first, last, email, role, account_state, airline) VALUES (?, ?, ?, ?, ?, ?, ?)];")) {
-                            error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
+                        try {
+                            let error = status;
+                            if (error.includes("Unique_User_Id")) {
+                                error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
+                            }
+                            notCreated.push(node.user);
+                            x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.user + '] -> ' + error + '</br>'
+                            setStatusText(x);
+                            setnotCreatedCount(notCreated.length);
                         }
-                        notCreated.push(node.user);
-                        x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.user + '] -> ' + error + '</br>'
-                        setStatusText(x);
-                        setnotCreatedCount(notCreated.length);
+                        catch (error) {
+                            console.log(status)
+                            break;
+                        }
                     }
+
                     count++;
                     countProgress = countProgress + increment;
                     setProgressBarCount(countProgress);
@@ -178,11 +186,7 @@ export const BulkLoad = (props) => {
                     if (count == items.length) {
                         setnotCreatedCount(notCreated.length);
                         setCreatedCount(created.length);
-                        setUploadLoader("Upload");
-                        setLoader("Send Registration");
                         setLoader2(": Done");
-                        setCreateCancelButtonEnabled(false);
-                        getPreUsers();
                         setTimeout(() => {
                             setShowProgressBar(false);
                         }, 1000);
@@ -191,16 +195,21 @@ export const BulkLoad = (props) => {
                 else {
                     setnotCreatedCount(notCreated.length);
                     setCreatedCount(created.length);
-                    setUploadLoader("Upload");
-                    setLoader("Send Registration");
                     setLoader2(": Aborted");
                     setCreateCancelButtonEnabled(false);
-                    getPreUsers();
                     setTimeout(() => {
                         setShowProgressBar(false);
                     }, 1000);
                 }
             }
+            setUploadLoader("Upload");
+            setLoader("Send Registration");
+            setCreateCancelButtonEnabled(false);
+            getPreUsers();
+            setTimeout(() => {
+                setShowProgressBar(false);
+            }, 1000);
+
         }
         else {
             setShowAlert(true);
@@ -237,14 +246,22 @@ export const BulkLoad = (props) => {
             body: data
         };
         let res = await fetch(process.env.REACT_APP_PREUSERS_CREATE_URI, options);
-        let message = await res.json();
         let status = res.status;
+        let message;
 
-        if (status == 500) {
-            return message.errorDescription;
+        if (status == 201) {
+            return status;
         }
         else {
-            return 1;
+            try {
+                message = await res.json();
+                if (message.errorDescription) {
+                    return message.errorDescription;
+                }
+            }
+            catch (error) {
+                return "Service Unavailable.";
+            }
         }
     }
 
@@ -535,7 +552,6 @@ export const BulkLoad = (props) => {
                     setDeleteLabel(x)
                 }
 
-
                 count++;
                 countProgress = countProgress + increment;
                 setDeleteProgressBarCount(countProgress);
@@ -586,15 +602,35 @@ export const BulkLoad = (props) => {
         // PROPERTIES
         // Objects like myRowData and myColDefs would be created in your application
 
-        pagination: true,
-        onCellEditingStopped: function (event) {
+        pagination: false,
+        onCellEditingStopped: async function (event) {
             console.log("ask the server to update changed data in back end", event);
             let data = { rowIndex: event.rowIndex, id: event.data.userId, col: event.column.colId, value: event.value }
             console.log(data)
-            editPreUser(event.data);
+            let status = await editPreUser(event.data);
+            if (status == 500) {
+                alert("User ID duplicated, could not save new value. Please use another ID.");
+               /* event.colDef.cellStyle = (p) => { return { 'color': 'red' } };
+
+                event.api.refreshCells({
+                    force: true,
+                    rowNodes: [event.node]
+
+                });*/
+            }
+
+            else {
+                var column = event.column.colDef.field;
+                //event.colDef.cellStyle = { 'color': 'green' };
+                console.log(event.colDef)
+                event.api.flashCells({
+                    force: true,
+                    columns: [event.column.colId],
+                    rowNodes: [event.node]
+
+                });
+            }
         },
-
-
     }
 
     const onFilterTextBoxChanged = e => {
@@ -610,10 +646,11 @@ export const BulkLoad = (props) => {
         headers.append("Content-Type", "application/json");
         headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
 
-        let first = data.first == "" ? null : data.first; 
-        let last = data.last == "" ? null : data.last; 
+        let first = data.first == "" ? null : data.first;
+        let last = data.last == "" ? null : data.last;
 
         var body = JSON.stringify({
+            "registrationToken": `${data.registrationToken}`,
             "userId": `${data.userId}`,
             "first": first,
             "last": last,
@@ -628,13 +665,10 @@ export const BulkLoad = (props) => {
             body: body
         };
 
-        fetch(process.env.REACT_APP_PREUSERS_EDIT_URI, options)
-            .then(response => response.text())
-            .then(data => {
-                console.log(data)
-            }
-            )
-            .catch(error => console.log('error', error));
+        let res = await fetch(process.env.REACT_APP_PREUSERS_EDIT_URI, options);
+        let message = await res.text();
+        let status = res.status;
+        return status;
     }
 
     const onRowSelected = useCallback((event) => {
@@ -647,7 +681,7 @@ export const BulkLoad = (props) => {
 
     const onCellValueChanged = useCallback((event) => {
         console.log('Data after change is', event.data);
-      }, []);
+    }, []);
 
     return (
         <div>
@@ -757,9 +791,20 @@ export const BulkLoad = (props) => {
                                     //onFirstDataRendered={autoSizeColumns}
                                     onRowSelected={onRowSelected}
                                     stopEditingWhenCellsLoseFocus={true}
-                                    onCellValueChanged={onCellValueChanged}
                                     enableCellTextSelection={false}>
-                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} headerCheckboxSelection={true} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="registrationToken" sortable={true} filter={true} editable={false} hide={true}></AgGridColumn>
+                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} headerCheckboxSelection={true} editable={true}
+                                        valueSetter={params => {
+                                            if (params.newValue == "") {
+                                                alert("Value can't be empty");
+                                                return false;
+                                            }
+                                            else {
+                                                params.data.userId = params.newValue;
+                                            }
+                                            return true;
+                                        }}
+                                    ></AgGridColumn>
                                     <AgGridColumn field="last" sortable={true} filter={true}
                                         valueGetter={params => {
                                             if (params.data.last == null) {
@@ -768,9 +813,9 @@ export const BulkLoad = (props) => {
                                             else return params.data.last;
                                         }}
                                         valueSetter={params => {
-                                            if (params.newValue == ""){
+                                            if (params.newValue == "") {
                                                 params.data.last = "";
-                                            } 
+                                            }
                                             else {
                                                 params.data.last = params.newValue;
                                             }
@@ -786,9 +831,9 @@ export const BulkLoad = (props) => {
                                             else return params.data.first;
                                         }}
                                         valueSetter={params => {
-                                            if (params.newValue == ""){
+                                            if (params.newValue == "") {
                                                 params.data.first = "";
-                                            } 
+                                            }
                                             else {
                                                 params.data.first = params.newValue;
                                             }
@@ -808,10 +853,10 @@ export const BulkLoad = (props) => {
                                         }}
                                         valueSetter={params => {
                                             let regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
-                                            if (!regex.test(params.newValue)){
+                                            if (!regex.test(params.newValue)) {
                                                 alert("Missing or invalid email format!")
                                                 return false;
-                                            } 
+                                            }
                                             else {
                                                 params.data.email = params.newValue;
                                             }

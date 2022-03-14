@@ -3187,13 +3187,13 @@
     transition: background-color 1s;
   }
   .ag-theme-alpine-dark .ag-value-change-value-highlight {
-    background-color: rgba(22, 160, 133, 0.5);
-    background-color: var(--ag-value-change-value-highlight-background-color, rgba(22, 160, 133, 0.5));
+    background-color: green;
+    background-color: var(--ag-value-change-value-highlight-background-color, green);
     transition: background-color 0.1s;
   }
   .ag-theme-alpine-dark .ag-cell-data-changed {
-    background-color: rgba(22, 160, 133, 0.5) !important;
-    background-color: var(--ag-value-change-value-highlight-background-color, rgba(22, 160, 133, 0.5)) !important;
+    background-color: green !important;
+    background-color: var(--ag-value-change-value-highlight-background-color, green) !important;
   }
   .ag-theme-alpine-dark .ag-cell-data-changed-animation {
     background-color: transparent;
