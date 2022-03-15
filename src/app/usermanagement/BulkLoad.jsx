@@ -697,8 +697,14 @@ export const BulkLoad = (props) => {
     }
 
     const onRowSelected = useCallback((event) => {
-        setGridDeleteButtonEnabled(true);
-        //return { background: '#ff9998 !important'}; 
+        let count = gridRef.current.api.getSelectedNodes().length;
+        if (count == 0) {
+            setGridDeleteButtonEnabled(false);
+
+        }
+        else {
+            setGridDeleteButtonEnabled(true);
+        }
     }, []);
 
     const [selected, setSelected] = useState("active");

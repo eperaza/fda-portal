@@ -83,10 +83,10 @@ export const ListUsers = (props) => {
     };
 
     const handleShow = e => {
-        
+
         let users = [];
         var x = "<br></br>";
-        const selectedNodes = gridRef.current.api.getSelectedNodes()
+        const selectedNodes = gridRef.current.api.getSelectedNodes();
         const selectedData = selectedNodes.map(node => node.data);
         const deleteUsers = selectedData.map(node => {
             users.push(node);
@@ -99,14 +99,14 @@ export const ListUsers = (props) => {
             setShow(true);
             users.forEach(user => {
                 x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.mailNickname + '] ' + user.surname + ', ' + user.givenName + '</br>'
-    
+
             });
             setDeleteUsersLabel(`You are about to delete: ${x}`);
         }
-        else{
+        else {
             alert("No users selected!")
         }
-        
+
     };
 
     const deleteHandler = async (e) => {
@@ -380,8 +380,14 @@ export const ListUsers = (props) => {
     };
 
     const onRowSelected = useCallback((event) => {
-        setDeleteDisabled(false);
-        //return { background: '#ff9998 !important'}; 
+        let count = gridRef.current.api.getSelectedNodes().length;
+        if (count == 0) {
+            setDeleteDisabled(true);
+
+        }
+        else {
+            setDeleteDisabled(false);
+        }
     }, []);
 
     const setAutoHeight = useCallback(() => {
@@ -643,7 +649,7 @@ export const ListUsers = (props) => {
                                     animateRows={true}
                                     rowClassRules={rowClassRules}
                                     onRowSelected={onRowSelected}
-                                    selectionChanged={e => console.log("cambio")}
+                                    selectionChanged={e => console.log(e)}
                                 //noRowsOverlayComponent={noRowsOverlayComponent}
 
                                 >
@@ -663,9 +669,9 @@ export const ListUsers = (props) => {
 
                                 <Modal scrollable="true" show={show} onHide={handleClose} contentClassName={"modal"}>
                                     <Modal.Header closeButton>
-                                        <Modal.Title>Delete Users {loader2}   
-                                                <a dangerouslySetInnerHTML={{ __html: titleWarning }} />
-</Modal.Title>
+                                        <Modal.Title>Delete Users {loader2}
+                                            <a dangerouslySetInnerHTML={{ __html: titleWarning }} />
+                                        </Modal.Title>
                                     </Modal.Header>
                                     <Modal.Body>
                                         <div dangerouslySetInnerHTML={{ __html: deleteUsersLabel }} />
