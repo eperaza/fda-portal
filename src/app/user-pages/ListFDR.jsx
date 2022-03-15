@@ -18,26 +18,26 @@ const axios = require('axios');
 
 export const ListFDR = (props) => {
     const [rowData, setRowData] = useState([]);
-    
+    const [monthSpan, setMonthSpan] = useState("role-airlinefocal")
+
     useEffect(() => {
         getFDR();
     }, [])
 
 
-    const getFDR = async () => {
+    const getFDR = async (months) => {
 
         const headers = new Headers();
-
         const options = {
             method: "GET",
             headers: headers
         };
 
         console.log(props.airline.toUpperCase())
-        const code = "rFbNmcU3UYhSKS8awX7vIs5YgvmEF5cQHNWdR9YMAaSHIV3CUTENTw==";
+        const code = process.env.REACT_APP_FUNCTION_LIST_FDR_CODE;
         //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=${props.airline.toUpperCase()}`, options)
         //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=TAV`, options)
-        fetch(`https://functionfdatspdev.azurewebsites.net/api/FlightDataRecordingList?code=${code}&airlineId=${props.airline.toUpperCase()}&monthSpan=2`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_LIST_FDR_URI}?code=${code}&airlineId=${props.airline.toUpperCase()}&monthSpan=${months}`, options)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -47,6 +47,10 @@ export const ListFDR = (props) => {
             .catch(error => console.log('error', error));
     }
 
+    const handleMonthSpan = (months) => {
+        setMonthSpan(months);
+        getFDR(months);
+    }
     return (
         <div>
 
@@ -63,8 +67,23 @@ export const ListFDR = (props) => {
                                         </div>
                                         <div className="col-md-3">
                                             <div class="input-group">
-                                                
 
+                                                <div className="input-group">
+                                                    <select
+                                                        name="cars"
+                                                        id="cars"
+                                                        className="inp"
+                                                        value={monthSpan}
+                                                        onChange={e => {
+                                                            console.log("e.target.value", e.target.value);
+                                                            handleMonthSpan(e.target.value);
+                                                        }}
+                                                        style={{ borderRadius: 10, fontStyle: 'italic', backgroundColor: '#191c24' }}>
+                                                        <option value="1">1 month</option>
+                                                        <option value="2">2 months</option>
+                                                        <option value="3">3 months</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -87,11 +106,11 @@ export const ListFDR = (props) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {
                                 rowData
                                     ?
-                                    <AccordionFDR rowData={rowData}></AccordionFDR>
+                                    <AccordionFDR rowData={rowData} airline={props.airline}></AccordionFDR>
                                     :
                                     <></>
                             }

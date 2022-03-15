@@ -44,6 +44,7 @@ export const ListUsers = (props) => {
     const [deleteDisabled, setDeleteDisabled] = useState(true);
     const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
     const [titleWarning, setTitleWarning] = useState();
+    const [closeDisabled, setCloseDisable] = useState(false);
 
     const abort = useRef(0);
 
@@ -117,6 +118,7 @@ export const ListUsers = (props) => {
         setTitleWarning();
         setDeleteLabel(<><Spinner animation="border" size="sm" /></>);
         setLoader2(<><Spinner animation="border" size="sm" /></>);
+        setCloseDisable(true);
         let selected = [];
         const selectedNodes = gridRef.current.api.getSelectedNodes()
         const selectedData = selectedNodes.map(node => node.data);
@@ -182,8 +184,11 @@ export const ListUsers = (props) => {
                     //setStatusText();
 
                 }, 1000);
+                setCloseDisable(false);
+                return;
             }
         }
+        setCloseDisable(false)
     }
 
     const deleteUsers = async (user) => {
@@ -632,7 +637,7 @@ export const ListUsers = (props) => {
                                     rowSelection="multiple"
                                     defaultColDef={{ resizable: true, editable: true, cellEditorPopup: false }}
                                     onGridReady={onGridReady}
-                                    onFirstDataRendered={autoSizeColumns}
+                                    //onFirstDataRendered={autoSizeColumns}
                                     enableCellTextSelection={false}
                                     gridOptions={gridOptions}
                                     animateRows={true}
@@ -689,7 +694,7 @@ export const ListUsers = (props) => {
                                                 :
                                                 <></>
                                         }
-                                        <Button variant="secondary" size="sm" onClick={e => {
+                                        <Button variant="secondary" disabled={closeDisabled} size="sm" onClick={e => {
                                             handleClose();
                                             setCancelButtonEnabled(false);
 

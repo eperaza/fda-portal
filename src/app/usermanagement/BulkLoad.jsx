@@ -64,6 +64,9 @@ export const BulkLoad = (props) => {
     const abort = useRef(0);
     const [createCancelButtonEnabled, setCreateCancelButtonEnabled] = useState();
     const [titleWarning, setTitleWarning] = useState();
+    const [okDisabled, SetOKDisabled] = useState(true);
+    const [closeDisabled, setCloseDisable] = useState(false);
+
 
     useEffect(() => {
         getPreUsers();
@@ -143,6 +146,8 @@ export const BulkLoad = (props) => {
             setShowProgressBar(true);
             setUploadLoader(<><Spinner animation="border" size="sm" /></>);
             setCreateCancelButtonEnabled(true);
+            SetOKDisabled(true);
+
             let count = 0
             let increment = (100 / items.length);
             let countProgress = 0;
@@ -153,6 +158,7 @@ export const BulkLoad = (props) => {
             setLoader2(<><Spinner animation="border" size="sm" /></>);
             abort.current = 0;
             for (let node of items) {
+                console.log("entra")
                 if (abort.current == 0) {
                     let status = await createPreUser(node);
                     console.log(status);
@@ -195,11 +201,16 @@ export const BulkLoad = (props) => {
                 else {
                     setnotCreatedCount(notCreated.length);
                     setCreatedCount(created.length);
+                    setUploadLoader("Upload");
+                    getPreUsers();
+                    setLoader("Send Registration");
                     setLoader2(": Aborted");
                     setCreateCancelButtonEnabled(false);
                     setTimeout(() => {
                         setShowProgressBar(false);
                     }, 1000);
+                    SetOKDisabled(false);
+                    return;
                 }
             }
             setUploadLoader("Upload");
@@ -209,7 +220,7 @@ export const BulkLoad = (props) => {
             setTimeout(() => {
                 setShowProgressBar(false);
             }, 1000);
-
+            SetOKDisabled(false);
         }
         else {
             setShowAlert(true);
@@ -290,6 +301,7 @@ export const BulkLoad = (props) => {
             setProgressBarCount(0);
             setnotCreatedCount(0);
             setCreatedCount(0);
+            SetOKDisabled(true);
             let countProgress = 0;
             let created = [];
             let notCreated = [];
@@ -357,9 +369,7 @@ export const BulkLoad = (props) => {
                         */
                         setShow(true);
                         setDisable(false);
-                        setLoader("Send Registration");
                         setLoader2("");
-                        getPreUsers();
                         setTimeout(() => {
                             setShowProgressBar(false);
                         }, 1000);
@@ -370,15 +380,21 @@ export const BulkLoad = (props) => {
                     setnotCreatedCount(notCreated.length);
                     setCreatedCount(created.length);
                     setUploadLoader("Upload");
+                    getPreUsers();
                     setLoader("Send Registration");
                     setLoader2(": Aborted");
-                    getPreUsers();
                     setTimeout(() => {
                         setShowProgressBar(false);
                     }, 1000);
+                    SetOKDisabled(false)
                     return;
                 }
             }
+
+            setLoader("Send Registration");
+            getPreUsers();
+            SetOKDisabled(false);
+
         }
         else {
             alert("Maximum batch size of " + process.env.REACT_APP_MAX_BATCH_SIZE + " users exceeded. Users selected: " + rows);
@@ -505,19 +521,25 @@ export const BulkLoad = (props) => {
         const deleteUsers = selectedData.map(node => {
             users.push(node);
         })
-
-        users.forEach(user => {
-            x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.userId + '] ' + user.last + ', ' + user.first + '</br>'
-
-        });
-
-        setDeleteLabel(`Do you really want to delete: ${x}`);
         if (deleteUsers.length != 0) {
-            setShowDelete(true)
+
+            users.forEach(user => {
+                x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.userId + '] ' + user.last + ', ' + user.first + '</br>'
+
+            });
+
+            setDeleteLabel(`Do you really want to delete: ${x}`);
+            if (deleteUsers.length != 0) {
+                setShowDelete(true)
+            }
+        }
+        else {
+            alert("No users selected!")
         }
     };
 
     const deleteHandler = async () => {
+        setCloseDisable(true);
         setStatusText("Creating Users...");
         setDeleteLabel("Deleting users...")
         setLoader2(<><Spinner animation="border" size="sm" /></>);
@@ -557,8 +579,6 @@ export const BulkLoad = (props) => {
                 setDeleteProgressBarCount(countProgress);
 
                 if (count == gridRef.current.api.getSelectedNodes().length) {
-                    getPreUsers();
-                    setDeleteLoader("Delete");
                     setLoader2(": Done")
                     setTimeout(() => {
                         setShowDeleteProgressBar(false);
@@ -568,16 +588,21 @@ export const BulkLoad = (props) => {
                 }
             }
             else {
-                getPreUsers();
-                setDeleteLoader("Delete");
-                setLoader2(": Aborted");
 
+                setLoader2(": Aborted");
                 setTimeout(() => {
                     setShowDeleteProgressBar(false);
                 }, 1000);
-
+                getPreUsers();
+                setDeleteLoader("Delete");
+                setCloseDisable(false);
+                return;
             }
         }
+        getPreUsers();
+        setDeleteLoader("Delete");
+        setCloseDisable(false);
+
     }
 
     const deletePreUsers = async (user) => {
@@ -602,7 +627,7 @@ export const BulkLoad = (props) => {
         // PROPERTIES
         // Objects like myRowData and myColDefs would be created in your application
 
-        pagination: false,
+        pagination: true,
         onCellEditingStopped: async function (event) {
             console.log("ask the server to update changed data in back end", event);
             let data = { rowIndex: event.rowIndex, id: event.data.userId, col: event.column.colId, value: event.value }
@@ -610,13 +635,13 @@ export const BulkLoad = (props) => {
             let status = await editPreUser(event.data);
             if (status == 500) {
                 alert("User ID duplicated, could not save new value. Please use another ID.");
-               /* event.colDef.cellStyle = (p) => { return { 'color': 'red' } };
-
-                event.api.refreshCells({
-                    force: true,
-                    rowNodes: [event.node]
-
-                });*/
+                /* event.colDef.cellStyle = (p) => { return { 'color': 'red' } };
+ 
+                 event.api.refreshCells({
+                     force: true,
+                     rowNodes: [event.node]
+ 
+                 });*/
             }
 
             else {
@@ -884,7 +909,7 @@ export const BulkLoad = (props) => {
 
                 <Modal show={show} size="lg" onHide={handleClose} scrollable="true" backdrop="static" contentClassName={"modal"}
                     keyboard={false}>
-                    <Modal.Header closeButton>
+                    <Modal.Header>
                         <Modal.Title>Bulk Load Status {loader2}</Modal.Title>
                     </Modal.Header>
 
@@ -952,8 +977,10 @@ export const BulkLoad = (props) => {
                                 <></>
                         }
 
-                        <Button variant="secondary" onClick={e => {
+                        <Button disabled={okDisabled} variant="secondary" onClick={e => {
                             handleClose();
+                            file.current.value = "";
+
                         }
                         }>
                             OK
@@ -961,7 +988,7 @@ export const BulkLoad = (props) => {
                     </Modal.Footer>
                 </Modal>
                 <Modal scrollable="true" show={showDelete} contentClassName={"modal"} onHide={handleClose}>
-                    <Modal.Header closeButton>
+                    <Modal.Header>
                         <Modal.Title> Delete Users {loader2}
                             <a dangerouslySetInnerHTML={{ __html: titleWarning }} />
                         </Modal.Title>
@@ -993,7 +1020,7 @@ export const BulkLoad = (props) => {
                                 :
                                 <></>
                         }
-                        <Button variant="secondary" size="sm" onClick={e => {
+                        <Button disabled={closeDisabled} variant="secondary" size="sm" onClick={e => {
                             handleClose();
                             setCancelButtonEnabled(false);
                             //setGridDeleteButtonEnabled(true);

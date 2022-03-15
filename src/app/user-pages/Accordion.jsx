@@ -29,7 +29,7 @@ export const AccordionFDR = (props) => {
                                     ?
                                     data.Value.map((item) => {
                                         
-                                        return <li className=""><i className="" key={item}><a href={`https://functionfdatspdev.azurewebsites.net/api/FlightDataRecordingDownload?code=CQuWinh1G8jFhEHaCgXGMQ9v1aNafxrZEmlrLeMHebjrga4ogDouPw==&airlineId=TAV&sourceFilePath=${item}`}>{item}</a></i></li>
+                                        return <li className=""><i className="" key={item}><a href={`${process.env.REACT_APP_FUNCTION_DOWNLOAD_FDR_URI}?code=${process.env.REACT_APP_FUNCTION_DOWNLOAD_FDR_CODE}&airlineId=${props.airline.toUpperCase()}&sourceFilePath=${item}`}>{item}</a></i></li>
                                     })
                                     :
                                     <>No FDR files to show.</>

@@ -28,7 +28,7 @@ export const Tails = (props) => {
                                         }
                                     </h6>
                                     <p className="text-muted mb-0">
-                                        <a href="/user-pages/FDR">
+                                        <a href="/fdrfiles/FDR">
                                         {
 
                                             (data.Value != "")
