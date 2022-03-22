@@ -59,7 +59,86 @@ export const ListUsers = (props) => {
         // Objects like myRowData and myColDefs would be created in your application
 
         pagination: true,
+        onCellEditingStopped: async function (event) {
+            console.log("ask the server to update changed data in back end", event);
+            let data = { rowIndex: event.rowIndex, id: event.data.userId, col: event.column.colId, value: event.value }
+            console.log(data)
+            let status = await editUser(event.data);
+            if (status == 500) {
+                alert("Error updating user.");
+                event.colDef.cellStyle = {
+                    'background-color': 'red', 'transition': 'background-color 0.5s'
+                };
+                event.api.refreshCells({
+                    force: true,
+                    columns: [event.column.colId],
+                    rowNodes: [event.node]
 
+                });
+
+                setTimeout(() => {
+                    event.colDef.cellStyle = { 'background-color': 'transparent', 'transition': 'background-color 0.5s' };
+                    event.api.refreshCells({
+                        force: true,
+                        columns: [event.column.colId],
+                        rowNodes: [event.node]
+
+                    });
+                }, 500);
+            }
+
+            else {
+                var column = event.column.colDef.field;
+                //event.colDef.cellStyle = { 'color': 'green' };
+                console.log(event.colDef)
+                event.api.flashCells({
+                    force: true,
+                    columns: [event.column.colId],
+                    rowNodes: [event.node]
+
+                });
+            }
+        }
+
+    }
+
+    const editUser = async (data) => {
+
+        const headers = new Headers();
+        const bearer = `Bearer ${props.token}`;
+
+        headers.append("Authorization", bearer);
+        headers.append("Content-Type", "application/json");
+        headers.append("Airline", `airline-${props.airline}`);
+
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
+
+        var body = JSON.stringify({
+            "objectId": `${data.objectId}`,
+            "displayName": `${data.displayName}`,
+            "givenName": `${data.givenName}`,
+            "surname": `${data.surname}`,
+            "userRole": `${data.userRole}`,
+            "mailNickname": `${data.mailNickname}`,
+            "otherMails": [
+                `${data.otherMails}`
+            ],
+            "userRole": `${data.userRole}`,
+            "createdDateTime": `${data.createdDateTime}`,
+
+
+        });
+
+        const options = {
+            method: "PUT",
+            headers: headers,
+            body: body
+        };
+
+        let res = await fetch(process.env.REACT_APP_USERS_EDIT_URI, options);
+        let message = await res.text();
+        let status = res.status;
+        return status;
     }
 
     useEffect(() => {
@@ -249,20 +328,19 @@ export const ListUsers = (props) => {
                 "Ocp-Apim-Subscription-Key": `${process.env.REACT_APP_APIM_KEY}`
             }
         };
-
-        fetch(process.env.REACT_APP_USERS_GET_URI, requestOptions)
-            .then(response => response.json())
-            .then(data => {
-                //setTimeout(() => {
-                if (data.objectId != "undefined") {
-                    setRowData(data);
-                    let rows = gridRef.current.api.getDisplayedRowCount();
-                    setCount(rows);
-                }
-                //}, 0);
+        try {
+            let res = await fetch(process.env.REACT_APP_USERS_GET_URI, requestOptions);
+            let status = await res.status;
+            let data = await res.json();
+            if (status == 200) {
+                setRowData(data);
+                let rows = gridRef.current.api.getDisplayedRowCount();
+                setCount(rows);
             }
-            )
-            .catch(error => console.log('error', error));
+        }
+        catch (error) {
+            console.log(error);
+        }
     }
 
     //Create Users
@@ -400,6 +478,11 @@ export const ListUsers = (props) => {
     const noRowsOverlayComponent = useMemo(() => {
         return CustomNoRowsOverlay;
     }, []);
+
+    const onFilterChanged = () => {
+        let rows = gridRef.current.api.getDisplayedRowCount();
+        setCount(rows);
+    }
 
     return (
         <div>
@@ -643,28 +726,31 @@ export const ListUsers = (props) => {
                                     rowSelection="multiple"
                                     defaultColDef={{ resizable: true, editable: true, cellEditorPopup: false }}
                                     onGridReady={onGridReady}
-                                    //onFirstDataRendered={autoSizeColumns}
+                                    onFirstDataRendered={autoSizeColumns}
                                     enableCellTextSelection={false}
                                     gridOptions={gridOptions}
                                     animateRows={true}
                                     rowClassRules={rowClassRules}
                                     onRowSelected={onRowSelected}
+                                    onFilterChanged={onFilterChanged}
                                     selectionChanged={e => console.log(e)}
                                 //noRowsOverlayComponent={noRowsOverlayComponent}
 
                                 >
-                                    <AgGridColumn field="objectId" sortable={true} filter={true} hide={true}></AgGridColumn>
-                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true} headerCheckboxSelection={true} ></AgGridColumn>
+                                    <AgGridColumn field="objectId" sortable={true} filter={true} hide={true} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true} headerCheckboxSelection={true} editable={false}></AgGridColumn>
                                     <AgGridColumn field="displayName" sortable={true} filter={true} hide={true} ></AgGridColumn>
                                     <AgGridColumn field="givenName" sortable={true} filter={true}></AgGridColumn>
                                     <AgGridColumn field="surname" sortable={true} filter={true} headerName={"Last Name"}></AgGridColumn>
                                     {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
-                                    <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"}></AgGridColumn>
-                                    <AgGridColumn field="userRole" sortable={true} filter={true}></AgGridColumn>
-                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} valueGetter={accountStateFormatter} cellClassRules={cellClassRules} headerName={"Status"}></AgGridColumn>
-                                    <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"}></AgGridColumn>
+                                    <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
+                                        values: ['role-airlinepilot', 'role-airlinefocal', 'role-airlineefbadmin', 'role-airlinecheckairman', 'role-airlinemaintenance'],
+                                    }}></AgGridColumn>
+                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} valueGetter={accountStateFormatter} cellClassRules={cellClassRules} headerName={"Status"} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"} editable={false}></AgGridColumn>
                                 </AgGridReact>
 
                                 <Modal scrollable="true" show={show} onHide={handleClose} contentClassName={"modal"}>

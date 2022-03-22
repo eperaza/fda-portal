@@ -635,18 +635,29 @@ export const BulkLoad = (props) => {
             let status = await editPreUser(event.data);
             if (status == 500) {
                 alert("User ID duplicated, could not save new value. Please use another ID.");
-                /* event.colDef.cellStyle = (p) => { return { 'color': 'red' } };
- 
-                 event.api.refreshCells({
-                     force: true,
-                     rowNodes: [event.node]
- 
-                 });*/
+                event.colDef.cellStyle = { 'background-color': 'red', 'transition': 'background-color 0.5s'
+            };
+                event.api.refreshCells({
+                    force: true,
+                    columns: [event.column.colId],
+                    rowNodes: [event.node]
+
+                });
+
+                setTimeout(() => {
+                    event.colDef.cellStyle = { 'background-color': 'transparent', 'transition': 'background-color 0.5s'};
+                    event.api.refreshCells({
+                        force: true,
+                        columns: [event.column.colId],
+                        rowNodes: [event.node]
+    
+                    });
+                }, 500); 
             }
 
             else {
                 var column = event.column.colDef.field;
-                //event.colDef.cellStyle = { 'color': 'green' };
+                //event.colDef.cellStyle = { 'color': 'red' };
                 console.log(event.colDef)
                 event.api.flashCells({
                     force: true,
