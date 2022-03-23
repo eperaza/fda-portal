@@ -11,6 +11,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { Accordion, Card } from "react-bootstrap";
 import { ProgressBar } from 'react-bootstrap';
 import { SwitchToggle } from "../usermanagement/SwitchToggle";
+import { deleteFromGroup, getAllGroups, addToGroup } from "../../graph";
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
@@ -42,11 +43,16 @@ export const ListUsers = (props) => {
     const [count, setCount] = useState(0);
     const [filterVal, setFilterVal] = useState();
     const [deleteDisabled, setDeleteDisabled] = useState(true);
+    const [exportDisabled, setExportDisabled] = useState(true);
     const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
     const [titleWarning, setTitleWarning] = useState();
     const [closeDisabled, setCloseDisable] = useState(false);
 
     const abort = useRef(0);
+
+    useEffect(() => {
+        getUsers();
+    }, []);
 
     const handleClose = () => {
         setShow(false);
@@ -62,9 +68,43 @@ export const ListUsers = (props) => {
         onCellEditingStopped: async function (event) {
             console.log("ask the server to update changed data in back end", event);
             let data = { rowIndex: event.rowIndex, id: event.data.userId, col: event.column.colId, value: event.value }
-            console.log(data)
             let status = await editUser(event.data);
-            if (status == 500) {
+
+            if (status == 204) {
+                let oldGroupId = null;
+                let newGroupId = null;
+                if (event.oldValue.includes("role-")) {
+                    if (event.oldValue != event.newValue) {
+                        getAllGroups(props.token).then(response => {
+                            response.value.forEach(group => {
+                                if (group.displayName.includes(event.oldValue) == true) {
+                                    oldGroupId = group.id;
+                                }
+                                if (group.displayName.includes(event.newValue) == true) {
+                                    newGroupId = group.id;
+                                }
+
+                            });
+                            deleteFromGroup(props.token, oldGroupId, event.data.objectId).then(response => {
+                                console.log(response);
+                            });
+                            addToGroup(props.token, newGroupId, event.data.objectId).then(response => {
+                                console.log(response);
+                            });
+                        });
+                    }
+                }
+
+                //var column = event.column.colDef.field;
+                //event.colDef.cellStyle = { 'color': 'green' };
+                event.api.flashCells({
+                    force: true,
+                    columns: [event.column.colId],
+                    rowNodes: [event.node]
+
+                });
+            }
+            else {
                 alert("Error updating user.");
                 event.colDef.cellStyle = {
                     'background-color': 'red', 'transition': 'background-color 0.5s'
@@ -85,18 +125,6 @@ export const ListUsers = (props) => {
 
                     });
                 }, 500);
-            }
-
-            else {
-                var column = event.column.colDef.field;
-                //event.colDef.cellStyle = { 'color': 'green' };
-                console.log(event.colDef)
-                event.api.flashCells({
-                    force: true,
-                    columns: [event.column.colId],
-                    rowNodes: [event.node]
-
-                });
             }
         }
 
@@ -126,7 +154,6 @@ export const ListUsers = (props) => {
             "userRole": `${data.userRole}`,
             "createdDateTime": `${data.createdDateTime}`,
 
-
         });
 
         const options = {
@@ -141,10 +168,6 @@ export const ListUsers = (props) => {
         return status;
     }
 
-    useEffect(() => {
-        getUsers();
-    }, [])
-
     const onGridReady = params => {
         params.api.sizeColumnsToFit();
         params.api.showLoadingOverlay();
@@ -158,7 +181,7 @@ export const ListUsers = (props) => {
             .getAllDisplayedColumns()
             .map(col => col.getColId());
 
-        params.columnApi.autoSizeColumns(colIds);
+        params.columnApi.autoSizeAllColumns();
     };
 
     const handleShow = e => {
@@ -444,7 +467,7 @@ export const ListUsers = (props) => {
         if (params.data.accountEnabled == "false") {
             return "PENDING";
         }
-        else return "ACTIVATED";
+        else return "REGISTERED";
     };
 
     const rowClassRules = {
@@ -461,10 +484,12 @@ export const ListUsers = (props) => {
         let count = gridRef.current.api.getSelectedNodes().length;
         if (count == 0) {
             setDeleteDisabled(true);
+            setExportDisabled(true);
 
         }
         else {
             setDeleteDisabled(false);
+            setExportDisabled(false);
         }
     }, []);
 
@@ -483,6 +508,12 @@ export const ListUsers = (props) => {
         let rows = gridRef.current.api.getDisplayedRowCount();
         setCount(rows);
     }
+
+    const onBtnExport = useCallback(() => {
+        gridRef.current.api.exportDataAsCsv({
+            onlySelected: true,
+          });
+      }, []);
 
     return (
         <div>
@@ -675,7 +706,7 @@ export const ListUsers = (props) => {
                                     </div>
                                     <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">
                                         <div className="row">
-                                            <SwitchToggle values={["pending", "all", "activated"]} selected="all" gridRef={gridRef} setCount={setCount} setFilterVal={setFilterVal} />
+                                            <SwitchToggle values={["pending", "all", "registered"]} selected="all" gridRef={gridRef} setCount={setCount} setFilterVal={setFilterVal} />
 
                                         </div>
                                         <div className="row" >
@@ -709,7 +740,6 @@ export const ListUsers = (props) => {
                             </div>
 
                             <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 550, marginTop: -15 }}>
-
                                 {
                                     deleteDisabled
                                         ?
@@ -719,7 +749,18 @@ export const ListUsers = (props) => {
                                             handleShow();
                                             setCancelButtonEnabled(false);
                                         }}><i className="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
+
                                 }
+                                {
+                                    exportDisabled
+                                        ?
+                                        <></>
+                                        :
+                                        <Button variant="primary" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e => {
+                                            onBtnExport(); 
+                                        }}><i className="mdi mdi-download"></i>Export</Button>
+                                }
+                                
                                 <AgGridReact
                                     ref={gridRef}
                                     rowData={rowData}
@@ -734,7 +775,8 @@ export const ListUsers = (props) => {
                                     onRowSelected={onRowSelected}
                                     onFilterChanged={onFilterChanged}
                                     selectionChanged={e => console.log(e)}
-                                //noRowsOverlayComponent={noRowsOverlayComponent}
+                                    //noRowsOverlayComponent={noRowsOverlayComponent}
+                                    suppressExcelExport={true}
 
                                 >
                                     <AgGridColumn field="objectId" sortable={true} filter={true} hide={true} editable={false}></AgGridColumn>

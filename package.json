@@ -76,6 +76,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:test": "env-cmd -f .env.test react-scripts start",
     "build:staging": "env-cmd -f .env.staging react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test",

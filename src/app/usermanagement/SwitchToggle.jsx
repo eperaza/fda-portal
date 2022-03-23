@@ -15,8 +15,8 @@ export const SwitchToggle = (props) => {
             props.setCount(rows);
             props.setFilterVal("")
         }
-        if (val == "activated") {
-            props.gridRef.current.api.setQuickFilter("activated");
+        if (val == "registered") {
+            props.gridRef.current.api.setQuickFilter("registered");
             let rows = props.gridRef.current.api.getDisplayedRowCount();
             props.setCount(rows);
             props.setFilterVal("")
