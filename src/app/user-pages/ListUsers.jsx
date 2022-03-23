@@ -181,7 +181,7 @@ export const ListUsers = (props) => {
             .getAllDisplayedColumns()
             .map(col => col.getColId());
 
-        params.columnApi.autoSizeAllColumns();
+        params.columnApi.autoSizeColumns(colIds);
     };
 
     const handleShow = e => {
