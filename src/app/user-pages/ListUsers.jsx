@@ -12,11 +12,11 @@ import { Accordion, Card } from "react-bootstrap";
 import { ProgressBar } from 'react-bootstrap';
 import { SwitchToggle } from "../usermanagement/SwitchToggle";
 import { deleteFromGroup, getAllGroups, addToGroup } from "../../graph";
-
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
-import UserCellRenderer from "../components/UserCellRenderer.jsx";
+import { AccountEnabledCellRenderer } from "../components/AccountEnabledCellRenderer.jsx";
 import CustomNoRowsOverlay from "../components/CustomNoRowsOverlay.jsx";
+import { VersionCellRenderer } from "../components/VersionCellRenderer";
 
 const axios = require('axios');
 
@@ -47,11 +47,12 @@ export const ListUsers = (props) => {
     const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
     const [titleWarning, setTitleWarning] = useState();
     const [closeDisabled, setCloseDisable] = useState(false);
-
+    const [TSP, setTSP] = useState();
     const abort = useRef(0);
 
     useEffect(() => {
-        getUsers();
+        getUsersAF();
+        getTSPAF();
     }, []);
 
     const handleClose = () => {
@@ -242,19 +243,27 @@ export const ListUsers = (props) => {
                 countProgress = countProgress + increment;
                 setDeleteProgressBarCount(countProgress);
                 count++;
-                if (status == 204) {
-                    deleted.push(node);
-                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Deleted [' + node.mailNickname + '] successfully.</br>'
-                    setDeleteUsersLabel(x)
+                try {
+                    if (status == 204) {
+                        deleted.push(node);
+                        x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Deleted [' + node.mailNickname + '] successfully.</br>';
+                        setDeleteUsersLabel(x)
+                    }
+
+                    else {
+                        notDeleted.push(node);
+                        x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.mailNickname + '] -> ' + status.errorDescription + '</br>';
+                        setDeleteUsersLabel(x);
+                    }
                 }
-                else {
+                catch (error) {
                     notDeleted.push(node);
-                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.mailNickname + '] -> User not found!</br>'
-                    setDeleteUsersLabel(x)
+                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.mailNickname + '] -> ' + status + '</br>';
+                    setDeleteUsersLabel(x);
                 }
 
                 if (count == gridRef.current.api.getSelectedNodes().length) {
-                    getUsers();
+                    getUsersAF();
                     setDeleteLabel("Delete");
                     setLoader2(": Done");
                     setCancelButtonEnabled(false);
@@ -272,7 +281,7 @@ export const ListUsers = (props) => {
                 }
             }
             else {
-                getUsers();
+                getUsersAF();
                 setDeleteLabel("Delete");
                 setLoader2(": Aborted");
 
@@ -310,8 +319,19 @@ export const ListUsers = (props) => {
         };
 
         let res = await fetch(`${process.env.REACT_APP_USERS_DELETE_URI}/${user}`, options);
-        let x = await res.status;
-        return x;
+        let status = await res.status;
+        try {
+            if (status == 204) {
+                return status;
+            }
+            else {
+                let json = await res.json();
+                return json;
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
     }
 
     const login = async () => {
@@ -353,6 +373,31 @@ export const ListUsers = (props) => {
         };
         try {
             let res = await fetch(process.env.REACT_APP_USERS_GET_URI, requestOptions);
+            let status = await res.status;
+            let data = await res.json();
+            if (status == 200) {
+                setRowData(data);
+                let rows = gridRef.current.api.getDisplayedRowCount();
+                setCount(rows);
+            }
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    const getUsersAF = async () => {
+
+        const code = process.env.REACT_APP_FUNCTION_USERS_GET_CODE;
+
+        var requestOptions = {
+            method: "GET",
+            headers: {
+                "x-functions-key": `${code}`
+            }
+        };
+        try {
+            let res = await fetch(`${process.env.REACT_APP_FUNCTION_USERS_GET_URI}?airline=${props.airline}&objectId=${props.objectId}`, requestOptions);
             let status = await res.status;
             let data = await res.json();
             if (status == 200) {
@@ -434,7 +479,7 @@ export const ListUsers = (props) => {
 
                 if (data.objectId) {
                     setShowAdd(false);
-                    getUsers();
+                    getUsersAF();
                     setShowSuccess(true);
                     setShowSuccessText(data.mailNickname);
                     setCreateLabel("Create User");
@@ -468,6 +513,10 @@ export const ListUsers = (props) => {
             return "PENDING";
         }
         else return "REGISTERED";
+    };
+
+    const roleFormatter = (params) => {
+        return params.data.userRole.replace("role-", "")
     };
 
     const rowClassRules = {
@@ -512,8 +561,27 @@ export const ListUsers = (props) => {
     const onBtnExport = useCallback(() => {
         gridRef.current.api.exportDataAsCsv({
             onlySelected: true,
-          });
-      }, []);
+        });
+    }, []);
+
+    const getTSPAF = async () => {
+
+        const airline = props.airline.replace("airline-", "");
+        const code = "6A/snQUVOX4rtKd1HOZf54PtHLppaQWsptKRCEXjRr10SE8ktl4zYQ==";
+        fetch(`https://fdalitewebfunctiontest.azurewebsites.net/api/getTSP?code=${code}&airline=${airline}`)
+            .then(response => response.text())
+            .then(data => {
+                if (data != "") {
+
+                    setTSP(data);
+                }
+                else {
+                    setTSP("TSP Not Found");
+                }
+            }
+            )
+            .catch(error => console.log('error', error));
+    }
 
     return (
         <div>
@@ -757,10 +825,10 @@ export const ListUsers = (props) => {
                                         <></>
                                         :
                                         <Button variant="primary" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e => {
-                                            onBtnExport(); 
+                                            onBtnExport();
                                         }}><i className="mdi mdi-download"></i>Export</Button>
                                 }
-                                
+
                                 <AgGridReact
                                     ref={gridRef}
                                     rowData={rowData}
@@ -775,6 +843,7 @@ export const ListUsers = (props) => {
                                     onRowSelected={onRowSelected}
                                     onFilterChanged={onFilterChanged}
                                     selectionChanged={e => console.log(e)}
+                                    stopEditingWhenCellsLoseFocus={true}
                                     //noRowsOverlayComponent={noRowsOverlayComponent}
                                     suppressExcelExport={true}
 
@@ -787,12 +856,24 @@ export const ListUsers = (props) => {
                                     {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
-                                    <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
                                         values: ['role-airlinepilot', 'role-airlinefocal', 'role-airlineefbadmin', 'role-airlinecheckairman', 'role-airlinemaintenance'],
                                     }}></AgGridColumn>
-                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} valueGetter={accountStateFormatter} cellClassRules={cellClassRules} headerName={"Status"} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="version" sortable={true} filter={true} editable={false} cellRenderer={VersionCellRenderer}
+                                        cellRendererParams={{tspLastModified: TSP}} headerName={"TSP Version"}></AgGridColumn>
+                                    <AgGridColumn field="lastUpdated" sortable={true} filter={true} editable={false} headerName={"TSP Last Update"}></AgGridColumn>
                                     <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="airline" sortable={true} filter={true} hide={true} ></AgGridColumn>
+                                    <AgGridColumn field="tspLastModified" sortable={true} filter={true} hide={true}
+                                        valueGetter={params => {
+                                            return TSP;
+                                        }}
+
+                                    >
+                                    </AgGridColumn>
+
                                 </AgGridReact>
 
                                 <Modal scrollable="true" show={show} onHide={handleClose} contentClassName={"modal"}>
@@ -850,7 +931,7 @@ export const ListUsers = (props) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

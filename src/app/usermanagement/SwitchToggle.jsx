@@ -16,14 +16,14 @@ export const SwitchToggle = (props) => {
             props.setFilterVal("")
         }
         if (val == "registered") {
-            props.gridRef.current.api.setQuickFilter("registered");
+            props.gridRef.current.api.setQuickFilter("true");
             let rows = props.gridRef.current.api.getDisplayedRowCount();
             props.setCount(rows);
             props.setFilterVal("")
 
         }
         if (val == "pending") {
-            props.gridRef.current.api.setQuickFilter("pending");
+            props.gridRef.current.api.setQuickFilter("false");
             let rows = props.gridRef.current.api.getDisplayedRowCount();
             props.setCount(rows);
             props.setFilterVal("")

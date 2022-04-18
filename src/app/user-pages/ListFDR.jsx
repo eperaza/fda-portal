@@ -35,12 +35,9 @@ export const ListFDR = (props) => {
 
         console.log(props.airline.toUpperCase())
         const code = process.env.REACT_APP_FUNCTION_LIST_FDR_CODE;
-        //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=${props.airline.toUpperCase()}`, options)
-        //fetch(`${process.env.REACT_APP_FDR_GET_URI}?airline=TAV`, options)
         fetch(`${process.env.REACT_APP_FUNCTION_LIST_FDR_URI}?code=${code}&airlineId=${props.airline.toUpperCase()}&monthSpan=${months}`, options)
             .then(response => response.json())
             .then(data => {
-                console.log(data);
                 setRowData(data);
             }
             )

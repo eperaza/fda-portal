@@ -53,9 +53,12 @@ p {
   font-size: 0.875rem;
 }
 .display-1 {
-  font-size: 3.75rem;
+  font-size: 9rem !important;
+  font-style: italic;
+  font-weight: 400;
   @media (max-width: 991px) {
     font-size: 3rem;
+    font-style: italic;
   }
 }
 .display-2 {

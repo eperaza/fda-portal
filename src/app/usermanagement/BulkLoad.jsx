@@ -64,7 +64,7 @@ export const BulkLoad = (props) => {
     const abort = useRef(0);
     const [createCancelButtonEnabled, setCreateCancelButtonEnabled] = useState();
     const [titleWarning, setTitleWarning] = useState();
-    const [okDisabled, SetOKDisabled] = useState(true);
+    const [okDisabled, setOKDisabled] = useState(true);
     const [closeDisabled, setCloseDisable] = useState(false);
 
 
@@ -97,139 +97,149 @@ export const BulkLoad = (props) => {
 
         promise.then((d) => {
             //console.log(d)
+            console.log("done..");
             setItems(d);
+            setDisable(false);
+            setUploadLoader("Upload")
         });
     };
 
     const renderGrid = async () => {
         //setRowData(items);
-        setProgressBarCount(0);
+        setTimeout(async () => {
 
-        const schema = {
-            type: "array",
-            items: {
-                type: "object",
-                properties: {
-                    first: {
-                        type: ["string", "null"]
+
+            setProgressBarCount(0);
+
+            const schema = {
+                type: "array",
+                items: {
+                    type: "object",
+                    properties: {
+                        first: {
+                            type: ["string", "null"]
+                        },
+                        last: {
+                            type: ["string", "null"]
+                        },
+                        user: {
+                            type: "string"
+                        },
+                        email: {
+                            type: "string", pattern: "[a-z0-9]+@[a-z]+\.[a-z]{2,3}"
+                        },
+                        role: {
+                            type: "string",
+                            enum: ["role-airlinefocal", "role-airlinepilot", "role-airlinecheckairman", "role-airlineefbadmin", "role-airlinemaintenance"]
+                        }
                     },
-                    last: {
-                        type: ["string", "null"]
-                    },
-                    user: {
-                        type: "string"
-                    },
-                    email: {
-                        type: "string", format: "email"
-                    },
-                    role: {
-                        type: "string",
-                        enum: ["role-airlinefocal", "role-airlinepilot", "role-airlinecheckairman", "role-airlineefbadmin", "role-airlinemaintenance"]
-                    }
+                    required: [
+                        "user", "email", "role"
+                    ]
                 },
-                required: [
-                    "user", "email", "role"
-                ]
-            },
-            minItems: 1,
-            maxItems: 300
-        }
+                minItems: 1,
+                maxItems: 300
+            }
 
-        const valid = ajv.validate(schema, items)
+            const valid = ajv.validate(schema, items)
 
-        if (valid) {
-            setDisable(true);
-            setShow(true);
-            setStatusText();
-            setnotCreatedCount(0);
-            setCreatedCount(0)
-            setShowProgressBar(true);
-            setUploadLoader(<><Spinner animation="border" size="sm" /></>);
-            setCreateCancelButtonEnabled(true);
-            SetOKDisabled(true);
+            if (valid) {
+                setDisable(true);
+                setShow(true);
+                setStatusText();
+                setnotCreatedCount(0);
+                setCreatedCount(0)
+                setShowProgressBar(true);
+                setUploadLoader(<><Spinner animation="border" size="sm" /></>);
+                setCreateCancelButtonEnabled(true);
+                setOKDisabled(true);
 
-            let count = 0
-            let increment = (100 / items.length);
-            let countProgress = 0;
-            let created = [];
-            let notCreated = [];
-            var x = "";
-            setLoader(<><Spinner animation="border" size="sm" /></>);
-            setLoader2(<><Spinner animation="border" size="sm" /></>);
-            abort.current = 0;
-            for (let node of items) {
-                console.log("entra")
-                if (abort.current == 0) {
-                    let status = await createPreUser(node);
-                    console.log(status);
-                    if (status == 201) {
-                        created.push(node);
-                        x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.user + '] successfully</br>'
-                        setStatusText(x);
-                        setCreatedCount(created.length);
+                let count = 0
+                let increment = (100 / items.length);
+                let countProgress = 0;
+                let created = [];
+                let notCreated = [];
+                var x = "";
+                setLoader(<><Spinner animation="border" size="sm" /></>);
+                setLoader2(<><Spinner animation="border" size="sm" /></>);
+                abort.current = 0;
+                for (let node of items) {
+                    console.log("entra")
+                    if (abort.current == 0) {
+                        let status = await createPreUser(node);
+                        console.log(status);
+                        if (status == 201) {
+                            created.push(node);
+                            x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.user + '] successfully</br>'
+                            setStatusText(x);
+                            setCreatedCount(created.length);
+                        }
+                        else {
+                            try {
+                                let error = status;
+                                if (error.includes("Unique_User_Id")) {
+                                    error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
+                                }
+                                notCreated.push(node.user);
+                                x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.user + '] -> ' + error + '</br>'
+                                setStatusText(x);
+                                setnotCreatedCount(notCreated.length);
+                            }
+                            catch (error) {
+                                console.log(status)
+                                break;
+                            }
+                        }
+
+                        count++;
+                        countProgress = countProgress + increment;
+                        setProgressBarCount(countProgress);
+
+                        if (count == items.length) {
+                            setnotCreatedCount(notCreated.length);
+                            setCreatedCount(created.length);
+                            setLoader2(": Done");
+                            setTimeout(() => {
+                                setShowProgressBar(false);
+                            }, 1000);
+                        }
                     }
                     else {
-                        try {
-                            let error = status;
-                            if (error.includes("Unique_User_Id")) {
-                                error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
-                            }
-                            notCreated.push(node.user);
-                            x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.user + '] -> ' + error + '</br>'
-                            setStatusText(x);
-                            setnotCreatedCount(notCreated.length);
-                        }
-                        catch (error) {
-                            console.log(status)
-                            break;
-                        }
-                    }
-
-                    count++;
-                    countProgress = countProgress + increment;
-                    setProgressBarCount(countProgress);
-
-                    if (count == items.length) {
                         setnotCreatedCount(notCreated.length);
                         setCreatedCount(created.length);
-                        setLoader2(": Done");
+                        setUploadLoader("Upload");
+                        getPreUsers();
+                        setLoader("Send Registration");
+                        setLoader2(": Aborted");
+                        setCreateCancelButtonEnabled(false);
                         setTimeout(() => {
                             setShowProgressBar(false);
                         }, 1000);
+                        setOKDisabled(false);
+                        return;
                     }
                 }
-                else {
-                    setnotCreatedCount(notCreated.length);
-                    setCreatedCount(created.length);
-                    setUploadLoader("Upload");
-                    getPreUsers();
-                    setLoader("Send Registration");
-                    setLoader2(": Aborted");
-                    setCreateCancelButtonEnabled(false);
-                    setTimeout(() => {
-                        setShowProgressBar(false);
-                    }, 1000);
-                    SetOKDisabled(false);
-                    return;
-                }
+                setUploadLoader("Upload");
+                setLoader("Send Registration");
+                setCreateCancelButtonEnabled(false);
+                getPreUsers();
+                setTimeout(() => {
+                    setShowProgressBar(false);
+                }, 1000);
+                setOKDisabled(false);
             }
-            setUploadLoader("Upload");
-            setLoader("Send Registration");
-            setCreateCancelButtonEnabled(false);
-            getPreUsers();
-            setTimeout(() => {
-                setShowProgressBar(false);
-            }, 1000);
-            SetOKDisabled(false);
-        }
-        else {
-            setShowAlert(true);
-            console.log(JSON.stringify(ajv.errors[0].params))
-            setShowAlertText(`Error: ${JSON.stringify(ajv.errors[0].params)} </br> Message: ${ajv.errors[0].message}.`);
-        }
+            else {
+                setShowAlert(true);
+                console.log(JSON.stringify(ajv.errors[0].params))
+                setShowAlertText(`Error: ${JSON.stringify(ajv.errors[0].params)} </br> Message: ${ajv.errors[0].message}.`);
+                setItems();
+                setDisable(true);
+            }
 
-        //setFile("");
-        file.current.value = "";
+            //setFile("");
+            file.current.value = "";
+        }, 0);
+        setDisable(true);
 
     }
 
@@ -301,7 +311,7 @@ export const BulkLoad = (props) => {
             setProgressBarCount(0);
             setnotCreatedCount(0);
             setCreatedCount(0);
-            SetOKDisabled(true);
+            setOKDisabled(true);
             let countProgress = 0;
             let created = [];
             let notCreated = [];
@@ -386,14 +396,14 @@ export const BulkLoad = (props) => {
                     setTimeout(() => {
                         setShowProgressBar(false);
                     }, 1000);
-                    SetOKDisabled(false)
+                    setOKDisabled(false)
                     return;
                 }
             }
 
             setLoader("Send Registration");
             getPreUsers();
-            SetOKDisabled(false);
+            setOKDisabled(false);
 
         }
         else {
@@ -561,19 +571,24 @@ export const BulkLoad = (props) => {
         for (let node of selectedData) {
             if (abort.current == 0) {
                 let status = await deletePreUsers(node.userId);
-
-                if (status == 204) {
-                    setCheck("true")
-                    deleted.push(node);
-                    x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Deleted [' + node.userId + '] successfully.</br>'
-                    setDeleteLabel(x)
+                try {
+                    if (status == 204) {
+                        setCheck("true")
+                        deleted.push(node);
+                        x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Deleted [' + node.userId + '] successfully.</br>';
+                        setDeleteLabel(x);
+                    }
+                    else {
+                        notDeleted.push(node);
+                        x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.userId + '] -> ' + status.errorDescription + '</br>';
+                        setDeleteLabel(x);
+                    }
                 }
-                else {
+                catch (error) {
                     notDeleted.push(node);
-                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.userId + '] -> ' + status.errorDescription + '</br>'
-                    setDeleteLabel(x)
+                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.userId + '] -> ' + status + '</br>';
+                    setDeleteLabel(x);
                 }
-
                 count++;
                 countProgress = countProgress + increment;
                 setDeleteProgressBarCount(countProgress);
@@ -618,9 +633,14 @@ export const BulkLoad = (props) => {
         };
 
         let res = await fetch(`${process.env.REACT_APP_PREUSERS_DELETE_URI}/${user}/`, options);
-        let x = await res.status;
-        return x;
-
+        let status = await res.status;
+        if (status == 204) {
+            return status
+        }
+        else {
+            let json = await res.json();
+            return json;
+        }
     }
 
     const gridOptions = {
@@ -635,8 +655,9 @@ export const BulkLoad = (props) => {
             let status = await editPreUser(event.data);
             if (status == 500) {
                 alert("User ID duplicated, could not save new value. Please use another ID.");
-                event.colDef.cellStyle = { 'background-color': 'red', 'transition': 'background-color 0.5s'
-            };
+                event.colDef.cellStyle = {
+                    'background-color': 'red', 'transition': 'background-color 0.5s'
+                };
                 event.api.refreshCells({
                     force: true,
                     columns: [event.column.colId],
@@ -645,14 +666,14 @@ export const BulkLoad = (props) => {
                 });
 
                 setTimeout(() => {
-                    event.colDef.cellStyle = { 'background-color': 'transparent', 'transition': 'background-color 0.5s'};
+                    event.colDef.cellStyle = { 'background-color': 'transparent', 'transition': 'background-color 0.5s' };
                     event.api.refreshCells({
                         force: true,
                         columns: [event.column.colId],
                         rowNodes: [event.node]
-    
+
                     });
-                }, 500); 
+                }, 500);
             }
 
             else {
@@ -751,9 +772,10 @@ export const BulkLoad = (props) => {
                                             ref={file}
                                             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                                             onChange={(e) => {
-                                                setDisable(false);
                                                 const uploadedFile = e.target.files[0];
                                                 readExcel(uploadedFile);
+                                                setDisable(true);
+                                                setUploadLoader(<><Spinner animation="border" size="sm" /></>)
                                             }}
                                         />
                                         <Form.Text >

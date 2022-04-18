@@ -29,7 +29,6 @@ export const UserGrid = () => {
 
   let accessToken = null;
   React.useEffect(() => {
-    console.log("fired...")
     if (inProgress === "none" && accounts.length > 0) {
       // Retrieve an access token
       accessToken = instance.acquireTokenSilent({
@@ -44,16 +43,16 @@ export const UserGrid = () => {
                 setAirline(group.displayName.replace("airline-", ""));
                 setGroupId(group.id);
               }
-              if(group.displayName.startsWith("role") == true){
+              if (group.displayName.startsWith("role") == true) {
                 setRole(group.displayName.replace("role-", ""));
               }
-              if(group.displayName.includes("User Administrator") == true){
+              if (group.displayName.includes("User Administrator") == true) {
                 setDirRole(group.displayName);
               }
             });
           });
           setToken(response.accessToken);
-          setObjectId(graphData.objectId);
+          setObjectId(response.uniqueId);
 
           return response.accessToken;
         }
@@ -61,9 +60,9 @@ export const UserGrid = () => {
       });
     }
 
-
-
   }, [inProgress, accounts, instance, token]);
+
+  
 
   return (
     <div>
@@ -76,16 +75,14 @@ export const UserGrid = () => {
           </ol>
         </nav>
       </div>
-              {
-                groupId
-                  ?
-                  <ListUsers groupId={groupId} token={token} airline={airline} role={role} dirRole={dirRole} graphData={graphData}/>
-                  :
-                  <div></div>
-              }
-              {
-                objectId?objectId:<></>
-              }
+      {
+        groupId
+          ?
+          <ListUsers groupId={groupId} token={token} airline={airline} role={role} dirRole={dirRole} graphData={graphData} objectId={objectId} />
+          :
+          <div></div>
+      }
+
     </div>
   );
 

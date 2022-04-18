@@ -132,6 +132,7 @@ class Sidebar extends Component {
                 <ul className="nav flex-column sub-menu">
                   <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/UserGrid') ? 'nav-link active' : 'nav-link' } to="/usermanagement/UserGrid"><Trans>Users</Trans></Link></li>
                   <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/BulkLoad') ? 'nav-link active' : 'nav-link' } to="/usermanagement/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
+                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/Preferences') ? 'nav-link active' : 'nav-link' } to="/usermanagement/Preferences"><Trans>Preferences</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>

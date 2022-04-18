@@ -18,6 +18,8 @@ import { BulkLoad } from "./usermanagement/BulkLoad";
 import { UserGrid } from "./usermanagement/UserGrid";
 import { FDR } from "./fdrfiles/FDR";
 import { Error404 } from "./error-pages/Error404";
+import { Error401 } from "./error-pages/Error401";
+import { Preferences } from './usermanagement/Preferences';
 
 const App = () => {
 
@@ -29,6 +31,7 @@ const App = () => {
   const [airline, setAirline] = useState("");
   const [groupId, setGroupId] = useState();
   const [dirRoles, setDirRoles] = useState();
+  const [role, setRole] = useState();
 
   let accessToken = null;
 
@@ -48,6 +51,9 @@ const App = () => {
                 setAirline(group.displayName.replace("airline-", ""));
                 setGroupId(group.id);
               }
+              if (group.displayName.startsWith("role") == true) {
+                setRole(group.displayName.replace("role-", ""));
+              }
             });
           });
           setToken(response.accessToken);
@@ -57,161 +63,222 @@ const App = () => {
         return null;
       });
     }
+
+    setTimeout(() => {
+      handleLogin();
+    }, 1800000);
+
   }, [inProgress, accounts, instance, token]);
+
+  const handleLogin = () => {
+      instance.loginRedirect(loginRequest).catch(e => {
+        console.log(e);
+      });
+  }
 
   return (
     <div className="App">
       <Router>
         <AuthenticatedTemplate>
+          {
+            role
+              ?
+              <>
+                {
+                  role == "airlineefbadmin" || role == "airlinefocal"
+                    ?
+                    <Switch>
+                      <Route path="/" exact component={() => {
+                        return (
+                          <div>
+                            <div className="container-scroller">
+                              {
+                                accounts[0]
+                                  ?
+                                  <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
+                                  :
+                                  <></>
+                              }
+                              <div className="container-fluid page-body-wrapper">
+                                {<Navbar account={accounts[0].name} />}
+                                <div className="main-panel">
+                                  <div className="content-wrapper">
+                                    {
+                                      airline
+                                        ?
+                                        <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId}></Dashboard>
+                                        :
+                                        <>
+                                          No airline membership (Unauthorized).
+                                        </>
+                                    }
+                                  </div>
+                                  {<Footer />
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }}
+                      />
+                      <Route path="/dashboard/Dashboard" exact component={() => {
+                        return (
+                          <div>
+                            <div className="container-scroller">
+                              {
+                                accounts[0]
+                                  ?
+                                  <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
+                                  :
+                                  <></>
+                              }
+                              <div className="container-fluid page-body-wrapper">
+                                {<Navbar account={accounts[0].name} />}
+                                <div className="main-panel">
+                                  <div className="content-wrapper">
+                                    {
+                                      airline
+                                        ?
+                                        <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId}></Dashboard>
+                                        :
+                                        <></>
+                                    }
+                                  </div>
+                                  {<Footer />
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }}
+                      />
+                      <Route path="/usermanagement/UserGrid" exact component={() => {
+                        return (
+                          <div>
+                            <div className="container-scroller">
+                              {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
+                              <div className="container-fluid page-body-wrapper">
+                                {<Navbar account={accounts[0].name} />}
+                                <div className="main-panel">
+                                  <div className="content-wrapper">
+                                    <UserGrid />
+                                  </div>
+                                  {<Footer />
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
+                        );
+                      }}
+                      />
+                      <Route path="/usermanagement/BulkLoad" exact component={() => {
+                        return (
+                          <div>
+                            <div className="container-scroller">
+                              {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
+                              <div className="container-fluid page-body-wrapper">
+                                {<Navbar account={accounts[0].name} />}
+                                <div className="main-panel">
+                                  <div className="content-wrapper">
+                                    {
+                                      airline
+                                        ?
+                                        <BulkLoad airline={airline} token={token} />
+                                        :
+                                        <div></div>
+                                    }
+                                  </div>
+                                  {<Footer />
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-          <Switch>
-          <Route path="/" exact component={() => {
-              return (
-                <div>
-                  <div className="container-scroller">
-                    {
-                      accounts[0]
-                        ?
-                        <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
-                        :
-                        <></>
-                    }
-                    <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
-                      <div className="main-panel">
-                        <div className="content-wrapper">
-                          {
-                            airline
-                              ?
-                              <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId}></Dashboard>
-                              :
-                              <>
-                                No airline membership (Unauthorized).
-                              </>
-                          }
-                        </div>
-                        {<Footer />
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            }}
-            />
-            <Route path="/dashboard/Dashboard" exact component={() => {
-              return (
-                <div>
-                  <div className="container-scroller">
-                    {
-                      accounts[0]
-                        ?
-                        <Sidebar account={accounts[0].name} membership={`airline-${airline}`} />
-                        :
-                        <></>
-                    }
-                    <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
-                      <div className="main-panel">
-                        <div className="content-wrapper">
-                          {
-                            airline
-                              ?
-                              <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId}></Dashboard>
-                              :
-                              <></>
-                          }
-                        </div>
-                        {<Footer />
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            }}
-            />
-            <Route path="/usermanagement/UserGrid" exact component={() => {
-              return (
-                <div>
-                  <div className="container-scroller">
-                    {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
-                    <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
-                      <div className="main-panel">
-                        <div className="content-wrapper">
-                          <UserGrid />
-                        </div>
-                        {<Footer />
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                        );
+                      }}
+                      /><Route path="/usermanagement/Preferences" exact component={() => {
+                        return (
+                          <div>
+                            <div className="container-scroller">
+                              {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
+                              <div className="container-fluid page-body-wrapper">
+                                {<Navbar account={accounts[0].name} />}
+                                <div className="main-panel">
+                                  <div className="content-wrapper">
+                                    {
+                                      airline
+                                        ?
+                                        <Preferences airline={airline} token={token} graphData={graphData} groupId={groupId} />
+                                        :
+                                        <div></div>
+                                    }
+                                  </div>
+                                  {<Footer />
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-              );
-            }}
-            />
-            <Route path="/usermanagement/BulkLoad" exact component={() => {
-              return (
-                <div>
-                  <div className="container-scroller">
-                    {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
-                    <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
-                      <div className="main-panel">
-                        <div className="content-wrapper">
-                          {
-                            airline
-                              ?
-                              <BulkLoad airline={airline} token={token} />
-                              :
-                              <div></div>
-                          }
-                        </div>
-                        {<Footer />
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                        );
+                      }}
+                      />
+                      <Route path="/fdrfiles/FDR" exact component={() => {
+                        return (
+                          <div>
+                            <div className="container-scroller">
+                              {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
+                              <div className="container-fluid page-body-wrapper">
+                                {<Navbar account={accounts[0].name} />}
+                                <div className="main-panel">
+                                  <div className="content-wrapper">
+                                    <FDR />
+                                  </div>
+                                  {<Footer />
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-              );
-            }}
-            />
-            <Route path="/fdrfiles/FDR" exact component={() => {
-              return (
-                <div>
-                  <div className="container-scroller">
-                    {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
-                    <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
-                      <div className="main-panel">
-                        <div className="content-wrapper">
-                          <FDR />
-                        </div>
-                        {<Footer />
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                        );
+                      }}
+                      />
 
-              );
-            }}
-            />
+                      <Route path="*" exact component={() => {
+                        return (
+                          <div>
+                            <Error404 style={{}} />
+                          </div>
+                        );
+                      }}
+                      />
+                    </Switch>
+                    :
+                    <Switch>
+                      
+                      <Route path="/" exact component={() => {
+                        return (
+                          <div>
+                            <Error401 style={{}} />
+                          </div>
+                        );
+                      }}
+                      />
+                    </Switch>
 
-            <Route path="*" exact component={() => {
-              return (
-                <div>
-                  <Error404 style={{}} />
-                </div>
-              );
-            }}
-            />
-
-          </Switch>
+                }
+              </>
+              :
+              <>
+               
+              </>
+          }
 
         </AuthenticatedTemplate>
 
@@ -221,7 +288,8 @@ const App = () => {
           <Route path="/" exact render={() => {
             return (
               <div>
-                <br></br>                        <br></br>
+                <br></br>                        
+                <br></br>
                 <br></br>
                 <Login></Login>
               </div>
