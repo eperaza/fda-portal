@@ -558,10 +558,23 @@
  
   color:#666 !important;
 }
+
 .inpMailTA{
   border:none !important;
   border-bottom: 2px solid #0d6efd !important;
   border-top: 2px solid #0d6efd !important;
+  padding: 5px 10px !important;
+  outline: none !important;
+  background-color: transparent;
+  width: 100% !important;
+  color:aliceblue !important;
+  font-style: normal !important;
+}
+
+.inpMailTAError{
+  border:none !important;
+  border-bottom: 2px solid red !important;
+  border-top: 2px solid red !important;
   padding: 5px 10px !important;
   outline: none !important;
   background-color: transparent;
@@ -593,11 +606,36 @@
     color:aliceblue !important;
     border-radius: 0.5 !important;
   }
+
+  .inpError {
+    border: none !important;
+    border-bottom: 2px solid red !important;
+    margin-bottom:20px;
+    padding: 5px 10px !important;
+    outline: none !important;
+    background-color: rgb(17, 17, 17);
+    width: 100% !important;
+    color:aliceblue !important;
+    border-radius: 0.5 !important;
+  }
   
   .inpSelect {
     border: none !important;
     border-bottom: 2px solid #0d6efd !important;
     border-top: 2px solid #0d6efd !important;
+    margin-bottom:20px;
+    padding: 5px 10px !important;
+    outline: none !important;
+    background-color: rgb(17, 17, 17);
+    width: 100% !important;
+    color:aliceblue !important;
+    border-radius: 0.5 !important;
+  }
+
+  .inpSelectError {
+    border: none !important;
+    border-bottom: 2px solid red !important;
+    border-top: 2px solid red !important;
     margin-bottom:20px;
     padding: 5px 10px !important;
     outline: none !important;
@@ -615,6 +653,15 @@
     padding:0 5px;
     background-color: rgb(17, 17, 17);
   }
+  
+  .borderLabelAlt{
+    position:absolute;
+    top:-1px;
+    left:-4px;
+    color:#fff;
+    padding:0 5px;
+    background-color: transparent;
+  }
 }
 
 /* For Tablets */
@@ -622,6 +669,18 @@
   .inp {
     border: none !important;
     border-bottom: 2px solid #0d6efd !important;
+    margin-bottom:20px;
+    padding: 5px 10px !important;
+    outline: none !important;
+    background-color: rgb(17, 17, 17);
+    width: 100% !important;
+    color:aliceblue !important;
+    border-radius: 0 !important;
+  }
+
+  .inpError {
+    border: none !important;
+    border-bottom: 2px solid red !important;
     margin-bottom:20px;
     padding: 5px 10px !important;
     outline: none !important;
@@ -642,8 +701,23 @@
     color:aliceblue !important;
     border-radius: 0 !important;
   }
+
+  .inpSelectError {
+    border: none !important;
+    border-bottom: 2px solid red !important;
+    margin-bottom:20px;
+    padding: 5px 10px !important;
+    outline: none !important;
+    background-color: rgb(17, 17, 17);
+    width: 100% !important;
+    color:aliceblue !important;
+    border-radius: 0 !important;
+  }
   
   .borderLabel{
+    display: none;
+  }
+  .borderLabelAlt{
     display: none;
   }
 }

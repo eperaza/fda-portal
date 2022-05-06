@@ -112,7 +112,7 @@ export async function getDirectoryRoles(accessToken) {
         
 }
 
-async function createGroup(accessToken, groupName) {
+async function createGroup(accessToken, groupName, description) {
     const headers = new Headers();
     const bearer = `Bearer ${accessToken}`;
 
@@ -124,7 +124,9 @@ async function createGroup(accessToken, groupName) {
         "displayName": `${groupName}`,
         "mailEnabled": false,
         "mailNickname": `${groupName}`,
-        "securityEnabled": true,        
+        "securityEnabled": true,    
+        "description": `${description}`
+    
     });
     
     const options = {
@@ -139,11 +141,12 @@ async function createGroup(accessToken, groupName) {
     if (status == 201) {
         return data.id;
     }
+    else {console.log (status)}
      
 }
 
-export async function createRole(accessToken, airlineId, displayName) {
-    let groupId = await createGroup(accessToken, displayName);
+export async function createRole(accessToken, airlineId, displayName, description) {
+    let groupId = await createGroup(accessToken, displayName, description);
     const headers = new Headers();
     const bearer = `Bearer ${accessToken}`;
 
@@ -152,7 +155,8 @@ export async function createRole(accessToken, airlineId, displayName) {
 
 
     var body = JSON.stringify({
-        "@odata.id": `https://graph.microsoft.com/v1.0/directoryObjects/${groupId}`               
+        "@odata.id": `https://graph.microsoft.com/v1.0/directoryObjects/${groupId}`
+
     });
     
     const options = {

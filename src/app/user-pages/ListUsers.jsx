@@ -49,6 +49,7 @@ export const ListUsers = (props) => {
     const [closeDisabled, setCloseDisable] = useState(false);
     const [TSP, setTSP] = useState();
     const abort = useRef(0);
+    const [isError, setIsError] = useState(false);
 
     useEffect(() => {
         getUsersAF();
@@ -430,15 +431,20 @@ export const ListUsers = (props) => {
     const [mail, setMail] = useState(""),
         onInputMail = ({ target: { value } }) => setMail(value.toLowerCase());
 
-    const [mode, setMode] = useState();
+    const [mode, setMode] = useState("lite");
 
-    const [aircraft, setAircraft] = useState();
+    const [aircraft, setAircraft] = useState("b737");
 
     const [role, setRole] = useState("role-airlinefocal")
 
     const onFormSubmit = e => {
         e.preventDefault();
-        createUser();
+        if ((principal != undefined && principal != "") && (givenName != undefined && givenName != "") && (surname != undefined && surname != "") && (mail != undefined && mail != "") && (mode != undefined && mode != "") && (aircraft != undefined && aircraft != "") && (role != undefined && role != "")) {
+            createUser();
+        }
+        else {
+            setIsError(true);
+        }
     }
 
     const createUser = async () => {
@@ -487,7 +493,7 @@ export const ListUsers = (props) => {
                     setShowSuccess(true);
                     setShowSuccessText(data.mailNickname);
                     setCreateLabel("Create User");
-
+                    setIsError(false);
                 }
                 else {
                     setShowAlert(true);
@@ -613,25 +619,17 @@ export const ListUsers = (props) => {
                                                 <div className="row">
                                                     <div className="col-md-5">
                                                         <div className="input-group">
-                                                            {/*<div className="input-group-prepend">
-                                                                <span className="input-group-text bg-primary text-white">User</span>
-                                                            </div>*/
-                                                            }
-
+                                                            <label className="borderLabelAlt"><span class="required">* </span></label>
                                                             <input
                                                                 type="text"
-                                                                className="inp"
+                                                                className={isError ? "inpError" : "inp"}
                                                                 placeholder="User ID"
                                                                 aria-label="User Principal"
                                                                 onChange={onInputPrincipal}
                                                                 value={principal}
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}
                                                             />
-                                                            {/*
-                                                            <div className="input-group-append">
-                                                                <span className="input-group-text text-white">@flitedeckadvisor.com</span>
-                                                                </div>
-                                                                */}
+
                                                         </div>
                                                     </div>
                                                     <div className="col-md-3">
@@ -639,7 +637,7 @@ export const ListUsers = (props) => {
                                                         <select
                                                             name="aircraft"
                                                             id="aircraft"
-                                                            className="inpSelect"
+                                                            className={isError ? "inpSelectError" : "inpSelect"}
                                                             value={aircraft}
                                                             onChange={e => {
                                                                 console.log("e.target.value", e.target.value);
@@ -657,7 +655,7 @@ export const ListUsers = (props) => {
                                                             <select
                                                                 name="cars"
                                                                 id="cars"
-                                                                className="inpSelect"
+                                                                className={isError ? "inpSelectError" : "inpSelect"}
                                                                 value={role}
                                                                 onChange={e => {
                                                                     console.log("e.target.value", e.target.value);
@@ -683,13 +681,11 @@ export const ListUsers = (props) => {
                                                 <div className="row">
                                                     <div className="col-md-3">
                                                         <div className="input-group">
-                                                            {/*<div className="input-group-prepend">
-                                                                <span className="input-group-text bg-primary text-white">First Name</span>
-                                                            </div>*/}
+                                                            <label className="borderLabelAlt"><span class="required">* </span></label>
                                                             <input
                                                                 aria-label=""
                                                                 type="text"
-                                                                className="inp"
+                                                                className={isError ? "inpError" : "inp"}
                                                                 onChange={onInputGivenName}
                                                                 value={givenName}
                                                                 placeholder="First Name"
@@ -699,11 +695,11 @@ export const ListUsers = (props) => {
                                                     </div>
                                                     <div className="col-md-3">
                                                         <div className="input-group">
-
+                                                            <label className="borderLabelAlt"><span class="required">* </span></label>
                                                             <input
                                                                 aria-label=""
                                                                 type="text"
-                                                                className="inp"
+                                                                className={isError ? "inpError" : "inp"}
                                                                 placeholder="Last Name"
                                                                 onChange={onInputSurname}
                                                                 value={surname}
@@ -712,11 +708,9 @@ export const ListUsers = (props) => {
                                                     </div>
                                                     <div className="col-md-3">
                                                         <div className="input-group">
-                                                            {/*<div className="input-group-prepend">
-                                                                <span className="input-group-text bg-primary text-white">eMail</span>
-                                                        </div>*/}
+                                                            <label className="borderLabelAlt"><span class="required">* </span></label>
                                                             <input
-                                                                className="inp"
+                                                                className={isError ? "inpError" : "inp"}
                                                                 aria-label="First name"
                                                                 type="text"
                                                                 onChange={onInputMail}
@@ -731,7 +725,7 @@ export const ListUsers = (props) => {
                                                         <select
                                                             name="aircraft"
                                                             id="aircraft"
-                                                            className="inpSelect"
+                                                            className={isError ? "inpSelectError" : "inpSelect"}
                                                             value={mode}
                                                             onChange={e => {
                                                                 console.log("e.target.value", e.target.value);
@@ -855,21 +849,21 @@ export const ListUsers = (props) => {
                             </div>
 
                             <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 550, marginTop: -15 }}>
-                                <Button className="btn-primary-override" variant="primary" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="sm" onClick={e => {
+                                <Button className="btn-primary-override" variant="primary" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="md" onClick={e => {
                                     refreshGrid()
 
                                 }}>
-                                    <i className="mdi mdi-refresh text-success"></i>Refresh
+                                    <i className="mdi mdi-refresh text-success mdi-18px"></i>Refresh
                                 </Button>
                                 {
                                     deleteDisabled
                                         ?
                                         <></>
                                         :
-                                        <Button className="btn-primary-override" variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="sm" onClick={e => {
+                                        <Button className="btn-primary-override" variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="md" onClick={e => {
                                             handleShow();
                                             setCancelButtonEnabled(false);
-                                        }}><i className="mdi mdi-delete-forever text-danger"></i>{deleteLabel}</Button>
+                                        }}><i className="mdi mdi-delete-forever text-danger mdi-18px"></i>{deleteLabel}</Button>
 
 
 
@@ -879,9 +873,9 @@ export const ListUsers = (props) => {
                                         ?
                                         <></>
                                         :
-                                        <Button className="btn-primary-override" variant="primary" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="sm" onClick={e => {
+                                        <Button className="btn-primary-override" variant="primary" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="md" onClick={e => {
                                             onBtnExport();
-                                        }}><i className="mdi mdi-file-export text-primary"></i>Export</Button>
+                                        }}><i className="mdi mdi-file-export text-primary mdi-18px"></i>Export</Button>
                                 }
 
                                 <AgGridReact

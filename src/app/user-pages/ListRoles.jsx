@@ -33,9 +33,14 @@ export const ListRoles = (props) => {
     const [deleteLabel, setDeleteLabel] = useState();
     const [deleteLoader, setDeleteLoader] = useState("Delete");
     const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
+    const [isError, setIsError] = useState(false);
+
 
     const [roleName, setRoleName] = useState(),
         onInputRoleName = ({ target: { value } }) => setRoleName(value);
+    const [description, setDescription] = useState(),
+        onInputDescription = ({ target: { value } }) => setDescription(value);
+
 
     useEffect(() => {
         getAllRoles();
@@ -44,7 +49,6 @@ export const ListRoles = (props) => {
     }, []);
 
     const getRoles = () => {
-        console.log("entra")
         let airlineId = null;
 
         getAllGroups(props.token).then(response => {
@@ -87,39 +91,53 @@ export const ListRoles = (props) => {
         console.log(names)
         let role = roleName;
         console.log(role)
+        try {
+            console.log(description)
+            if ((roleName != undefined && roleName != "") && (description != undefined && description != "")) {
+                if (!role.startsWith("role-")) {
+                    role = "role-" + role;
+                }
 
-        if (!role.startsWith("role-")) {
-            role = "role-" + role;
-        }
+                if (!names.includes(role)) {
+                    let res = await getAllGroups(props.token).then(response => {
 
-        if (!names.includes(role)) {
-            let res = await getAllGroups(props.token).then(response => {
+                        response.value.forEach(group => {
+                            //get airline group id
+                            if (group.displayName.startsWith(`airline-${props.airline}`) == true) {
+                                createRole(props.token, group.id, role, description).then(response => {
+                                    console.log(response);
+                                    setShowSuccessText(role)
+                                    setShowSuccess(true);
+                                });
 
-                response.value.forEach(group => {
-                    //get airline group id
-                    if (group.displayName.startsWith(`airline-${props.airline}`) == true) {
-                        createRole(props.token, group.id, role).then(response => {
-                            console.log(response);
-                            setShowSuccessText(role)
-                            setShowSuccess(true);
+                            }
+                            //getRoles()
                         });
 
-                    }
-                    //getRoles()
-                });
+                        return response;
+                    });
+                    setTimeout(() => {
+                        console.log("hola")
+                        getRoles();
+                    }, 10000);
+                }
+                else {
+                    setShowAlertText("Role already exists");
+                    setShowAlert(true);
 
-                return response;
-            });
-            setTimeout(() => {
-                console.log("hola")
-                getRoles();
-            }, 10000);
+                }
+                setIsError(false);
+                
+            }
+            else throw 500;
         }
-        else {
-            setShowAlertText("Role already exists");
-            setShowAlert(true);
+        catch (error) {
+            //setShowAlert(true);
+            //setShowAlertText("Empty fields");
+            setIsError(true);
+            
+        }
 
-        }
     }
 
     const onGridReady = params => {
@@ -158,7 +176,7 @@ export const ListRoles = (props) => {
     const onFilterTextBoxChanged = e => {
         gridRef.current.api.setQuickFilter(e.target.value);
     }
-    
+
     const refreshGrid = useCallback(() => {
         gridRef.current.api.showLoadingOverlay();
         getRoles();
@@ -185,19 +203,29 @@ export const ListRoles = (props) => {
                                                 <div className="row">
                                                     <div className="col-md-5">
                                                         <div className="input-group">
-                                                            {/*<div className="input-group-prepend">
-                                                                <span className="input-group-text bg-primary text-white">User</span>
-                                                            </div>*/
-                                                            }
-
+                                                            <label className="borderLabelAlt"><span class="required">* </span></label>
                                                             <input
                                                                 type="text"
-                                                                className="inp"
-                                                                placeholder="Role Name"
-                                                                aria-label="Role Name"
+                                                                className={isError ? "inpError" : "inp"}
+                                                                placeholder="Name"
+                                                                aria-label="Name"
                                                                 onChange={onInputRoleName}
                                                                 value={roleName}
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}
+                                                            />
+
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-md-7">
+                                                        <div className="input-group">
+                                                            <label className="borderLabel"><span class="required">* </span>description</label>
+                                                            <textarea
+                                                                className={isError ? "inpMailTAError" : "inpMailTA"}
+                                                                placeholder="Type in group description..."
+                                                                aria-label="Content"
+                                                                onChange={onInputDescription}
+                                                                value={description}
+                                                                style={{ borderRadius: 10, fontStyle: 'italic', height: 70 }}
                                                             />
 
                                                         </div>
@@ -271,11 +299,11 @@ export const ListRoles = (props) => {
                             </div>
                             <p className="card-description"> Airline <code className="text-warning">{props.airline.toUpperCase()}</code></p>
 
-                            <Button className="btn-primary-override" variant="primary" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="sm" onClick={e => {
+                            <Button className="btn-primary-override" variant="primary" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="md" onClick={e => {
                                 refreshGrid()
 
                             }}>
-                                <i className="mdi mdi-refresh text-success"></i>Refresh
+                                <i className="mdi mdi-refresh text-success mdi-18px"></i>Refresh
                             </Button>
 
                             <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 530 }}>
