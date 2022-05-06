@@ -51,7 +51,8 @@ export const Tails = (props) => {
 
     return (
         <>
-            {props.rowData.map(renderTails)
+            {
+                props.rowData.map(renderTails)
             }
         </>
     );

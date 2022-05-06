@@ -430,6 +430,10 @@ export const ListUsers = (props) => {
     const [mail, setMail] = useState(""),
         onInputMail = ({ target: { value } }) => setMail(value.toLowerCase());
 
+    const [mode, setMode] = useState();
+
+    const [aircraft, setAircraft] = useState();
+
     const [role, setRole] = useState("role-airlinefocal")
 
     const onFormSubmit = e => {
@@ -583,6 +587,11 @@ export const ListUsers = (props) => {
             .catch(error => console.log('error', error));
     }
 
+    const refreshGrid = useCallback(() => {
+        gridRef.current.api.showLoadingOverlay();
+        getUsersAF();
+    }, []);
+
     return (
         <div>
             <div className="row">
@@ -626,31 +635,53 @@ export const ListUsers = (props) => {
                                                         </div>
                                                     </div>
                                                     <div className="col-md-3">
+                                                        <label className="borderLabel"><span class="required">* </span>aircraft type</label>
+                                                        <select
+                                                            name="aircraft"
+                                                            id="aircraft"
+                                                            className="inpSelect"
+                                                            value={aircraft}
+                                                            onChange={e => {
+                                                                console.log("e.target.value", e.target.value);
+                                                                setAircraft(e.target.value);
+                                                            }}
+                                                            style={{ borderRadius: 10, fontStyle: 'italic' }}>
+
+                                                            <option value="">B737</option>
+
+                                                        </select>
                                                     </div>
                                                     <div className="col-md-4">
                                                         <div className="input-group">
+                                                            <label className="borderLabel"><span class="required">* </span>role</label>
                                                             <select
                                                                 name="cars"
                                                                 id="cars"
-                                                                className="inp"
+                                                                className="inpSelect"
                                                                 value={role}
                                                                 onChange={e => {
                                                                     console.log("e.target.value", e.target.value);
                                                                     setRole(e.target.value);
                                                                 }}
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}>
-                                                                <option value="role-airlinefocal">Focal</option>
-                                                                <option value="role-airlinepilot">Pilot</option>
-                                                                <option value="role-airlinecheckairman">Check Airman</option>
-                                                                <option value="role-airlineefbadmin">FB Admin</option>
-                                                                <option value="role-airlinemaintenance">Maintenance</option>
+                                                                {
+
+                                                                    props.roles.map((role) => {
+                                                                        return (
+                                                                            <>
+                                                                                <option value={role}>{role}</option>
+
+                                                                            </>
+                                                                        );
+                                                                    })
+                                                                }
                                                             </select>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <br></br>
                                                 <div className="row">
-                                                    <div className="col-md-4">
+                                                    <div className="col-md-3">
                                                         <div className="input-group">
                                                             {/*<div className="input-group-prepend">
                                                                 <span className="input-group-text bg-primary text-white">First Name</span>
@@ -679,7 +710,7 @@ export const ListUsers = (props) => {
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }} />
                                                         </div>
                                                     </div>
-                                                    <div className="col-md-5">
+                                                    <div className="col-md-3">
                                                         <div className="input-group">
                                                             {/*<div className="input-group-prepend">
                                                                 <span className="input-group-text bg-primary text-white">eMail</span>
@@ -694,6 +725,22 @@ export const ListUsers = (props) => {
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }} />
 
                                                         </div>
+                                                    </div>
+                                                    <div className="col-md-3">
+                                                        <label className="borderLabel"><span class="required">* </span>flight mode</label>
+                                                        <select
+                                                            name="aircraft"
+                                                            id="aircraft"
+                                                            className="inpSelect"
+                                                            value={mode}
+                                                            onChange={e => {
+                                                                console.log("e.target.value", e.target.value);
+                                                                setMode(e.target.value);
+                                                            }}
+                                                            style={{ borderRadius: 10, fontStyle: 'italic' }}>
+
+                                                            <option value="">Lite</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <br></br>
@@ -808,15 +855,23 @@ export const ListUsers = (props) => {
                             </div>
 
                             <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 550, marginTop: -15 }}>
+                                <Button className="btn-primary-override" variant="primary" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="sm" onClick={e => {
+                                    refreshGrid()
+
+                                }}>
+                                    <i className="mdi mdi-refresh text-success"></i>Refresh
+                                </Button>
                                 {
                                     deleteDisabled
                                         ?
                                         <></>
                                         :
-                                        <Button variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e => {
+                                        <Button className="btn-primary-override" variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="sm" onClick={e => {
                                             handleShow();
                                             setCancelButtonEnabled(false);
-                                        }}><i className="mdi mdi-delete-forever"></i>{deleteLabel}</Button>
+                                        }}><i className="mdi mdi-delete-forever text-danger"></i>{deleteLabel}</Button>
+
+
 
                                 }
                                 {
@@ -824,9 +879,9 @@ export const ListUsers = (props) => {
                                         ?
                                         <></>
                                         :
-                                        <Button variant="primary" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold" }} size="sm" onClick={e => {
+                                        <Button className="btn-primary-override" variant="primary" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="sm" onClick={e => {
                                             onBtnExport();
-                                        }}><i className="mdi mdi-download"></i>Export</Button>
+                                        }}><i className="mdi mdi-file-export text-primary"></i>Export</Button>
                                 }
 
                                 <AgGridReact
@@ -857,11 +912,11 @@ export const ListUsers = (props) => {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
                                     <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
-                                        values: ['role-airlinepilot', 'role-airlinefocal', 'role-airlineefbadmin', 'role-airlinecheckairman', 'role-airlinemaintenance'],
+                                        values: props.roles,
                                     }}></AgGridColumn>
                                     <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="version" sortable={true} filter={true} editable={false} cellRenderer={VersionCellRenderer}
-                                        cellRendererParams={{tspLastModified: TSP}} headerName={"TSP Version"}></AgGridColumn>
+                                        cellRendererParams={{ tspLastModified: TSP }} headerName={"TSP Version"}></AgGridColumn>
                                     <AgGridColumn field="lastUpdated" sortable={true} filter={true} editable={false} headerName={"TSP Last Update"}></AgGridColumn>
                                     <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"} editable={false}></AgGridColumn>

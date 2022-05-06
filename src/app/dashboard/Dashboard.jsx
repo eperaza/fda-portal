@@ -377,7 +377,7 @@ export const Dashboard = (props) => {
           <div className="card">
             <div className="card-body" style={{ overflowY: 'scroll', height: 300, marginBottom: 20 }} >
               <div className="d-flex flex-row justify-content-between">
-                <h4 className="card-title mb-1">Units of Measurement:</h4>
+                <h4 className="card-title mb-1">Units of Measurement Default Settings:</h4>
                 <p className="text-muted mb-1">User preferences</p>
               </div >
               {
@@ -390,7 +390,7 @@ export const Dashboard = (props) => {
               }
               <br></br>
               <div className="d-flex flex-row justify-content-between">
-                <h4 className="card-title mb-1">Units of Measurement:</h4>
+                <h4 className="card-title mb-1">Flight Progress Table Default Setting:</h4>
                 <p className="text-muted mb-1">User preferences</p>
               </div >
               Turn on to automatically save values for each flight.
@@ -409,7 +409,7 @@ export const Dashboard = (props) => {
           <div className="card">
             <div className="card-body" style={{ overflowY: 'scroll', height: 450, marginBottom: 20 }} >
               <div className="d-flex flex-row justify-content-between">
-                <h4 className="card-title mb-1">Notification Triggers:</h4>
+                <h4 className="card-title mb-1">Notification Trigger Default Settings:</h4>
                 <p className="text-muted mb-1">User preferences</p>
               </div >
               {

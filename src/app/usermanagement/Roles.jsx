@@ -1,22 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ProgressBar } from 'react-bootstrap';
 import { ListUsers } from "../user-pages/ListUsers";
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
+import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
-import { callMsGraph, getGroupNames, getAllGroups, getAirlineRoles } from "../../graph";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import Alert from 'react-bootstrap/Alert';
-import Form from "react-bootstrap/Form";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import Container from 'react-bootstrap/Container'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-//import '../bootstrap.scss';
+import { callMsGraph, getGroupNames, getAllGroups } from "../../graph";
+import { ListRoles } from '../user-pages/ListRoles';
 
-
-export const UserGrid = () => {
+export const Roles = () => {
 
   const { instance, accounts, inProgress } = useMsal();
   const [graphData, setGraphData] = useState([]);
@@ -27,6 +16,7 @@ export const UserGrid = () => {
   const [role, setRole] = useState();
   const [dirRole, setDirRole] = useState();
   const [roles, setRoles] = useState([]);
+  const [airlineId, setAirlineId] = useState();
 
   let accessToken = null;
   React.useEffect(() => {
@@ -54,7 +44,6 @@ export const UserGrid = () => {
           });
           getAllGroups(response.accessToken).then(response => {
             let roles = [];
-            
             response.value.forEach(group => {
               if (group.displayName.startsWith("role") == true) {
                 roles.push(group.displayName);
@@ -62,7 +51,6 @@ export const UserGrid = () => {
             });
             setRoles(roles);
           });
-          getAirlineRoles(response.accessToken, "802db82f-8600-41d6-ac9e-08f82c80ca8b").then(response => console.log(response))
 
           setToken(response.accessToken);
           setObjectId(response.uniqueId);
@@ -75,23 +63,21 @@ export const UserGrid = () => {
 
   }, [inProgress, accounts, instance, token]);
 
-  
-
   return (
     <div>
       <div className="page-header">
-        <h3 className="page-title">Users</h3>
+        <h3 className="page-title">Roles</h3>
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
             <li className="breadcrumb-item"><a onClick={event => event.preventDefault()}>User Management</a></li>
-            <li className="breadcrumb-item active" aria-current="page">Users</li>
+            <li className="breadcrumb-item active" aria-current="page">Roles</li>
           </ol>
         </nav>
       </div>
       {
         groupId
           ?
-          <ListUsers groupId={groupId} token={token} airline={airline} role={role} dirRole={dirRole} graphData={graphData} objectId={objectId} roles={roles} />
+          <ListRoles groupId={groupId} token={token} airline={airline} airlineId={airlineId} role={role} dirRole={dirRole} graphData={graphData} objectId={objectId} roles={roles} />
           :
           <div></div>
       }

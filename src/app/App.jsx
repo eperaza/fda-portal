@@ -8,7 +8,7 @@ import { withTranslation } from "react-i18next";
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
 import { BrowserRouter as Router, Route, Link, useParams } from 'react-router-dom';
 import { loginRequest } from "../authConfig";
-import { callMsGraph, getDirectoryRoles, getGroupNames } from "../graph";
+import { callMsGraph, getGroupNames } from "../graph";
 import { Login } from './user-pages/Login';
 import { Switch, Redirect } from 'react-router-dom';
 import { useIsAuthenticated } from "@azure/msal-react";
@@ -20,6 +20,7 @@ import { FDR } from "./fdrfiles/FDR";
 import { Error404 } from "./error-pages/Error404";
 import { Error401 } from "./error-pages/Error401";
 import { Preferences } from './usermanagement/Preferences';
+import { Groups, Roles } from './usermanagement/Roles';
 
 const App = () => {
 
@@ -71,9 +72,9 @@ const App = () => {
   }, [inProgress, accounts, instance, token]);
 
   const handleLogin = () => {
-      instance.loginRedirect(loginRequest).catch(e => {
-        console.log(e);
-      });
+    instance.loginRedirect(loginRequest).catch(e => {
+      console.log(e);
+    });
   }
 
   return (
@@ -228,6 +229,26 @@ const App = () => {
                         );
                       }}
                       />
+                      <Route path="/usermanagement/Roles" exact component={() => {
+                        return (
+                          <div>
+                            <div className="container-scroller">
+                              {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} />}
+                              <div className="container-fluid page-body-wrapper">
+                                {<Navbar account={accounts[0].name} />}
+                                <div className="main-panel">
+                                  <div className="content-wrapper">
+                                    <Roles />
+                                  </div>
+                                  {<Footer />
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }}
+                      />
                       <Route path="/fdrfiles/FDR" exact component={() => {
                         return (
                           <div>
@@ -261,7 +282,7 @@ const App = () => {
                     </Switch>
                     :
                     <Switch>
-                      
+
                       <Route path="/" exact component={() => {
                         return (
                           <div>
@@ -276,7 +297,7 @@ const App = () => {
               </>
               :
               <>
-               
+
               </>
           }
 
@@ -288,7 +309,7 @@ const App = () => {
           <Route path="/" exact render={() => {
             return (
               <div>
-                <br></br>                        
+                <br></br>
                 <br></br>
                 <br></br>
                 <Login></Login>

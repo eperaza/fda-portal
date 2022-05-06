@@ -36,7 +36,7 @@ export const Preferences = (props) => {
                                 true
                                 :
                                 false
-                        } size="xs" width="100" onlabel="kg" offlabel="lb" onstyle="primary" offstyle="dark"
+                        } size="xs" width="100" onlabel="kg" offlabel="lb" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "kg");
@@ -60,7 +60,7 @@ export const Preferences = (props) => {
                                 true
                                 :
                                 false
-                        } size="xs" width="100" onlabel="knots" offlabel="mach" onstyle="primary" offstyle="dark"
+                        } size="xs" width="100" onlabel="knots" offlabel="mach" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "knots");
@@ -84,7 +84,7 @@ export const Preferences = (props) => {
                                 true
                                 :
                                 false
-                        } size="xs" width="100" onlabel="nm100kg" offlabel="nm100lb" onstyle="primary" offstyle="dark"
+                        } size="xs" width="100" onlabel="nm100kg" offlabel="nm100lb" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "nm100kg");
@@ -108,7 +108,7 @@ export const Preferences = (props) => {
                                 true
                                 :
                                 false
-                        } size="xs" width="100" onlabel="meterX100" offlabel="feetX100" onstyle="primary" offstyle="dark"
+                        } size="xs" width="100" onlabel="meterX100" offlabel="feetX100" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "meterX100");
@@ -126,7 +126,7 @@ export const Preferences = (props) => {
         return (
             <>
                 {
-                    data.value != "true" && data.value != "false"
+                    data.value != "true" && data.value != "false" && data.value != 0 && data.value != 1
                         ?
                         <div className="row">
                             <div className="col-12">

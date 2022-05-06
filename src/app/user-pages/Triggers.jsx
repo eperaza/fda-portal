@@ -29,7 +29,7 @@ export const Triggers = (props) => {
         return (
             <>
                 {
-                    (data.value == "true" || data.value == "false") && data.userKey != "saveFlightProgressTablesValues"
+                    (data.value == "true" || data.value == "false" || data.value == 0 || data.value == 1) && data.userKey != "saveFlightProgressTablesValues"
                         ?
                         <div className="row">
                             <div className="col-12">

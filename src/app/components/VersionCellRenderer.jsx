@@ -18,7 +18,7 @@ export const VersionCellRenderer = (props) => {
             return x;
         }
         else {
-            let x = (<div> {props.data.version} <i className='mdi mdi-check text-success'></i></div>)
+            let x = (<div> {props.data.version} <i className='mdi mdi-new-box text-success'></i></div>)
             return x;
         }
 

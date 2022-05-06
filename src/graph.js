@@ -111,3 +111,82 @@ export async function getDirectoryRoles(accessToken) {
     .catch(error => console.log(error));
         
 }
+
+async function createGroup(accessToken, groupName) {
+    const headers = new Headers();
+    const bearer = `Bearer ${accessToken}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-type", "application/json");
+
+
+    var body = JSON.stringify({
+        "displayName": `${groupName}`,
+        "mailEnabled": false,
+        "mailNickname": `${groupName}`,
+        "securityEnabled": true,        
+    });
+    
+    const options = {
+        method: "POST",
+        headers: headers,
+        body: body
+    };
+
+    let res = await fetch(`https://graph.microsoft.com/v1.0/groups`, options);
+    let status = res.status;
+    let data = await res.json();
+    if (status == 201) {
+        return data.id;
+    }
+     
+}
+
+export async function createRole(accessToken, airlineId, displayName) {
+    let groupId = await createGroup(accessToken, displayName);
+    const headers = new Headers();
+    const bearer = `Bearer ${accessToken}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-type", "application/json");
+
+
+    var body = JSON.stringify({
+        "@odata.id": `https://graph.microsoft.com/v1.0/directoryObjects/${groupId}`               
+    });
+    
+    const options = {
+        method: "POST",
+        headers: headers,
+        body: body
+    };
+
+    return fetch(`https://graph.microsoft.com/v1.0/groups/${airlineId}/members/$ref`, options)
+    .then(response => response.status)
+    .catch(error => console.log(error));
+    
+}
+
+export async function getAirlineRoles(accessToken, airlineId) {
+    const headers = new Headers();
+    const bearer = `Bearer ${accessToken}`;
+
+    headers.append("Authorization", bearer);
+    headers.append("Content-type", "application/json");
+    headers.append("ConsistencyLevel", "eventual");
+
+
+    var body = JSON.stringify({
+        "securityEnabledOnly": true               
+    });
+
+    const options = {
+        method: "GET",
+        headers: headers,
+    };
+
+    return fetch(`https://graph.microsoft.com/v1.0/groups/${airlineId}/transitiveMembers?$select=displayName,description,createdDateTime,renewedDateTime&$search="displayName:role-"`, options)
+    .then(response => response.json())
+    .catch(error => console.log(error));
+    
+}

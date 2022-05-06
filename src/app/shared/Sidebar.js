@@ -133,6 +133,7 @@ class Sidebar extends Component {
                   <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/UserGrid') ? 'nav-link active' : 'nav-link' } to="/usermanagement/UserGrid"><Trans>Users</Trans></Link></li>
                   <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/BulkLoad') ? 'nav-link active' : 'nav-link' } to="/usermanagement/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
                   <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/Preferences') ? 'nav-link active' : 'nav-link' } to="/usermanagement/Preferences"><Trans>Preferences</Trans></Link></li>
+                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/Roles') ? 'nav-link active' : 'nav-link' } to="/usermanagement/Roles"><Trans>Roles</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>
