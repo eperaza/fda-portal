@@ -21,7 +21,7 @@ export const Tails = (props) => {
                             <div className="preview-item-content d-sm-flex flex-grow">
                                 <div className="flex-grow">
                                     <h6 className="preview-subject">
-                                        <i className="mdi mdi-airplane icon-item text-primary"> </i>
+                                        <i className="mdi mdi-airplane mdi-18px icon-item text-primary"> </i>
 
                                         {
                                             data.Key.toUpperCase()

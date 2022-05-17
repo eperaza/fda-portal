@@ -34,6 +34,7 @@ export const ListRoles = (props) => {
     const [deleteLoader, setDeleteLoader] = useState("Delete");
     const [cancelButtonEnabled, setCancelButtonEnabled] = useState(false);
     const [isError, setIsError] = useState(false);
+    const [deleteDisabled, setDeleteDisabled] = useState(true);
 
 
     const [roleName, setRoleName] = useState(),
@@ -68,6 +69,7 @@ export const ListRoles = (props) => {
         });
 
     }
+
     const getAllRoles = async () => {
         let roles = [];
         let names = [];
@@ -146,6 +148,33 @@ export const ListRoles = (props) => {
 
     };
 
+    const handleShow = e => {
+/*
+        let users = [];
+        var x = "<br></br>";
+        const selectedNodes = gridRef.current.api.getSelectedNodes();
+        const selectedData = selectedNodes.map(node => node.data);
+        const deleteUsers = selectedData.map(node => {
+            users.push(node);
+        });
+        setLoader2(": Warning");
+        setTitleWarning(" <i class='mdi mdi-alert-octagon text-danger'></i>");
+        setDisableDeleteButton(false);
+        setStatusText();
+        if (deleteUsers.length != 0) {
+            setShow(true);
+            users.forEach(user => {
+                x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.mailNickname + '] ' + user.surname + ', ' + user.givenName + '</br>'
+
+            });
+            setDeleteUsersLabel(`You are about to delete: ${x}`);
+        }
+        else {
+            alert("No users selected!")
+        }
+*/
+    };
+
     const handleShowDelete = e => {
         setLoader2(": Warning");
         setTitleWarning(" <i class='mdi mdi-alert-octagon text-danger'></i>");
@@ -180,6 +209,17 @@ export const ListRoles = (props) => {
     const refreshGrid = useCallback(() => {
         gridRef.current.api.showLoadingOverlay();
         getRoles();
+    }, []);
+
+    const onRowSelected = useCallback((event) => {
+        let count = gridRef.current.api.getSelectedNodes().length;
+        if (count == 0) {
+            setDeleteDisabled(true);
+
+        }
+        else {
+            setDeleteDisabled(false);
+        }
     }, []);
 
     return (
@@ -305,21 +345,34 @@ export const ListRoles = (props) => {
                             }}>
                                 <i className="mdi mdi-refresh text-success mdi-18px"></i>Refresh
                             </Button>
+                            {
+                                    deleteDisabled
+                                        ?
+                                        <></>
+                                        :
+                                        <Button className="btn-primary-override" variant="danger" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="md" onClick={e => {
+                                            handleShow();
+                                            setCancelButtonEnabled(false);
+                                        }}><i className="mdi mdi-delete-forever text-danger mdi-18px"></i>Delete</Button>
+
+
+
+                                }
 
                             <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 530 }}>
                                 <AgGridReact
                                     ref={gridRef}
                                     rowData={rowData}
-                                    rowSelection="multiple"
+                                    rowSelection="single"
                                     defaultColDef={{ resizable: true, editable: true, cellEditorPopup: false }}
                                     animateRows={true}
                                     onGridReady={onGridReady}
                                     //gridOptions={gridOptions}
                                     //onFirstDataRendered={autoSizeColumns}
-                                    //onRowSelected={onRowSelected}
+                                    onRowSelected={onRowSelected}
                                     stopEditingWhenCellsLoseFocus={true}
                                     enableCellTextSelection={false}>
-                                    <AgGridColumn field="displayName" checkboxSelection={true} headerCheckboxSelection={true} sortable={true} filter={true} editable={false} hide={false}></AgGridColumn>
+                                    <AgGridColumn field="displayName" checkboxSelection={true} headerCheckboxSelection={false} sortable={true} filter={true} editable={false} hide={false}></AgGridColumn>
                                     <AgGridColumn field="description" sortable={true} filter={true} editable={false} hide={false}></AgGridColumn>
                                     <AgGridColumn field="createdDateTime" sortable={true} filter={true} editable={false} hide={false}></AgGridColumn>
                                     <AgGridColumn field="renewedDateTime" sortable={true} filter={true} editable={false} hide={false}></AgGridColumn>

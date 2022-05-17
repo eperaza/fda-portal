@@ -340,7 +340,20 @@ export const Dashboard = (props) => {
                       </div>
                       <div className="preview-item-content d-sm-flex flex-grow">
                         <div className="flex-grow">
-                          <h6 className="preview-subject">airline-focal</h6>
+                          <h6 className="preview-subject">
+                            {
+
+                              props.role == "airlinesuperadmin"
+                                ?
+                                <>
+                                  {props.role}<i className='mdi mdi-shield-star icon-item mdi-18px text-info'></i>
+                                </>
+                                :
+                                <>
+                                  {props.role}
+                                </>
+                            }
+                          </h6>
                           <p className="text-muted mb-0">Role</p>
                         </div>
 
@@ -373,63 +386,67 @@ export const Dashboard = (props) => {
             </div>
           </div>
         </div>
-        <div className="col-md-6 grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body" style={{ overflowY: 'scroll', height: 300, marginBottom: 20 }} >
-              <div className="d-flex flex-row justify-content-between">
-                <h4 className="card-title mb-1">Units of Measurement Default Settings:</h4>
-                <p className="text-muted mb-1">User preferences</p>
-              </div >
-              {
-                props.groupId
-                  ?
+        {
+          props.role == "airlinesuperadmin"
+            ?
+            <>
+              <div className="col-md-6 grid-margin stretch-card">
+                <div className="card">
+                  <div className="card-body" style={{ overflowY: 'scroll', height: 300, marginBottom: 20 }} >
+                    <div className="d-flex flex-row justify-content-between">
+                      <h4 className="card-title mb-1">Units of Measurement Default Settings:</h4>
+                      <p className="text-muted mb-1">User preferences</p>
+                    </div >
+                    {
+                      props.groupId
+                        ?
 
-                  <ListPreferences token={props.token} airline={props.airline} />
-                  :
-                  <div></div>
-              }
-              <br></br>
-              <div className="d-flex flex-row justify-content-between">
-                <h4 className="card-title mb-1">Flight Progress Table Default Setting:</h4>
-                <p className="text-muted mb-1">User preferences</p>
-              </div >
-              Turn on to automatically save values for each flight.
-              {
-                props.groupId
-                  ?
+                        <ListPreferences token={props.token} airline={props.airline} />
+                        :
+                        <div></div>
+                    }
+                    <br></br>
+                    <div className="d-flex flex-row justify-content-between">
+                      <h4 className="card-title mb-1">Flight Progress Table Default Setting:</h4>
+                      <p className="text-muted mb-1">User preferences</p>
+                    </div >
+                    Turn on to automatically save values for each flight.
+                    {
+                      props.groupId
+                        ?
 
-                  <ListFlightProgress token={props.token} airline={props.airline} />
-                  :
-                  <div></div>
-              }
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body" style={{ overflowY: 'scroll', height: 450, marginBottom: 20 }} >
-              <div className="d-flex flex-row justify-content-between">
-                <h4 className="card-title mb-1">Notification Trigger Default Settings:</h4>
-                <p className="text-muted mb-1">User preferences</p>
-              </div >
-              {
+                        <ListFlightProgress token={props.token} airline={props.airline} />
+                        :
+                        <div></div>
+                    }
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-6 grid-margin stretch-card">
+                <div className="card">
+                  <div className="card-body" style={{ overflowY: 'scroll', height: 450, marginBottom: 20 }} >
+                    <div className="d-flex flex-row justify-content-between">
+                      <h4 className="card-title mb-1">Notification Trigger Default Settings:</h4>
+                      <p className="text-muted mb-1">User preferences</p>
+                    </div >
+                    {
 
-                props.groupId
-                  ?
+                      props.groupId
+                        ?
 
-                  <ListTriggers token={props.token} airline={props.airline} />
-                  :
-                  <div></div>
-              }
+                        <ListTriggers token={props.token} airline={props.airline} />
+                        :
+                        <div></div>
+                    }
 
-            </div>
-          </div>
-        </div>
+                  </div>
+                </div>
+              </div>
+            </>
+            :
+            <></>
+        }
       </div>
-
-
-
-
     </div>
   );
 

@@ -29,13 +29,14 @@ export const UserGrid = () => {
   const [roles, setRoles] = useState([]);
 
   let accessToken = null;
+
   React.useEffect(() => {
     if (inProgress === "none" && accounts.length > 0) {
       // Retrieve an access token
       accessToken = instance.acquireTokenSilent({
         account: accounts[0],
         ...loginRequest
-      }).then(response => {
+      }).then(async response => {
         if (response.accessToken) {
           callMsGraph(response.accessToken).then(response => setGraphData(response));
           getGroupNames(response.accessToken).then(response => {
@@ -50,19 +51,9 @@ export const UserGrid = () => {
               if (group.displayName.includes("User Administrator") == true) {
                 setDirRole(group.displayName);
               }
+
             });
           });
-          getAllGroups(response.accessToken).then(response => {
-            let roles = [];
-            
-            response.value.forEach(group => {
-              if (group.displayName.startsWith("role") == true) {
-                roles.push(group.displayName);
-              }
-            });
-            setRoles(roles);
-          });
-          getAirlineRoles(response.accessToken, "802db82f-8600-41d6-ac9e-08f82c80ca8b").then(response => console.log(response))
 
           setToken(response.accessToken);
           setObjectId(response.uniqueId);
@@ -74,8 +65,6 @@ export const UserGrid = () => {
     }
 
   }, [inProgress, accounts, instance, token]);
-
-  
 
   return (
     <div>
@@ -91,7 +80,7 @@ export const UserGrid = () => {
       {
         groupId
           ?
-          <ListUsers groupId={groupId} token={token} airline={airline} role={role} dirRole={dirRole} graphData={graphData} objectId={objectId} roles={roles} />
+          <ListUsers groupId={groupId} token={token} airline={airline} role={role} dirRole={dirRole} graphData={graphData} objectId={objectId} />
           :
           <div></div>
       }

@@ -4,14 +4,11 @@ import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Alert from 'react-bootstrap/Alert';
-import Form from "react-bootstrap/Form";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
 import Spinner from 'react-bootstrap/Spinner';
 import { Accordion, Card } from "react-bootstrap";
 import { ProgressBar } from 'react-bootstrap';
 import { SwitchToggle } from "../usermanagement/SwitchToggle";
-import { deleteFromGroup, getAllGroups, addToGroup } from "../../graph";
+import { deleteFromGroup, getAllGroups, addToGroup, getAirlineRoles } from "../../graph";
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
 import { AccountEnabledCellRenderer } from "../components/AccountEnabledCellRenderer.jsx";
@@ -50,8 +47,10 @@ export const ListUsers = (props) => {
     const [TSP, setTSP] = useState();
     const abort = useRef(0);
     const [isError, setIsError] = useState(false);
+    const [roles, setRoles] = useState([]);
 
     useEffect(() => {
+        getRoles();
         getUsersAF();
         getTSPAF();
     }, []);
@@ -62,10 +61,27 @@ export const ListUsers = (props) => {
         setShowAdd(false)
     }
 
-    const gridOptions = {
-        // PROPERTIES
-        // Objects like myRowData and myColDefs would be created in your application
+    const getRoles = () => {
+        let airlineId = null;
+        getAllGroups(props.token).then(response => {
+            response.value.forEach(group => {
+                //get airline group id
+                if (group.displayName.startsWith(`airline-${props.airline}`) == true) {
+                    airlineId = group.id;
+                }
+            });
+            let roles = [];
+            getAirlineRoles(props.token, airlineId).then(response => {
+                response.value.forEach(role => {
+                    roles.push(role.displayName);
+                });
+                console.log(roles)
+                setRoles(roles)
+            });
+        });
+    }
 
+    const gridOptions = {
         pagination: true,
         onCellEditingStopped: async function (event) {
             console.log("ask the server to update changed data in back end", event);
@@ -577,8 +593,8 @@ export const ListUsers = (props) => {
     const getTSPAF = async () => {
 
         const airline = props.airline.replace("airline-", "");
-        const code = "6A/snQUVOX4rtKd1HOZf54PtHLppaQWsptKRCEXjRr10SE8ktl4zYQ==";
-        fetch(`https://fdalitewebfunctiontest.azurewebsites.net/api/getTSP?code=${code}&airline=${airline}`)
+        const code = process.env.REACT_APP_FUNCTION_TSP_GET_CODE;
+        fetch(`${process.env.REACT_APP_FUNCTION_TSP_GET_URI}?code=${code}&airline=${airline}`)
             .then(response => response.text())
             .then(data => {
                 if (data != "") {
@@ -633,6 +649,7 @@ export const ListUsers = (props) => {
                                                         </div>
                                                     </div>
                                                     <div className="col-md-3">
+                                                        {/*
                                                         <label className="borderLabel"><span class="required">* </span>aircraft type</label>
                                                         <select
                                                             name="aircraft"
@@ -648,6 +665,7 @@ export const ListUsers = (props) => {
                                                             <option value="">B737</option>
 
                                                         </select>
+                                                        */}
                                                     </div>
                                                     <div className="col-md-4">
                                                         <div className="input-group">
@@ -663,8 +681,8 @@ export const ListUsers = (props) => {
                                                                 }}
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}>
                                                                 {
-
-                                                                    props.roles.map((role) => {
+                                                                    
+                                                                    roles.map((role) => {
                                                                         return (
                                                                             <>
                                                                                 <option value={role}>{role}</option>
@@ -893,6 +911,8 @@ export const ListUsers = (props) => {
                                     onFilterChanged={onFilterChanged}
                                     selectionChanged={e => console.log(e)}
                                     stopEditingWhenCellsLoseFocus={true}
+                                    multiSortKey={'ctrl'}
+
                                     //noRowsOverlayComponent={noRowsOverlayComponent}
                                     suppressExcelExport={true}
 
@@ -906,7 +926,7 @@ export const ListUsers = (props) => {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
                                     <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
-                                        values: props.roles,
+                                        values: roles,
                                     }}></AgGridColumn>
                                     <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="version" sortable={true} filter={true} editable={false} cellRenderer={VersionCellRenderer}

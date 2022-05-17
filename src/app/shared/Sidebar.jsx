@@ -10,14 +10,14 @@ class Sidebar extends Component {
 
   toggleMenuState(menuState) {
     if (this.state[menuState]) {
-      this.setState({[menuState] : false});
-    } else if(Object.keys(this.state).length === 0) {
-      this.setState({[menuState] : true});
+      this.setState({ [menuState]: false });
+    } else if (Object.keys(this.state).length === 0) {
+      this.setState({ [menuState]: true });
     } else {
       Object.keys(this.state).forEach(i => {
-        this.setState({[i]: false});
+        this.setState({ [i]: false });
       });
-      this.setState({[menuState] : true}); 
+      this.setState({ [menuState]: true });
     }
   }
 
@@ -30,40 +30,40 @@ class Sidebar extends Component {
   onRouteChanged() {
     document.querySelector('#sidebar').classList.remove('active');
     Object.keys(this.state).forEach(i => {
-      this.setState({[i]: false});
+      this.setState({ [i]: false });
     });
 
     const dropdownPaths = [
-      {path:'/usermanagement', state: 'userManagementOpen'},
-      {path:'/fdrfiles', state: 'fdrFilesOpen'}
+      { path: '/usermanagement', state: 'userManagementOpen' },
+      { path: '/fdrfiles', state: 'fdrFilesOpen' }
     ];
 
     dropdownPaths.forEach((obj => {
       if (this.isPathActive(obj.path)) {
-        this.setState({[obj.state] : true})
+        this.setState({ [obj.state]: true })
       }
     }));
- 
+
   }
 
-  render () {
+  render() {
     return (
       <nav className="sidebar sidebar-offcanvas" id="sidebar">
         <div className="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-          <a className="sidebar-brand brand-logo" href="index.html">   <img height="45px" width="200px" src={require('../../assets/images/logo.png')}/></a>
+          <a className="sidebar-brand brand-logo" href="index.html">   <img height="45px" width="200px" src={require('../../assets/images/logo.png')} /></a>
           <a className="sidebar-brand brand-logo-mini" href="index.html"><img src='https://nextek.com/wp-content/uploads/2014/10/boeing-logo.png' alt="logo" /></a>
-                
+
         </div>
         <ul className="nav">
-        <li className="nav-item profile">
+          <li className="nav-item profile">
             <div className="profile-desc">
               <div className="profile-pic">
                 <div className="">
                   <span className="count bg-success"></span>
                 </div>
                 <div className="profile-name">
-                  <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>                
-                    <span className='text-warning'><Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>                  
+                  <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>
+                  <span className='text-warning'><Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>
                 </div>
               </div>
               {/*
@@ -112,44 +112,52 @@ class Sidebar extends Component {
           <li className="nav-item nav-category">
             <span className="nav-link"><Trans>Navigation</Trans></span>
           </li>
-          <li className={ this.isPathActive('/dashboard/Dashboard') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
+          <li className={this.isPathActive('/dashboard/Dashboard') ? 'nav-item menu-items active' : 'nav-item menu-items'}>
             <Link className="nav-link" to="/dashboard/Dashboard">
               <span className="menu-icon"><i className="mdi mdi-speedometer text-primary"></i></span>
               <span className="menu-title"><Trans>Dashboard</Trans></span>
             </Link>
           </li>
-          
-          <li className={ this.isPathActive('/usermanagement') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <div className={ this.state.userManagementOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('userManagementOpen') } data-toggle="collapse">
+
+          <li className={this.isPathActive('/usermanagement') ? 'nav-item menu-items active' : 'nav-item menu-items'}>
+            <div className={this.state.userManagementOpen ? 'nav-link menu-expanded' : 'nav-link'} onClick={() => this.toggleMenuState('userManagementOpen')} data-toggle="collapse">
               <span className="menu-icon">
                 <i className="mdi mdi-account-multiple text-warning"></i>
               </span>
               <span className="menu-title"><Trans>User Management</Trans></span>
               <i className="menu-arrow"></i>
             </div>
-            <Collapse in={ this.state.userManagementOpen }>
+            <Collapse in={this.state.userManagementOpen}>
               <div>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/UserGrid') ? 'nav-link active' : 'nav-link' } to="/usermanagement/UserGrid"><Trans>Users</Trans></Link></li>
-                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/BulkLoad') ? 'nav-link active' : 'nav-link' } to="/usermanagement/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
-                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/Preferences') ? 'nav-link active' : 'nav-link' } to="/usermanagement/Preferences"><Trans>Preferences</Trans></Link></li>
-                  <li className="nav-item"> <Link className={ this.isPathActive('/usermanagement/Roles') ? 'nav-link active' : 'nav-link' } to="/usermanagement/Roles"><Trans>Roles</Trans></Link></li>
+                  <li className="nav-item"> <Link className={this.isPathActive('/usermanagement/UserGrid') ? 'nav-link active' : 'nav-link'} to="/usermanagement/UserGrid"><Trans>Users</Trans></Link></li>
+                  <li className="nav-item"> <Link className={this.isPathActive('/usermanagement/BulkLoad') ? 'nav-link active' : 'nav-link'} to="/usermanagement/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
+                  {
+                    this.props.role == "airlinesuperadmin"
+                      ?
+                      <>
+                        <li className="nav-item"> <Link className={this.isPathActive('/usermanagement/Preferences') ? 'nav-link active' : 'nav-link'} to="/usermanagement/Preferences"><Trans>Preferences</Trans></Link></li>
+                        <li className="nav-item"> <Link className={this.isPathActive('/usermanagement/Roles') ? 'nav-link active' : 'nav-link'} to="/usermanagement/Roles"><Trans>Roles</Trans></Link></li>
+                      </>
+                      :
+                      <></>
+                  }
                 </ul>
               </div>
             </Collapse>
           </li>
-          <li className={ this.isPathActive('/fdrfiles/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items' }>
-            <div className={ this.state.fdrFilesOpen ? 'nav-link menu-expanded' : 'nav-link' } onClick={ () => this.toggleMenuState('fdrFilesOpen') } data-toggle="collapse">
+          <li className={this.isPathActive('/fdrfiles/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items'}>
+            <div className={this.state.fdrFilesOpen ? 'nav-link menu-expanded' : 'nav-link'} onClick={() => this.toggleMenuState('fdrFilesOpen')} data-toggle="collapse">
               <span className="menu-icon">
                 <i className="mdi mdi-file-tree text-danger"></i>
               </span>
               <span className="menu-title"><Trans>FDR Files</Trans></span>
               <i className="menu-arrow"></i>
             </div>
-            <Collapse in={ this.state.fdrFilesOpen }>
+            <Collapse in={this.state.fdrFilesOpen}>
               <div>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"> <Link className={ this.isPathActive('/fdrfiles/FDR') ? 'nav-link active' : 'nav-link' } to="/fdrfiles/FDR"><Trans>Download</Trans></Link></li>
+                  <li className="nav-item"> <Link className={this.isPathActive('/fdrfiles/FDR') ? 'nav-link active' : 'nav-link'} to="/fdrfiles/FDR"><Trans>Download</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>
@@ -168,14 +176,14 @@ class Sidebar extends Component {
     // add class 'hover-open' to sidebar navitem while hover in sidebar-icon-only menu
     const body = document.querySelector('body');
     document.querySelectorAll('.sidebar .nav-item').forEach((el) => {
-      
-      el.addEventListener('mouseover', function() {
-        if(body.classList.contains('sidebar-icon-only')) {
+
+      el.addEventListener('mouseover', function () {
+        if (body.classList.contains('sidebar-icon-only')) {
           el.classList.add('hover-open');
         }
       });
-      el.addEventListener('mouseout', function() {
-        if(body.classList.contains('sidebar-icon-only')) {
+      el.addEventListener('mouseout', function () {
+        if (body.classList.contains('sidebar-icon-only')) {
           el.classList.remove('hover-open');
         }
       });
