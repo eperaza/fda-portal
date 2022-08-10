@@ -35,7 +35,10 @@ class Sidebar extends Component {
 
     const dropdownPaths = [
       { path: '/usermanagement', state: 'userManagementOpen' },
-      { path: '/fdrfiles', state: 'fdrFilesOpen' }
+      { path: '/flightdatarecords', state: 'fdrFilesOpen' },
+      { path: '/airlinemanagement', state: 'airlineManagementOpen' },
+      { path: '/fdalite', state: 'optimalCIOpen' }
+
     ];
 
     dropdownPaths.forEach((obj => {
@@ -50,8 +53,8 @@ class Sidebar extends Component {
     return (
       <nav className="sidebar sidebar-offcanvas" id="sidebar">
         <div className="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-          <a className="sidebar-brand brand-logo" href="index.html">   <img height="45px" width="200px" src={require('../../assets/images/logo.png')} /></a>
-          <a className="sidebar-brand brand-logo-mini" href="index.html"><img src='https://nextek.com/wp-content/uploads/2014/10/boeing-logo.png' alt="logo" /></a>
+          <a className="sidebar-brand brand-logo" href="">   <img height="45px" width="200px" src={require('../../assets/images/logo.png')} /></a>
+          <a className="sidebar-brand brand-logo-mini" href=""><img src='https://nextek.com/wp-content/uploads/2014/10/boeing-logo.png' alt="logo" /></a>
 
         </div>
         <ul className="nav">
@@ -133,7 +136,7 @@ class Sidebar extends Component {
                   <li className="nav-item"> <Link className={this.isPathActive('/usermanagement/UserGrid') ? 'nav-link active' : 'nav-link'} to="/usermanagement/UserGrid"><Trans>Users</Trans></Link></li>
                   <li className="nav-item"> <Link className={this.isPathActive('/usermanagement/BulkLoad') ? 'nav-link active' : 'nav-link'} to="/usermanagement/BulkLoad"><Trans>Bulk Load</Trans></Link></li>
                   {
-                    this.props.role == "airlinesuperadmin"
+                    this.props.role == "superadmin"
                       ?
                       <>
                         <li className="nav-item"> <Link className={this.isPathActive('/usermanagement/Preferences') ? 'nav-link active' : 'nav-link'} to="/usermanagement/Preferences"><Trans>Preferences</Trans></Link></li>
@@ -146,7 +149,7 @@ class Sidebar extends Component {
               </div>
             </Collapse>
           </li>
-          <li className={this.isPathActive('/fdrfiles/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items'}>
+          <li className={this.isPathActive('/flightdatarecords/FDR') ? 'nav-item menu-items active' : 'nav-item menu-items'}>
             <div className={this.state.fdrFilesOpen ? 'nav-link menu-expanded' : 'nav-link'} onClick={() => this.toggleMenuState('fdrFilesOpen')} data-toggle="collapse">
               <span className="menu-icon">
                 <i className="mdi mdi-file-tree text-danger"></i>
@@ -157,11 +160,55 @@ class Sidebar extends Component {
             <Collapse in={this.state.fdrFilesOpen}>
               <div>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"> <Link className={this.isPathActive('/fdrfiles/FDR') ? 'nav-link active' : 'nav-link'} to="/fdrfiles/FDR"><Trans>Download</Trans></Link></li>
+                  <li className="nav-item"> <Link className={this.isPathActive('/flightdatarecords/FDR') ? 'nav-link active' : 'nav-link'} to="/flightdatarecords/FDR"><Trans>Download</Trans></Link></li>
                 </ul>
               </div>
             </Collapse>
           </li>
+          {
+            this.props.membership == "airline-fda"
+              ?
+              <li className={this.isPathActive('/airlinemanagement/Airlines') ? 'nav-item menu-items active' : 'nav-item menu-items'}>
+                <div className={this.state.airlineManagementOpen ? 'nav-link menu-expanded' : 'nav-link'} onClick={() => this.toggleMenuState('airlineManagementOpen')} data-toggle="collapse">
+                  <span className="menu-icon">
+                    <i className="mdi mdi-airplane-plus text-success"></i>
+                  </span>
+                  <span className="menu-title"><Trans>Airline Management</Trans></span>
+                  <i className="menu-arrow"></i>
+                </div>
+                <Collapse in={this.state.airlineManagementOpen}>
+                  <div>
+                    <ul className="nav flex-column sub-menu">
+                      <li className="nav-item"> <Link className={this.isPathActive('/airlinemanagement/Airlines') ? 'nav-link active' : 'nav-link'} to="/airlinemanagement/Airlines"><Trans>Create Airline</Trans></Link></li>
+                    </ul>
+                  </div>
+                </Collapse>
+              </li>
+              :
+              <></>
+          }
+          {
+            this.props.role == "superadmin"
+              ?
+              <li className={this.isPathActive('/fdalite/OptimalCI') ? 'nav-item menu-items active' : 'nav-item menu-items'}>
+                <div className={this.state.optimalCIOpen ? 'nav-link menu-expanded' : 'nav-link'} onClick={() => this.toggleMenuState('optimalCIOpen')} data-toggle="collapse">
+                  <span className="menu-icon">
+                    <i className="mdi mdi-airplane-takeoff text-info"></i>
+                  </span>
+                  <span className="menu-title"><Trans>FDA Lite</Trans></span>
+                  <i className="menu-arrow"></i>
+                </div>
+                <Collapse in={this.state.optimalCIOpen}>
+                  <div>
+                    <ul className="nav flex-column sub-menu">
+                      <li className="nav-item"> <Link className={this.isPathActive('/fdalite/OptimalCI') ? 'nav-link active' : 'nav-link'} to="/fdalite/OptimalCI"><Trans>Optimal CI</Trans></Link></li>
+                    </ul>
+                  </div>
+                </Collapse>
+              </li>
+              :
+              <></>
+          }
         </ul>
       </nav>
     );

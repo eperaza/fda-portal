@@ -1,0 +1,6 @@
+projectKey=FDA-portal
+serverUrl=http://localhost:9000
+serverVersion=9.1.0.47736
+dashboardUrl=http://localhost:9000/dashboard?id=FDA-portal
+ceTaskId=AYFJgbESvauk-B6U6od6
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AYFJgbESvauk-B6U6od6

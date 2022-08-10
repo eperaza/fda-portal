@@ -112,7 +112,7 @@ export async function getDirectoryRoles(accessToken) {
         
 }
 
-async function createGroup(accessToken, groupName, description) {
+export async function createGroup(accessToken, groupName, description) {
     const headers = new Headers();
     const bearer = `Bearer ${accessToken}`;
 
@@ -139,7 +139,7 @@ async function createGroup(accessToken, groupName, description) {
     let status = res.status;
     let data = await res.json();
     if (status == 201) {
-        return data.id;
+        return status;
     }
     else {console.log (status)}
      
@@ -156,7 +156,6 @@ export async function createRole(accessToken, airlineId, displayName, descriptio
 
     var body = JSON.stringify({
         "@odata.id": `https://graph.microsoft.com/v1.0/directoryObjects/${groupId}`
-
     });
     
     const options = {

@@ -1,14 +1,14 @@
 import React, { Component, useState, useEffect } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Line, Bar, Pie, Scatter } from 'react-chartjs-2';
-import { ListTails } from "../user-pages/ListTails";
+import { ListTails } from "../components/ListTails";
 import Spinner from 'react-bootstrap/Spinner';
-import { ListPreferences } from '../user-pages/ListPreferences';
-import { ListTriggers } from '../user-pages/ListTriggers';
-import { ListFlightProgress } from '../user-pages/ListFlightProgress';
+import { ListPreferences } from '../components/ListPreferences';
+import { ListTriggers } from '../components/ListTriggers';
+import { ListFlightProgress } from '../components/ListFlightProgress';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import { ListAirlinePreferences } from '../user-pages/ListAirlinePreferences';
+import { ListAirlinePreferences } from '../components/ListAirlinePreferences';
 
 export const Preferences = (props) => {
 
@@ -21,8 +21,6 @@ export const Preferences = (props) => {
   useEffect(() => {
     
   }, []);
-
-  
 
   return (
     <div>
@@ -52,6 +50,7 @@ export const Preferences = (props) => {
                   :
                   <div></div>
               }
+              <br></br>
               <br></br>
               <div className="d-flex flex-row justify-content-between">
                 <h4 className="card-title mb-1">Flight Progress Table Default Setting:</h4>

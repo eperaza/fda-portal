@@ -1,11 +1,11 @@
 import React, { Component, useState, useEffect } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Line, Bar, Pie, Scatter } from 'react-chartjs-2';
-import { ListTails } from "../user-pages/ListTails";
+import { ListTails } from "../components/ListTails";
 import Spinner from 'react-bootstrap/Spinner';
-import { ListPreferences } from '../user-pages/ListPreferences';
-import { ListTriggers } from '../user-pages/ListTriggers';
-import { ListFlightProgress } from '../user-pages/ListFlightProgress';
+import { ListPreferences } from '../components/ListPreferences';
+import { ListTriggers } from '../components/ListTriggers';
+import { ListFlightProgress } from '../components/ListFlightProgress';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 
@@ -343,7 +343,7 @@ export const Dashboard = (props) => {
                           <h6 className="preview-subject">
                             {
 
-                              props.role == "airlinesuperadmin"
+                              props.role == "superadmin"
                                 ?
                                 <>
                                   {props.role}<i className='mdi mdi-shield-star icon-item mdi-18px text-info'></i>
@@ -387,7 +387,7 @@ export const Dashboard = (props) => {
           </div>
         </div>
         {
-          props.role == "airlinesuperadmin"
+          props.role == "superadmin"
             ?
             <>
               <div className="col-md-6 grid-margin stretch-card">

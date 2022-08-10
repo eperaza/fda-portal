@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ListUsers } from "../user-pages/ListUsers";
+import { ListUsers } from "../components/ListUsers";
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
 import { callMsGraph, getGroupNames, getAllGroups } from "../../graph";
-import { ListRoles } from '../user-pages/ListRoles';
+import { ListRoles } from '../components/ListRoles';
 
 export const Roles = () => {
 

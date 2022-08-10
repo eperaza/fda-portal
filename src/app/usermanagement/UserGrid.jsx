@@ -1,18 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ProgressBar } from 'react-bootstrap';
-import { ListUsers } from "../user-pages/ListUsers";
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
+import { ListUsers } from "../components/ListUsers";
+import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
-import { callMsGraph, getGroupNames, getAllGroups, getAirlineRoles } from "../../graph";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import Alert from 'react-bootstrap/Alert';
-import Form from "react-bootstrap/Form";
-import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import Container from 'react-bootstrap/Container'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+import { callMsGraph, getGroupNames } from "../../graph";
+
 //import '../bootstrap.scss';
 
 
