@@ -26,6 +26,8 @@ import { InstructionsDropZone } from '../components/InstructionsDropZone';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Spinner from 'react-bootstrap/Spinner'
+import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
 
 const StyledAutocomplete = styled(Autocomplete)({
     "& .MuiInputLabel-outlined:not(.MuiInputLabel-shrink)": {
@@ -107,6 +109,12 @@ export const Airlines = (props) => {
     const [statusUploadTriggers, setStatusUploadTriggers] = useState("");
     const [statusUploadFeatureMgmt, setStatusUploadFeatureMgmt] = useState("");
     const [statusCompleted, setStatusCompleted] = useState("");
+    const [skeleton, setSkeleton] = useState(<>
+        <br></br>
+        <Stack spacing={1.5}>
+          <Skeleton variant="rectangular"  height={30} sx={{ bgcolor: "grey.900" }} width="25%" />          
+        </Stack>
+        </>);
 
     useEffect(() => {
         getOperators();
@@ -157,6 +165,7 @@ export const Airlines = (props) => {
             .then(response => response.json())
             .then(data => {
                 setOperators(data);
+                setSkeleton();
             }
             )
             .catch(error => console.log('error', error));
@@ -492,6 +501,7 @@ export const Airlines = (props) => {
                                     <p className="text-muted mb-1">AAD Setup</p>
                                 </div >
                                 <br></br>
+                                {skeleton}
                                 {
                                     operators
                                         ?
@@ -505,7 +515,7 @@ export const Airlines = (props) => {
                                             onChange={(event, newValue) => {
                                                 setICAO(newValue.IcaoCode);
                                             }}
-                                            renderInput={(params) => <TextField className={isError ? "autocompleteError" : "autocomplete"} {...params} label="" />}
+                                            renderInput={(params) => <TextField className={isError ? "autocompleteError" : "autocomplete"} {...params} placeholder="ICAO" label="" />}
                                             renderOption={(props, option) => (
                                                 <Box component="li" {...props}>
 
@@ -570,7 +580,6 @@ export const Airlines = (props) => {
                                 </div >
                                 <br></br>
                                 <InstructionsDropZone setInstructionFiles={setInstructionFiles} />
-
                             </div>
                         </div>
                     </div>

@@ -23,6 +23,7 @@ import { Preferences } from './usermanagement/Preferences';
 import { Groups, Roles } from './usermanagement/Roles';
 import { Airlines } from './airlinemanagement/Airlines';
 import { OptimalCI } from './fdalite/OptimalCI';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const App = () => {
 
@@ -434,7 +435,10 @@ const App = () => {
                 </Switch>
               </>
               :
-              <></>
+              <><div class="loader">
+                <Spinner animation="border" variant="primary"/>
+              </div>
+              </>
           }
 
         </AuthenticatedTemplate>
