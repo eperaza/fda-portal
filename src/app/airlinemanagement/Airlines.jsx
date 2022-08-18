@@ -211,7 +211,7 @@ export const Airlines = (props) => {
 
     const listFiles = async () => {
         // Update <placeholder> with your Blob service SAS URL string
-        const blobSasUrl = "https://fdagroundstorage.blob.core.windows.net/?sv=2021-06-08&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2100-06-19T11:59:27Z&st=2022-06-19T03:59:27Z&spr=https&sig=mQjWiT59JAr3hyLrubWeoFeHxj57ZpnBkIyFfnTMBcc%3D";
+        const blobSasUrl = process.env.REACT_APP_STORAGE_BLOB_SAS_URL;
 
         // Create a new BlobServiceClient
         const blobServiceClient = new BlobServiceClient(blobSasUrl);
@@ -237,8 +237,7 @@ export const Airlines = (props) => {
 
     const uploadConfig = async (file) => {
         // Update <placeholder> with your Blob service SAS URL string
-        const blobSasUrl = "https://fdagroundstorage.blob.core.windows.net/?sv=2021-06-08&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2100-06-19T11:59:27Z&st=2022-06-19T03:59:27Z&spr=https&sig=mQjWiT59JAr3hyLrubWeoFeHxj57ZpnBkIyFfnTMBcc%3D";
-
+        const blobSasUrl = process.env.REACT_APP_STORAGE_BLOB_SAS_URL;
         // Create a new BlobServiceClient
         const blobServiceClient = new BlobServiceClient(blobSasUrl);
 

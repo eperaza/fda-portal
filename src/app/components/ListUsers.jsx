@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import Alert from 'react-bootstrap/Alert';
 import Spinner from 'react-bootstrap/Spinner';
 import { Accordion, Card } from "react-bootstrap";
 import { ProgressBar } from 'react-bootstrap';
@@ -14,6 +13,8 @@ import "../aggrid.css";
 import { AccountEnabledCellRenderer } from "./AccountEnabledCellRenderer.jsx";
 import CustomNoRowsOverlay from "./CustomNoRowsOverlay.jsx";
 import { VersionCellRenderer } from "./VersionCellRenderer";
+import Alert from '@mui/material/Alert';
+import Collapse from '@mui/material/Collapse';
 
 const axios = require('axios');
 
@@ -32,7 +33,7 @@ export const ListUsers = (props) => {
     const [createLabel, setCreateLabel] = useState("Create User");
     const [deleteUsersLabel, setDeleteUsersLabel] = useState("Create User");
     const [statusText, setStatusText] = useState();
-    const [showAlertText, setShowAlertText] = useState();
+    const [showAlertText, setShowAlertText] = useState("Error unknown");
     const [showSuccessText, setShowSuccessText] = useState();
     const [showDeleteProgressBar, setShowDeleteProgressBar] = useState(false);
     const [deleteProgressBarCount, setDeleteProgressBarCount] = useState(0);
@@ -430,22 +431,40 @@ export const ListUsers = (props) => {
 
     //Create Users
     const [principal, setPrincipal] = useState(""),
-        onInputPrincipal = ({ target: { value } }) => setPrincipal(value);
+        onInputPrincipal = ({ target: { value } }) => {
+            setPrincipal(value);
+            setIsError(false);
+        };
 
     const [givenName, setGivenName] = useState(""),
-        onInputGivenName = ({ target: { value } }) => setGivenName(value);
+        onInputGivenName = ({ target: { value } }) => {
+            setGivenName(value);
+            setIsError(false);
+        }
 
     const [surname, setSurname] = useState(""),
-        onInputSurname = ({ target: { value } }) => setSurname(value);
+        onInputSurname = ({ target: { value } }) => {
+            setSurname(value);
+            setIsError(false);
+        }
 
     const [displayName, setDisplayName] = useState(""),
-        onInputDisplayName = ({ target: { value } }) => setDisplayName(value);
+        onInputDisplayName = ({ target: { value } }) => {
+            setDisplayName(value);
+            setIsError(false);
+        }
 
     const [password, setPassword] = useState(""),
-        onInputPassword = ({ target: { value } }) => setPassword(value);
+        onInputPassword = ({ target: { value } }) => {
+            setPassword(value);
+            setIsError(false);
+        }
 
     const [mail, setMail] = useState(""),
-        onInputMail = ({ target: { value } }) => setMail(value.toLowerCase());
+        onInputMail = ({ target: { value } }) => {
+            setMail(value.toLowerCase());
+            setIsError(false);
+        }
 
     const [mode, setMode] = useState("lite");
 
@@ -510,12 +529,15 @@ export const ListUsers = (props) => {
                     setShowSuccessText(data.mailNickname);
                     setCreateLabel("Create User");
                     setIsError(false);
+                    setTimeout(() => {
+                        setShowSuccess(false);
+                    }, 10000);
                 }
                 else {
                     setShowAlert(true);
                     setShowAlertText(data.errorDescription);
                     setCreateLabel("Create User");
-
+                    setIsError(true);
                 }
             }
             )
@@ -681,12 +703,11 @@ export const ListUsers = (props) => {
                                                                 }}
                                                                 style={{ borderRadius: 10, fontStyle: 'italic' }}>
                                                                 {
-                                                                    
+
                                                                     roles.map((role) => {
                                                                         return (
                                                                             <>
                                                                                 <option value={role}>{role}</option>
-
                                                                             </>
                                                                         );
                                                                     })
@@ -758,35 +779,17 @@ export const ListUsers = (props) => {
                                                 <br></br>
                                                 <div className="row">
                                                     <div className="col-md-12">
-                                                        <button type="submit" disabled={false} size="sm" className="btn btn-primary btn-lg btn-block" onClick={onFormSubmit}>
+                                                        <button style={{ borderRadius: 1 }} type="submit" disabled={false} size="sm" className="btn btn-primary btn-lg btn-block" onClick={onFormSubmit}>
                                                             {createLabel}
                                                         </button>
                                                     </div>
                                                 </div>
-                                                {
-                                                    showAlert == true
-                                                        ?
-                                                        <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
-                                                            <Alert.Heading>Conflict!</Alert.Heading>
-                                                            <p>
-                                                                {showAlertText}
-                                                            </p>
-                                                        </Alert>
-                                                        :
-                                                        <></>
-                                                }
-                                                {
-                                                    showSuccess == true
-                                                        ?
-                                                        <Alert variant="success" onClose={() => setShowSuccess(false)} dismissible>
-                                                            <Alert.Heading>User with ID [{showSuccessText}] created successfully!</Alert.Heading>
-                                                            <p>
-                                                                {showAlertText}
-                                                            </p>
-                                                        </Alert>
-                                                        :
-                                                        <></>
-                                                }
+                                                <Collapse in={showAlert}>
+                                                    <Alert style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }} severity="error" onClose={() => { setShowAlert(false) }}>Conflict! [{showAlertText}]</Alert>
+                                                </Collapse>
+                                                <Collapse in={showSuccess}>
+                                                    <Alert style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }} onClose={() => { setShowSuccess(false) }}>User with ID [{showSuccessText}] created successfully!</Alert>
+                                                </Collapse>
                                             </div>
                                         </Card.Body>
                                     </Accordion.Collapse>
@@ -866,7 +869,7 @@ export const ListUsers = (props) => {
                                 </div>
                             </div>
 
-                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 550, marginTop: -15, marginBottom:20 }}>
+                            <div className="ag-theme-alpine-dark" style={{ width: '100%', height: 550, marginTop: -15, marginBottom: 20 }}>
                                 <Button className="btn-primary-override" variant="primary" style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="md" onClick={e => {
                                     refreshGrid()
 
