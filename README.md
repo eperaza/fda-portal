@@ -1,6 +1,6 @@
-## FDA Lite Web
+## FDA Portal
 
-artifact id: fdalite
+artifact id: fdaportal
 
 ---
 technologies:
@@ -11,11 +11,11 @@ products:
 - azure-active-directory
 - microsoft graph
 
-description: "Web version of FDA Lite. React application that Uses MSAL authentication and 
+description: "FDA Web Portal. React application that Uses MSAL authentication and 
 client-side rendering to control the authentication flow of users, the authentication 
 process happens on the client side of the application. Business logic to be added later on."
 
-## FDA Lite Features
+## FDA Portal Features
 
 This beta contains the following MSAL React functionallity:
 
@@ -44,7 +44,7 @@ This beta contains the following MSAL React functionallity:
 1. Open the [/src/authConfig.js](./src/authConfig.js) file and provide the required configuration values.
 1. On the command line, navigate to the root of the repository, and run `npm install` to install the project dependencies via npm.
 
-## Running FDA Lite
+## Running FDA Portal
 
 1. Configure authentication and authorization parameters:
    1. Open `src/authConfig.js`
@@ -53,6 +53,6 @@ This beta contains the following MSAL React functionallity:
    4. Replace the string `"Enter_the_Redirect_Uri_Here"` with the redirect uri you setup on AAD Portal.
 2. Configure the parameters for calling MS Graph API:
    2. Replace the string `"Enter_the_Graph_Endpoint_Herev1.0/me"` with `"https://graph.microsoft.com/v1.0/me"` (*note*: This is for MS Graph instance located on the global Azure cloud. For more information, see the [documentation](https://docs.microsoft.com/en-us/graph/deployments))
-3. To start the FDA Lite application, run `npm install` once and then `npm start`.
+3. To start the FDA portal application, run `npm install` once and then `npm start`.
 4. Finally, open a browser and navigate to [http://localhost:3000](http://localhost:3000).
 
