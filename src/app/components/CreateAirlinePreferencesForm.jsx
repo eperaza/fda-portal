@@ -68,7 +68,13 @@ export const CreateAirlinePreferencesForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.enabled}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.enabled
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "enabled", data.enabled)}
                                                         />
@@ -76,48 +82,78 @@ export const CreateAirlinePreferencesForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.display}
-                                                            style={{ color: "#0d6efd" }}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.display
+                                                            }                                                            style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "display", data.display)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceEFBAdmin}
-                                                            style={{ color: "#0d6efd" }}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceEFBAdmin
+                                                            }                                                               style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceEFBAdmin", data.choiceEFBAdmin)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceFocal}
-                                                            style={{ color: "#0d6efd" }}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceFocal
+                                                            }                                                               style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceFocal", data.choiceFocal)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceCheckAirman}
-                                                            style={{ color: "#0d6efd" }}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceCheckAirman
+                                                            }                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceCheckAirman", data.choiceCheckAirman)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choicePilot}
-                                                            style={{ color: "#0d6efd" }}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choicePilot
+                                                            }                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choicePilot", data.choicePilot)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceMaintenance}
-                                                            style={{ color: "#0d6efd" }}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceMaintenance
+                                                            }                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceMaintenance", data.choiceMaintenance)}
                                                         />
                                                     </div>

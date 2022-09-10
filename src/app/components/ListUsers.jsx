@@ -371,7 +371,6 @@ export const ListUsers = (props) => {
             };
             let res = await fetch(process.env.REACT_APP_LOGIN_URI, options);
             let token = await res.json();
-            console.log("el token es " + token.authenticationResult.accessToken)
             return token.authenticationResult.accessToken;
         } catch (error) {
             console.log(error);
@@ -613,7 +612,6 @@ export const ListUsers = (props) => {
     }, []);
 
     const getTSPAF = async () => {
-
         const airline = props.airline.replace("airline-", "");
         const code = process.env.REACT_APP_FUNCTION_TSP_GET_CODE;
         fetch(`${process.env.REACT_APP_FUNCTION_TSP_GET_URI}?code=${code}&airline=${airline}`)
@@ -926,13 +924,13 @@ export const ListUsers = (props) => {
                                     {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
-                                    <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
-                                        values: roles,
-                                    }}></AgGridColumn>
                                     <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="version" sortable={true} filter={true} editable={false} cellRenderer={VersionCellRenderer}
                                         cellRendererParams={{ tspLastModified: TSP }} headerName={"TSP Version"}></AgGridColumn>
                                     <AgGridColumn field="lastUpdated" sortable={true} filter={true} editable={false} headerName={"TSP Last Update"}></AgGridColumn>
+                                    <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
+                                        values: roles,
+                                    }}></AgGridColumn>
                                     <AgGridColumn field="otherMails" sortable={true} filter={true} headerName={"Email"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="createdDateTime" sortable={true} filter={true} sort={"desc"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="airline" sortable={true} filter={true} hide={true} ></AgGridColumn>
@@ -940,7 +938,6 @@ export const ListUsers = (props) => {
                                         valueGetter={params => {
                                             return TSP;
                                         }}
-
                                     >
                                     </AgGridColumn>
 

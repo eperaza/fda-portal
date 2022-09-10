@@ -74,10 +74,10 @@ export const ConfigDropZone = (props) => {
 
     return <>
         <MultipleFileUpload onFileDrop={handleFileDrop} dropzoneProps={{
-            accept: 'text/plain, .mobileconfig, application/json',
+            accept: '.mobileconfig',
             onDropRejected: handleDropRejected
         }} isHorizontal={isHorizontal}>
-            <MultipleFileUploadMain titleIcon={<UploadIcon />} titleText="Drag and drop configuration files here" titleTextSeparator="or" infoText="Accepted file types: .MOBILECONFIG, .JSON, .TXT" />
+            <MultipleFileUploadMain titleIcon={<UploadIcon />} titleText="Drag and drop configuration files here" titleTextSeparator="or" infoText="Accepted file types: .MOBILECONFIG" />
             {showStatus && <MultipleFileUploadStatus statusToggleText={`${successfullyReadFileCount} of ${currentFiles.length} files uploaded`} statusToggleIcon={statusIcon}>
                 {currentFiles.map(file => <MultipleFileUploadStatusItem file={file} key={file.name} onClearClick={() => removeFiles([file.name])} onReadSuccess={handleReadSuccess} onReadFail={handleReadFail} />)}
             </MultipleFileUploadStatus>}

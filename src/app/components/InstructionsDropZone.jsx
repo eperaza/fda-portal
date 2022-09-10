@@ -73,10 +73,10 @@ export const InstructionsDropZone = (props) => {
 
     return <>
         <MultipleFileUpload onFileDrop={handleFileDrop} dropzoneProps={{
-            accept: 'text/plain, application/pdf, application/json',
+            accept: 'application/pdf',
             onDropRejected: handleDropRejected
         }} isHorizontal={isHorizontal}>
-            <MultipleFileUploadMain titleIcon={<UploadIcon />} titleText="Drag and drop email instruction files here" titleTextSeparator="or" infoText="Accepted file types: .PDF, .JSON, .TXT" />
+            <MultipleFileUploadMain titleIcon={<UploadIcon />} titleText="Drag and drop email instruction files here" titleTextSeparator="or" infoText="Accepted file types: .PDF" />
             {showStatus && <MultipleFileUploadStatus statusToggleText={`${successfullyReadFileCount} of ${currentFiles.length} files uploaded`} statusToggleIcon={statusIcon}>
                 {currentFiles.map(file => <MultipleFileUploadStatusItem file={file} key={file.name} onClearClick={() => removeFiles([file.name])} onReadSuccess={handleReadSuccess} onReadFail={handleReadFail} />)}
             </MultipleFileUploadStatus>}

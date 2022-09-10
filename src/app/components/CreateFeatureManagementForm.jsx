@@ -63,7 +63,13 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.enabled}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.enabled
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.featureKey, e.target.checked, "enabled", data.enabled)}
                                                         />
@@ -71,7 +77,13 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.display}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.display
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.featureKey, e.target.checked, "display", data.display)}
                                                         />
@@ -79,7 +91,13 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceEFBAdmin}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceEFBAdmin
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.featureKey, e.target.checked, "choiceEFBAdmin", data.choiceEFBAdmin)}
                                                         />
@@ -87,7 +105,13 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceFocal}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceFocal
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.featureKey, e.target.checked, "choiceFocal", data.choiceFocal)}
                                                         />
@@ -95,7 +119,13 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceCheckAirman}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceCheckAirman
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.featureKey, e.target.checked, "choiceCheckAirman", data.choiceCheckAirman)}
                                                         />
@@ -103,7 +133,13 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choicePilot}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choicePilot
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.featureKey, e.target.checked, "choicePilot", data.choicePilot)}
                                                         />
@@ -111,7 +147,13 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
-                                                            defaultChecked={data.choiceMaintenance}
+                                                            defaultChecked={
+                                                                data.airline == "airline-fda"
+                                                                ?
+                                                                false
+                                                                :
+                                                                data.choiceMaintenance
+                                                            }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.featureKey, e.target.checked, "choiceMaintenance", data.choiceMaintenance)}
                                                         />

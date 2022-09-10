@@ -15,7 +15,7 @@ export const CreateUserPreferences = (props) => {
             if (preference.userKey == userKey) {
                 props.rowData[index]["value"] = value;
 
-            }   
+            }
         });
 
         props.setUserPreferences(props.rowData);
@@ -28,11 +28,15 @@ export const CreateUserPreferences = (props) => {
                     <>
                         Pound {" "}
                         <BootstrapSwitchButton checked={
-                            data.value == "kg"
+                            data.airline == "airline-fda"
                                 ?
-                                true
-                                :
                                 false
+                                :
+                                data.value == "kg"
+                                    ?
+                                    true
+                                    :
+                                    false
                         } size="xs" width="100" onlabel="kg" offlabel="lb" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
@@ -51,13 +55,19 @@ export const CreateUserPreferences = (props) => {
                 return (
                     <>
                         Mach {" "}
-                        <BootstrapSwitchButton checked={
-                            data.value == "knots"
-                                ?
-                                true
-                                :
-                                false
-                        } size="xs" width="100" onlabel="knots" offlabel="mach" onstyle="dark" offstyle="dark"
+                        <BootstrapSwitchButton
+                            checked={
+                                data.airline == "airline-fda"
+                                    ?
+                                    false
+                                    :
+                                    data.value == "knots"
+                                        ?
+                                        true
+                                        :
+                                        false
+                            }
+                            size="xs" width="100" onlabel="knots" offlabel="mach" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "knots");
@@ -76,11 +86,15 @@ export const CreateUserPreferences = (props) => {
                     <>
                         NM/100lb {" "}
                         <BootstrapSwitchButton checked={
-                            data.value == "nm100kg"
+                            data.airline == "airline-fda"
                                 ?
-                                true
-                                :
                                 false
+                                :
+                                data.value == "nm100kg"
+                                    ?
+                                    true
+                                    :
+                                    false
                         } size="xs" width="100" onlabel="nm100kg" offlabel="nm100lb" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
@@ -100,11 +114,15 @@ export const CreateUserPreferences = (props) => {
                     <>
                         FeetX100 {" "}
                         <BootstrapSwitchButton checked={
-                            data.value == "meterX100"
+                            data.airline == "airline-fda"
                                 ?
-                                true
-                                :
                                 false
+                                :
+                                data.value == "meterX100"
+                                    ?
+                                    true
+                                    :
+                                    false
                         } size="xs" width="100" onlabel="meterX100" offlabel="feetX100" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {

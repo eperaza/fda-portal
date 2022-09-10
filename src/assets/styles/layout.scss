@@ -912,18 +912,6 @@
     border-radius: 0 !important;
   }
 
-  .autocompleteError {
-    border-bottom: 2px solid red !important;
-    border-top: 2px solid red !important;
-    border-radius: 0px !important;
-  }
-
-  .autocomplete {
-    border-bottom: 2px solid #0d6efd !important;
-    border-top: 2px solid #0d6efd !important;
-    border-radius: 0px !important;
-  }
-
   .inpSelect {
     border: none !important;
     border-bottom: 2px solid #0d6efd !important;
@@ -958,6 +946,16 @@
     width: 100% !important;
     color: aliceblue !important;
     border-radius: 0 !important;
+  }
+
+  .autocompleteError {
+    border-bottom: 2px solid red !important;
+    border-radius: 0px !important;
+  }
+
+  .autocomplete {
+    border-bottom: 2px solid #0d6efd !important;
+    border-radius: 0px !important;
   }
 
   .borderLabel {
@@ -1137,5 +1135,9 @@
   top:0;
   bottom:0;
   position:fixed;
+}
+
+.MuiSvgIcon-fontSizeSmall {
+  color: #fff !important;
 }
 

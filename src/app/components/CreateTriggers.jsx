@@ -50,11 +50,15 @@ export const CreateTriggers = (props) => {
                                                         <div className="col-3">
                                                             {
                                                                 <BootstrapSwitchButton checked={
-                                                                    data.value == "1" || data.value == "true"
+                                                                    data.airline == "airline-fda"
                                                                         ?
-                                                                        true
-                                                                        :
                                                                         false
+                                                                        :
+                                                                        data.value == "1" || data.value == "true"
+                                                                            ?
+                                                                            true
+                                                                            :
+                                                                            false
                                                                 } size="xs" onstyle="success" offstyle="dark"
                                                                     onChange={(e) => {
                                                                         updatePreference(data.userKey, e);

@@ -18,7 +18,7 @@ export const CreateFlightProgress = (props) => {
                 }
             }
         });
-       props.setFlightProgress(props.rowData);      
+        props.setFlightProgress(props.rowData);
     }
 
     const renderPreferences = (data) => {
@@ -46,13 +46,17 @@ export const CreateFlightProgress = (props) => {
                                                         </div>
 
                                                         <div className="col-3">
-                                                        {
+                                                            {
                                                                 <BootstrapSwitchButton checked={
-                                                                    data.value == "1" || data.value == "true"
-                                                                    ?
-                                                                    true
-                                                                    :
-                                                                    false
+                                                                    data.airline == "airline-fda"
+                                                                        ?
+                                                                        false
+                                                                        :
+                                                                        data.value == "1" || data.value == "true"
+                                                                            ?
+                                                                            true
+                                                                            :
+                                                                            false
                                                                 } size="xs" onstyle="success" offstyle="dark"
                                                                     onChange={(e) => {
                                                                         updatePreference(data.userKey, e);

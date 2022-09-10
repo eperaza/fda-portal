@@ -95,6 +95,7 @@ export const Airlines = (props) => {
     const [featureManagement, setFeatureManagement] = useState([]);
     const [key, setKey] = useState('home');
     const [loader2, setLoader2] = useState("");
+    const [statusLoader, setStatusLoader] = useState("");
     const [okDisabled, setOKDisabled] = useState(true);
     const [show, setShow] = useState(false);
     const handleClose = () => {
@@ -112,9 +113,11 @@ export const Airlines = (props) => {
     const [skeleton, setSkeleton] = useState(<>
         <br></br>
         <Stack spacing={1.5}>
-          <Skeleton variant="rectangular"  height={30} sx={{ bgcolor: "grey.900" }} width="25%" />          
+            <Skeleton variant="rectangular" height={30} sx={{ bgcolor: "grey.900" }} width="25%" />
         </Stack>
-        </>);
+    </>);
+    const [focalRegistrationStatus, setfocalRegistrationStatus] = useState("");
+    const [active, setActive] = React.useState(1);
 
     useEffect(() => {
         getOperators();
@@ -124,7 +127,7 @@ export const Airlines = (props) => {
         //generate zip on files change
         generateZip();
 
-    }, [configFiles, instructionFiles, airline, settings, statusText]);
+    }, [configFiles, instructionFiles, airline, settings, statusText, ICAO]);
 
     const generateZip = () => {
         setFileBuffer([]);
@@ -256,15 +259,15 @@ export const Airlines = (props) => {
 
             await Promise.all(promises);
             setStatusUploadConfig('Config uploaded <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>');
-            setStatusCompleted('</br>Airline setup completed.');
-            setLoader2("OK");
-            setOKDisabled(false);
         }
         catch (error) {
             setStatusUploadConfig('Error uploading configuration <i class="mdi mdi mdi-alert-circle text-danger"></i>');
-
         }
+
+        setStatusCompleted(`Airline [${ICAO}] setup completed <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i></br>`);
+        setfocalRegistrationStatus("Waiting for Azure AAD to send focal initial registrations, can take up to 15 seconds...");
     }
+
 
     const getAirlines = () => {
         let airlines = [];
@@ -449,33 +452,154 @@ export const Airlines = (props) => {
         });
     }
 
-    const createAirline = () => {
-        console.log(airlinePreferences)
-        console.log(userPreferences)
-        console.log(flightProgress)
-        console.log(triggers)
+    const createInitialRegistrations = async () => {
+        let json = null;
+        try {
+            // Update <placeholder> with your Blob service SAS URL string
+            const blobSasUrl = process.env.REACT_APP_STORAGE_BLOB_SAS_URL;
+            // Create a new BlobServiceClient
+            const blobServiceClient = new BlobServiceClient(blobSasUrl);
 
-        setShow(true);
-        if (ICAO == "" || airlineDescription.current.value == "" || configFiles.length == 0 || instructionFiles.length == 0 || airlinePreferences.length == 0 || userPreferences.length == 0 || flightProgress.length == 0 || triggers == 0) {
+            // Create a unique name for the container by 
+            // appending the current time to the file name
+            const containerName = "airline-onboarding-automation";
+
+            // Get a container client from the BlobServiceClient
+            const containerClient = blobServiceClient.getContainerClient(containerName);
+
+            // Create a unique name for the blob
+            const blobName = "initial-registration-focals.json";
+
+            // Get a block blob client
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+            const downloadBlockBlobResponse = await blockBlobClient.download();
+            console.log("\nDownloaded blob content...");
+            let blob = await (downloadBlockBlobResponse.blobBody)
+            json = await (new Response(blob)).json();
+            console.log(json)
+        }
+        catch (e) {
+            console.log(e)
+        }
+
+        const tokenFDA = await login();
+        const headers = new Headers();
+        const bearer = `Bearer ${tokenFDA}`;
+
+        headers.append("Authorization", bearer);
+        headers.append("Content-Type", "application/json");
+        headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
+        var x = "";
+        setfocalRegistrationStatus();
+
+        for (let focal of json) {
+            console.log(`${focal.userPrincipalName}.${ICAO}`)
+
+            var data = JSON.stringify({
+                "userPrincipalName": `${focal.userPrincipalName}.${ICAO.toLowerCase()}`,
+                "givenName": `${focal.givenName}`,
+                "surname": `${focal.surname}`,
+                "displayName": `${focal.givenName} ${focal.surname}`,
+                "password": `${process.env.REACT_APP_FDAGROUND_PASS}`,
+                "forceChangePasswordNextLogin": "false",
+                "otherMails": [
+                    `${focal.otherMails}`
+                ],
+                "airlineGroupName": `airline-${ICAO.toLowerCase()}`,
+                "roleGroupName": `role-airlinefocal`
+            });
+
+            const options = {
+                method: "POST",
+                headers: headers,
+                body: data
+            };
+
+            try {
+                let res = await fetch(process.env.REACT_APP_USERS_CREATE_URI, options)
+                let data = await res.json();
+                if (data.objectId) {
+                    x = x + 'Sent focal registration to [' + focal.otherMails + '] successfully <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i></br>';
+                    setfocalRegistrationStatus(x)
+                }
+                else {
+                    x = x + 'Error sending focal registration to [' + focal.otherMails + '] <i class="mdi mdi mdi-alert-circle text-danger"></i> -> ' + data.errorDescription + '</br>';
+                    setfocalRegistrationStatus(x)
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        setOKDisabled(false);
+        setLoader2("OK");
+        setStatusLoader();
+
+    }
+
+    const login = async () => {
+        try {
+            const headers = new Headers();
+
+            headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
+            headers.append("Content-Type", "application/json");
+
+            var data = JSON.stringify({
+                "azUsername": `${process.env.REACT_APP_FDAGROUND_USER}`,
+                "azPassword": `${process.env.REACT_APP_FDAGROUND_PASS}`
+
+            });
+            const options = {
+                method: "POST",
+                headers: headers,
+                body: data
+            };
+            let res = await fetch(process.env.REACT_APP_LOGIN_URI, options);
+            let token = await res.json();
+            return token.authenticationResult.accessToken;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const createAirline = () => {
+        setStatusCompleted()
+        setStatusCreateGroup()
+        setStatusUploadAirlinePrefs()
+        setStatusUploadUserPrefs()
+        setStatusUploadConfig()
+        setStatusUploadFeatureMgmt()
+        setStatusUploadFlightProgress()
+        setStatusUploadTriggers()
+        setfocalRegistrationStatus()
+
+        if (ICAO == "" || configFiles.length == 0 || instructionFiles.length == 0 || airlinePreferences.length == 0 || userPreferences.length == 0 || flightProgress.length == 0 || triggers == 0) {
             setIsError(true);
-            alert("Missing configuration")
+            alert("Missing configuration");
         }
         else {
+            if (airlineDescription.current.value == "") {
+                airlineDescription.current.value = `Airline group for ${ICAO}`;
+            }
+            setShow(true);
             setLoader2(<><Spinner animation="border" size="sm" /></>);
-            setStatusText("Creating airline...");
+            setStatusLoader(<><Spinner variant="primary" animation="border" size="sm" /></>);
+            setStatusText(`Creating airline [${ICAO}]...`);
 
             createAirlineGroup();
-            uploadConfig();
             uploadAirlinePreferences();
             uploadUserPreferences();
             uploadFlightProgress();
             uploadTriggers();
             uploadFeatureManagement();
+            uploadConfig();
+            setTimeout(() => {
+                createInitialRegistrations();
+            }, 18000);
         }
 
     }
-
-    const [active, setActive] = React.useState(1)
 
     return (
         <>
@@ -512,7 +636,13 @@ export const Airlines = (props) => {
                                             options={operators}
                                             sx={{ width: 300 }}
                                             onChange={(event, newValue) => {
-                                                setICAO(newValue.IcaoCode);
+                                                try {
+                                                    setICAO(newValue.IcaoCode);
+                                                }
+                                                catch (e) {
+                                                    setICAO("");
+                                                    console.log(e);
+                                                }
                                             }}
                                             renderInput={(params) => <TextField className={isError ? "autocompleteError" : "autocomplete"} {...params} placeholder="ICAO" label="" />}
                                             renderOption={(props, option) => (
@@ -527,30 +657,35 @@ export const Airlines = (props) => {
                                         <></>
                                 }
                                 <br></br>
-                                <div className="input-group">
-                                    <label className="borderLabelAlt"><span class="required">* </span></label>
-                                    <input
-                                        type="text"
-                                        className={isError ? "inpError2" : "inp2"}
-                                        placeholder="Airline Description"
-                                        aria-label="Airline Description"
-                                        ref={airlineDescription}
-                                        style={{ borderRadius: 10, fontStyle: 'italic' }}
-                                    />
-
+                                <div className="row col-xl-8 col-sm-6 grid-margin stretch-card">
+                                    <div className="input-group">
+                                        <label className="borderLabelAlt"></label>
+                                        <input
+                                            type="text"
+                                            className={isError ? "inpError2" : "inp2"}
+                                            placeholder="Airline Description"
+                                            aria-label="Airline Description"
+                                            ref={airlineDescription}
+                                            style={{ borderRadius: 10, fontStyle: 'italic' }}
+                                        />
+                                    </div>
                                 </div>
                                 <br></br>
-                                Is .mp for registration?
-                                <Checkbox
-                                    defaultChecked={false}
-                                    value={isMP}
-                                    style={{ color: "#0d6efd" }}
-                                    onChange={e => {
-                                        setIsMP(e.target.checked);
-                                        generateZip();
-                                    }}
-
-                                />
+                                {
+                                    /*
+                                    Is .mp for registration?
+                                    <Checkbox
+                                        defaultChecked={false}
+                                        value={isMP}
+                                        style={{ color: "#0d6efd" }}
+                                        onChange={e => {
+                                            setIsMP(e.target.checked);
+                                            generateZip();
+                                        }}
+    
+                                    />
+                                    */
+                                }
 
                             </div>
                         </div>
@@ -600,10 +735,20 @@ export const Airlines = (props) => {
                                     setAirline(e.target.value);
                                 }}
                                 style={{ borderRadius: 10, fontStyle: 'italic' }}>
+                                <option value="">--Select airline--</option>
+
                                 {
                                     airlines.map((airline) => {
                                         return (
-                                            <option value={airline}>{airline}</option>
+                                            <>
+                                                {
+                                                    airline !== "airline-fda"
+                                                        ?
+                                                        <option value={airline}>{airline}</option>
+                                                        :
+                                                        <></>
+                                                }
+                                            </>
                                         );
                                     })
                                 }
@@ -781,6 +926,72 @@ export const Airlines = (props) => {
             </MultiStepForm>
 
             {
+                /*
+                {
+                    active !== 1 && (
+                        <Button onClick={() => setActive(active - 1)}>Previous</Button>
+                    )
+                }
+                {
+                    active !== 3 && (
+                        <>
+                            {
+                                ICAO == "" && configFiles.length == 0 && instructionFiles.length == 0
+                                    ?
+                                    <></>
+                                    :
+                                    <Button
+                                        onClick={() => setActive(active + 1)}
+                                        style={{ float: 'right' }}
+                                    >
+                                        Next
+                                    </Button>
+                            }
+                        </>
+                    )
+                    
+                }
+                */
+            }
+
+            {
+                active === 1 && (
+                    <>
+                        {
+                            ICAO === ""
+                                ?
+                                <></>
+                                :
+                                <Button
+                                    onClick={() => setActive(active + 1)}
+                                    style={{ float: 'right' }}
+                                >
+                                    Next
+                                </Button>
+                        }
+                    </>
+                )
+            }
+            {
+                active === 2 && (
+                    <>
+                        {
+                            configFiles.length === 0 || instructionFiles.length === 0
+                                ?
+                                <></>
+                                :
+                                <Button
+                                    onClick={() => setActive(active + 1)}
+                                    style={{ float: 'right' }}
+                                >
+                                    Next
+                                </Button>
+                        }
+                    </>
+                )
+
+            }
+            {
                 active === 3
                     ?
                     <>
@@ -799,26 +1010,16 @@ export const Airlines = (props) => {
                     :
                     <></>
             }
-
             {
                 active !== 1 && (
                     <Button onClick={() => setActive(active - 1)}>Previous</Button>
                 )
             }
-            {
-                active !== 3 && (
-                    <Button
-                        onClick={() => setActive(active + 1)}
-                        style={{ float: 'right' }}
-                    >
-                        Next
-                    </Button>
-                )
-            }
+
             <Modal show={show} size="lg" onHide={handleClose} scrollable="true" backdrop="static" contentClassName={"modal"}
                 keyboard={false}>
                 <Modal.Header>
-                    <Modal.Title>Airline Create Status</Modal.Title>
+                    <Modal.Title>Airline Create Status {statusLoader}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <div dangerouslySetInnerHTML={{ __html: statusText }} />
@@ -830,6 +1031,9 @@ export const Airlines = (props) => {
                     <div dangerouslySetInnerHTML={{ __html: statusCreateGroup }} />
                     <div dangerouslySetInnerHTML={{ __html: statusUploadConfig }} />
                     <div dangerouslySetInnerHTML={{ __html: statusCompleted }} />
+                    <br></br>
+                    <div dangerouslySetInnerHTML={{ __html: focalRegistrationStatus }} />
+
                 </Modal.Body>
                 <Modal.Footer>
                     <Button disabled={okDisabled} variant="secondary" onClick={e => {
