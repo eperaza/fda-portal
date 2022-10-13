@@ -38,7 +38,7 @@ export const ListFlightProgress = (props) => {
 
         console.log(props.airline.toUpperCase())
         const code = process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=airline-${props.airline}`, options)
             .then(response => response.json())
             .then(data => {
                 setRowData(data);

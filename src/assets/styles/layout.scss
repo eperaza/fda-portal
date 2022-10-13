@@ -1141,3 +1141,39 @@
   color: #fff !important;
 }
 
+.MuiInputBase-root{
+  color: #fff !important;
+}
+.MuiAutocomplete-root{
+  color: #fff !important;
+
+} 
+.MuiOutlinedInput-root{
+  color: #fff !important;
+
+}
+.MuiFormLabel-root{
+  color: #0d6efd !important;
+}
+.MuiFormHelperText-root{
+  color: #0d6efd !important;
+}
+
+//<div class="MuiInputBase-root MuiInput-root MuiInput-underline MuiInputBase-colorPrimary MuiInputBase-formControl css-1vv4lmi"><div tabindex="0" role="button" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="standard-select-currency-label standard-select-currency" aria-describedby="standard-select-currency-helper-text" id="standard-select-currency" class="MuiSelect-select MuiSelect-standard MuiInputBase-input MuiInput-input css-1cccqvr">€</div><input aria-hidden="true" tabindex="-1" class="MuiSelect-nativeInput css-1k3x8v3" value="EUR"><svg class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconStandard css-1utq5rl" focusable="false" aria-hidden="true" viewBox="0 0 24 24" data-testid="ArrowDropDownIcon"><path d="M7 10l5 5 5-5z"></path></svg></div>
+/*
+.MuiSvgIcon-fontSizeMedium{
+  color: #fff !important;
+}
+*/
+.MuiSelect-iconStandard{
+  color: #fff !important;
+}
+
+.preferenceGrid{
+  opacity: 1 !important;
+}
+
+.preferenceGridDisabled{
+  opacity: .4 !important;
+}
+

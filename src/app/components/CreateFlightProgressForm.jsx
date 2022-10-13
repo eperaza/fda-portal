@@ -37,11 +37,17 @@ export const CreateFlightProgressForm = (props) => {
             headers: headers
         };
 
-        console.log(props.airline.toUpperCase())
         const code = process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline.replace("airline-","")}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline}`, options)
             .then(response => response.json())
             .then(data => {
+                if (props.airline == "airline-fda") {
+                    data.forEach((preference) => {
+                        if (preference.userKey == "saveFlightProgressTablesValues") {
+                            preference.value = "false";
+                        }
+                    })
+                }
                 setRowData(data);
                 props.setFlightProgress(data)
                 setSkeleton();
@@ -56,7 +62,7 @@ export const CreateFlightProgressForm = (props) => {
             {
                 rowData
                     ?
-                    <CreateFlightProgress rowData={rowData} airline={props.airline} setFlightProgress={props.setFlightProgress}/>
+                    <CreateFlightProgress rowData={rowData} airline={props.airline} setFlightProgress={props.setFlightProgress} manualSelect={props.manualSelect} disabled={props.disabled} />
                     :
                     <></>
             }

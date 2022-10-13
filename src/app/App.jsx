@@ -56,8 +56,7 @@ const App = () => {
               if (group.displayName.startsWith("airline") == true) {
                 setAirline(group.displayName.replace("airline-", ""));
                 setGroupId(group.id);
-                airline = (group.displayName.replace("airline-", ""));
-                getFeatureManagement(airline);
+                getFeatureManagement(group.displayName);
               }
               if (group.displayName.startsWith("role") == true) {
                 setRole(group.displayName.replace("role-", ""));

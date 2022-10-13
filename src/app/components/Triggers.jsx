@@ -1,12 +1,14 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-
+import { useSnackbar } from 'notistack';
 
 export const Triggers = (props) => {
+    const [snack, setSnack] = useState("");
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     useEffect(() => {
     }, []);
-    
+
     const updatePreference = (key, value) => {
         const headers = new Headers();
 
@@ -20,9 +22,13 @@ export const Triggers = (props) => {
             .then(response => response.text())
             .then(data => {
                 console.log("Rows updated: " + data);
+                enqueueSnackbar(`Preference updated: ${key}_${value}`, { variant: 'success' });
             }
             )
-            .catch(error => console.log('error', error));
+            .catch(error => {
+                enqueueSnackbar("Error", { variant: 'error' })
+                console.log('error', error)
+            });
     }
 
     const renderPreferences = (data) => {
@@ -53,10 +59,10 @@ export const Triggers = (props) => {
                                                             {
                                                                 <BootstrapSwitchButton checked={
                                                                     data.value == "1" || data.value == "true"
-                                                                    ?
-                                                                    true
-                                                                    :
-                                                                    false
+                                                                        ?
+                                                                        true
+                                                                        :
+                                                                        false
                                                                 } size="xs" onstyle="success" offstyle="dark"
                                                                     onChange={(e) => {
                                                                         updatePreference(data.userKey, e);

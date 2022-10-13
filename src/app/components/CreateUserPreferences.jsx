@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
+const { v4: uuidv4 } = require('uuid');
 
 export const CreateUserPreferences = (props) => {
 
     useEffect(() => {
-        console.log(props.rowData)
     }, []);
 
     const updatePreference = (userKey, value) => {
@@ -27,17 +27,21 @@ export const CreateUserPreferences = (props) => {
                 return (
                     <>
                         Pound {" "}
-                        <BootstrapSwitchButton checked={
-                            data.airline == "airline-fda"
-                                ?
-                                false
-                                :
-                                data.value == "kg"
+                        <BootstrapSwitchButton
+                            key={uuidv4()} /* fixed issue */
+                            disabled={props.disabled}
+                            checked={
+                                props.manualSelect == true
                                     ?
-                                    true
-                                    :
                                     false
-                        } size="xs" width="100" onlabel="kg" offlabel="lb" onstyle="dark" offstyle="dark"
+                                    :
+                                    data.value == "kg"
+                                        ?
+                                        true
+                                        :
+                                        false
+                            }
+                            size="xs" width="100" onlabel="kg" offlabel="lb" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "kg");
@@ -56,8 +60,10 @@ export const CreateUserPreferences = (props) => {
                     <>
                         Mach {" "}
                         <BootstrapSwitchButton
+                            key={uuidv4()} /* fixed issue */
+                            disabled={props.disabled}
                             checked={
-                                data.airline == "airline-fda"
+                                props.manualSelect == true
                                     ?
                                     false
                                     :
@@ -85,17 +91,20 @@ export const CreateUserPreferences = (props) => {
                 return (
                     <>
                         NM/100lb {" "}
-                        <BootstrapSwitchButton checked={
-                            data.airline == "airline-fda"
-                                ?
-                                false
-                                :
-                                data.value == "nm100kg"
+                        <BootstrapSwitchButton
+                            key={uuidv4()} /* fixed issue */
+                            disabled={props.disabled}
+                            checked={
+                                props.manualSelect == true
                                     ?
-                                    true
-                                    :
                                     false
-                        } size="xs" width="100" onlabel="nm100kg" offlabel="nm100lb" onstyle="dark" offstyle="dark"
+                                    :
+                                    data.value == "nm100kg"
+                                        ?
+                                        true
+                                        :
+                                        false
+                            } size="xs" width="100" onlabel="nm100kg" offlabel="nm100lb" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "nm100kg");
@@ -113,17 +122,20 @@ export const CreateUserPreferences = (props) => {
                 return (
                     <>
                         FeetX100 {" "}
-                        <BootstrapSwitchButton checked={
-                            data.airline == "airline-fda"
-                                ?
-                                false
-                                :
-                                data.value == "meterX100"
+                        <BootstrapSwitchButton
+                            key={uuidv4()} /* fixed issue */
+                            disabled={props.disabled}
+                            checked={
+                                props.manualSelect == true
                                     ?
-                                    true
-                                    :
                                     false
-                        } size="xs" width="100" onlabel="meterX100" offlabel="feetX100" onstyle="dark" offstyle="dark"
+                                    :
+                                    data.value == "meterX100"
+                                        ?
+                                        true
+                                        :
+                                        false
+                            } size="xs" width="100" onlabel="meterX100" offlabel="feetX100" onstyle="dark" offstyle="dark"
                             onChange={(e) => {
                                 if (e == true) {
                                     updatePreference(data.userKey, "meterX100");

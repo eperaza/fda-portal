@@ -5,8 +5,14 @@ export const SwitchToggle = (props) => {
     const [selected, setSelected] = useState(props.selected);
     const [count, setCount] = useState();
 
+    useEffect(() => {
+        if(props.resetSwitch === true){
+            setSelected("all");
+        }
+    }, [props.resetSwitch]);
 
     const handleChange = (val) => {
+        props.setResetSwitch(false);
         setSelected(val);
         console.log(val);
         if (val == "all") {

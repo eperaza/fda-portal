@@ -2,8 +2,11 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
 import { Form } from 'react-bootstrap';
 import Checkbox from '@mui/material/Checkbox';
+import { useSnackbar } from 'notistack';
 
 export const AirlinePreferences = (props) => {
+    const [snack, setSnack] = useState("");
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     useEffect(() => {
     }, []);
@@ -21,9 +24,13 @@ export const AirlinePreferences = (props) => {
             .then(response => response.text())
             .then(data => {
                 console.log("Rows updated: " + data);
+                enqueueSnackbar(`Preference updated: ${key}_${value}_${role}`, { variant: 'success' });
             }
             )
-            .catch(error => console.log('error', error));
+            .catch(error => {
+                enqueueSnackbar("Error", { variant: 'error' })
+                console.log('error', error)
+            });
     }
 
     const renderPreferences = (data) => {

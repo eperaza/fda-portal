@@ -1,8 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { useEffect, useRef } from 'react';
 import { Tails } from "./Tails"
-
-
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import "../aggrid.css";
 import { Preferences } from "./Preferences";
@@ -13,7 +11,7 @@ const axios = require('axios');
 
 export const ListAirlinePreferences = (props) => {
     const [rowData, setRowData] = useState([]);
-
+    
     useEffect(() => {
         getPreferences();
     }, [])
@@ -30,7 +28,7 @@ export const ListAirlinePreferences = (props) => {
 
         console.log(props.airline.toUpperCase())
         const code = process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_GET_URI}?code=${code}&airline=airline-${props.airline}`, options)
             .then(response => response.json())
             .then(data => {
                 setRowData(data);
@@ -65,7 +63,7 @@ export const ListAirlinePreferences = (props) => {
             {
                 rowData
                     ?
-                    <AirlinePreferences rowData={rowData} airline={props.airline}></AirlinePreferences>
+                    <AirlinePreferences rowData={rowData} airline={props.airline} />
                     :
                     <></>
             }

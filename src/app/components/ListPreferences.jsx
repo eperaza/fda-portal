@@ -5,6 +5,7 @@ import "../aggrid.css";
 import { Preferences } from "./Preferences";
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import { useSnackbar } from 'notistack';
 
 const axios = require('axios');
 
@@ -20,6 +21,9 @@ export const ListPreferences = (props) => {
             </Stack>
         </>
     );
+    const [snack, setSnack] = useState("");
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
 
     useEffect(() => {
         getPreferences();
@@ -35,7 +39,7 @@ export const ListPreferences = (props) => {
         };
 
         const code = process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=airline-${props.airline}`, options)
             .then(response => response.json())
             .then(data => {
                 setRowData(data);
@@ -51,7 +55,7 @@ export const ListPreferences = (props) => {
             {
                 rowData
                     ?
-                    <Preferences rowData={rowData} airline={props.airline}></Preferences>
+                    <Preferences rowData={rowData} airline={props.airline} setSnack={setSnack} />
                     :
                     <></>
             }

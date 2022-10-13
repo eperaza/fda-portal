@@ -49,6 +49,7 @@ export const ListUsers = (props) => {
     const abort = useRef(0);
     const [isError, setIsError] = useState(false);
     const [roles, setRoles] = useState([]);
+    const [resetSwitch, setResetSwitch] = useState(false);
 
     useEffect(() => {
         getRoles();
@@ -414,7 +415,7 @@ export const ListUsers = (props) => {
             }
         };
         try {
-            let res = await fetch(`${process.env.REACT_APP_FUNCTION_USERS_GET_URI}?airline=${props.airline}&objectId=${props.objectId}`, requestOptions);
+            let res = await fetch(`${process.env.REACT_APP_FUNCTION_USERS_GET_URI}?airline=airline-${props.airline}&objectId=${props.objectId}`, requestOptions);
             let status = await res.status;
             let data = await res.json();
             if (status == 200) {
@@ -552,7 +553,7 @@ export const ListUsers = (props) => {
         gridRef.current.api.setQuickFilter(e.target.value);
         let rows = gridRef.current.api.getDisplayedRowCount();
         setCount(rows);
-
+        setResetSwitch(true);
     }
 
     const accountStateFormatter = (params) => {
@@ -834,8 +835,7 @@ export const ListUsers = (props) => {
                                     </div>
                                     <div className="col-md-4 align-self-center d-flex align-items-center justify-content-center">
                                         <div className="row">
-                                            <SwitchToggle values={["pending", "all", "registered"]} selected="all" gridRef={gridRef} setCount={setCount} setFilterVal={setFilterVal} />
-
+                                            <SwitchToggle values={["pending", "all", "registered"]} selected="all" gridRef={gridRef} setCount={setCount} setFilterVal={setFilterVal} resetSwitch={resetSwitch} setResetSwitch={setResetSwitch} />
                                         </div>
                                         <div className="row" >
                                             <div className="col-12 ">
@@ -924,7 +924,7 @@ export const ListUsers = (props) => {
                                     {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
-                                    <AgGridColumn field="accountEnabled" sortable={true} filter={true} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="accountEnabled" sortable={true} filter={false} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
                                     <AgGridColumn field="version" sortable={true} filter={true} editable={false} cellRenderer={VersionCellRenderer}
                                         cellRendererParams={{ tspLastModified: TSP }} headerName={"TSP Version"}></AgGridColumn>
                                     <AgGridColumn field="lastUpdated" sortable={true} filter={true} editable={false} headerName={"TSP Last Update"}></AgGridColumn>

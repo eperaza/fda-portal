@@ -12,29 +12,29 @@ export const CreateAirlinePreferencesForm = (props) => {
     const updatePreference = (airlineKey, checked, key) => {
 
         props.airlinePreferences.forEach((preference, index) => {
-            if (preference.airlineKey == airlineKey) {
-                if (key == "enabled") {
+            if (preference.airlineKey === airlineKey) {
+                if (key === "enabled") {
                     props.airlinePreferences[index]["enabled"] = checked
                 }
-                if (key == "display") {
+                if (key === "display") {
                     props.airlinePreferences[index]["display"] = checked
                 }
-                if (key == "choiceEFBAdmin") {
+                if (key === "choiceEFBAdmin") {
                     props.airlinePreferences[index]["choiceEFBAdmin"] = checked
                 }
-                if (key == "choiceFocal") {
+                if (key === "choiceFocal") {
                     props.airlinePreferences[index]["choiceFocal"] = checked
                 }
-                if (key == "choiceCheckAirman") {
+                if (key === "choiceCheckAirman") {
                     props.airlinePreferences[index]["choiceCheckAirman"] = checked
                 }
-                if (key == "choicePilot") {
+                if (key === "choicePilot") {
                     props.airlinePreferences[index]["choicePilot"] = checked
                 }
-                if (key == "choiceMaintenance") {
+                if (key === "choiceMaintenance") {
                     props.airlinePreferences[index]["choiceMaintenance"] = checked
                 }
-                
+
             }
         })
 
@@ -45,9 +45,8 @@ export const CreateAirlinePreferencesForm = (props) => {
     const renderPreferences = (data) => {
         return (
             <>
-            {console.log(uuidv4)}
                 {
-                    
+
                     <div className="row">
                         <div className="col-12">
                             <div className="preview-list">
@@ -68,12 +67,13 @@ export const CreateAirlinePreferencesForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
-                                                                ?
-                                                                false
-                                                                :
-                                                                data.enabled
+                                                                props.manualSelect === true
+                                                                    ?
+                                                                    false
+                                                                    :
+                                                                    data.enabled
                                                             }
                                                             style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "enabled", data.enabled)}
@@ -82,78 +82,84 @@ export const CreateAirlinePreferencesForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
-                                                                ?
-                                                                false
-                                                                :
-                                                                data.display
-                                                            }                                                            style={{ color: "#0d6efd" }}
+                                                                props.manualSelect === true
+                                                                    ?
+                                                                    false
+                                                                    :
+                                                                    data.display
+                                                            } style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "display", data.display)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
-                                                                ?
-                                                                false
-                                                                :
-                                                                data.choiceEFBAdmin
-                                                            }                                                               style={{ color: "#0d6efd" }}
+                                                                props.manualSelect === true
+                                                                    ?
+                                                                    false
+                                                                    :
+                                                                    data.choiceEFBAdmin
+                                                            } style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceEFBAdmin", data.choiceEFBAdmin)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
-                                                                ?
-                                                                false
-                                                                :
-                                                                data.choiceFocal
-                                                            }                                                               style={{ color: "#0d6efd" }}
+                                                                props.manualSelect === true
+                                                                    ?
+                                                                    false
+                                                                    :
+                                                                    data.choiceFocal
+                                                            } style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceFocal", data.choiceFocal)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
-                                                                ?
-                                                                false
-                                                                :
-                                                                data.choiceCheckAirman
-                                                            }                                                             style={{ color: "#0d6efd" }}
+                                                                props.manualSelect === true
+                                                                    ?
+                                                                    false
+                                                                    :
+                                                                    data.choiceCheckAirman
+                                                            } style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceCheckAirman", data.choiceCheckAirman)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
-                                                                ?
-                                                                false
-                                                                :
-                                                                data.choicePilot
-                                                            }                                                             style={{ color: "#0d6efd" }}
+                                                                props.manualSelect === true
+                                                                    ?
+                                                                    false
+                                                                    :
+                                                                    data.choicePilot
+                                                            } style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choicePilot", data.choicePilot)}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
-                                                                ?
-                                                                false
-                                                                :
-                                                                data.choiceMaintenance
-                                                            }                                                             style={{ color: "#0d6efd" }}
+                                                                props.manualSelect === true
+                                                                    ?
+                                                                    false
+                                                                    :
+                                                                    data.choiceMaintenance
+                                                            } style={{ color: "#0d6efd" }}
                                                             onChange={e => updatePreference(data.airlineKey, e.target.checked, "choiceMaintenance", data.choiceMaintenance)}
                                                         />
                                                     </div>
@@ -178,7 +184,7 @@ export const CreateAirlinePreferencesForm = (props) => {
         );
     };
 
-   
+
 
     return (
         <>

@@ -42,7 +42,6 @@ export const CreateFeatureManagementForm = (props) => {
     const renderPreferences = (data) => {
         return (
             <>
-                {console.log(uuidv4)}
                 {
                     <div className="row">
                         <div className="col-12">
@@ -63,8 +62,9 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
+                                                                props.manualSelect == true
                                                                 ?
                                                                 false
                                                                 :
@@ -77,8 +77,9 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
+                                                                props.manualSelect == true
                                                                 ?
                                                                 false
                                                                 :
@@ -91,8 +92,9 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
+                                                                props.manualSelect == true
                                                                 ?
                                                                 false
                                                                 :
@@ -105,8 +107,9 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
+                                                                props.manualSelect == true
                                                                 ?
                                                                 false
                                                                 :
@@ -119,8 +122,9 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
+                                                                props.manualSelect == true
                                                                 ?
                                                                 false
                                                                 :
@@ -133,8 +137,9 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
+                                                                props.manualSelect == true
                                                                 ?
                                                                 false
                                                                 :
@@ -147,8 +152,9 @@ export const CreateFeatureManagementForm = (props) => {
                                                     <div className="col-1">
                                                         <Checkbox
                                                             key={uuidv4()} /* fixed issue */
+                                                            disabled={props.disabled}
                                                             defaultChecked={
-                                                                data.airline == "airline-fda"
+                                                                props.manualSelect == true
                                                                 ?
                                                                 false
                                                                 :

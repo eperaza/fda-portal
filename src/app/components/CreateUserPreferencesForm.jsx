@@ -23,7 +23,6 @@ export const CreateUserPreferencesForm = (props) => {
     );
 
     useEffect(() => {
-        console.log(props.airline)
         getPreferences();
     }, [props.airline])
 
@@ -36,11 +35,30 @@ export const CreateUserPreferencesForm = (props) => {
             headers: headers
         };
 
-        console.log(props.airline.toUpperCase())
         const code = process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline.replace("airline-","")}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline}`, options)
             .then(response => response.json())
             .then(data => {
+                console.log(data);
+                /*
+                if (props.airline == "airline-fda") {
+                    data.forEach((preference) => {
+                        if (preference.userKey == "fuelWeightUnit") {
+                            preference.value = "lb";
+                        }
+                        if (preference.userKey == "speedUnit") {
+                            preference.value = "mach";
+                        }
+                        if (preference.userKey == "fuelMileageUnit") {
+                            preference.value = "nm100lb";
+                        }
+                        if (preference.userKey == "altitudeUnit") {
+                            preference.value = "feetX100";
+                        }
+                    })
+                }
+                */
+                console.log(data);
                 setRowData(data);
                 props.setUserPreferences(data)
                 setSkeleton();
@@ -55,7 +73,7 @@ export const CreateUserPreferencesForm = (props) => {
             {
                 rowData
                     ?
-                    <CreateUserPreferences rowData={rowData} airline={props.airline} setUserPreferences={props.setUserPreferences} />
+                    <CreateUserPreferences rowData={rowData} airline={props.airline} setUserPreferences={props.setUserPreferences} manualSelect={props.manualSelect} disabled={props.disabled}/>
                     :
                     <></>
             }

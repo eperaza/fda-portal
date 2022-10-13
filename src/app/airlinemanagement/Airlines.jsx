@@ -28,6 +28,14 @@ import Tabs from 'react-bootstrap/Tabs';
 import Spinner from 'react-bootstrap/Spinner'
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import MenuItem from '@mui/material/MenuItem';
+import Radio from '@mui/material/Radio';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import { Collapse } from '@mui/material';
+import Switch, { SwitchProps } from '@mui/material/Switch';
+import { useSnackbar } from 'notistack';
+
+const { v4: uuidv4 } = require('uuid');
 
 const StyledAutocomplete = styled(Autocomplete)({
     "& .MuiInputLabel-outlined:not(.MuiInputLabel-shrink)": {
@@ -46,15 +54,10 @@ const StyledAutocomplete = styled(Autocomplete)({
             height: 2
         },
         "& .MuiOutlinedInput-notchedOutline": {
-            borderRight: "none",
-            borderLeft: "none",
-            borderTop: "none",
-            borderBottom: "none"
-
-
+            border: '2px solid white'
         },
         "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "red"
+            borderColor: "#0d6efd"
         },
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: "purple"
@@ -66,11 +69,71 @@ const StyledAutocomplete = styled(Autocomplete)({
         "& .css-14s5rfu-MuiFormLabel-root-MuiInputLabel-root": {
             color: "blue",
             fontSize: 14
-        }//<label class=" MuiInputLabel-animated MuiInputLabel-outlined MuiFormLabel-root MuiFormLabel-colorPrimary css-14s5rfu-MuiFormLabel-root-MuiInputLabel-root" data-shrink="false" for="combo-box-demo" id="combo-box-demo-label">ICAO</label>
-
-
+        },
+        '& .MuiSvgIcon-root': {
+            color: '#fff !important'
+        }
+        //<label class=" MuiInputLabel-animated MuiInputLabel-outlined MuiFormLabel-root MuiFormLabel-colorPrimary css-14s5rfu-MuiFormLabel-root-MuiInputLabel-root" data-shrink="false" for="combo-box-demo" id="combo-box-demo-label">ICAO</label>
     }
 });
+
+const StyledTextArea = styled(TextField)({
+    '& input:valid + fieldset': {
+        borderWidth: 2,
+        width: 400
+    },
+    '& input:invalid + fieldset': {
+        borderColor: 'red',
+        borderWidth: 2,
+        width: 400
+    },
+    '& input:valid:focus + fieldset': {
+        borderLeftWidth: 6,
+        padding: '4px !important', // override inline-style
+        borderColor: '#0d6efd',
+        width: 400
+    },
+    '& .MuiOutlinedInput-root': {
+        border: '2px solid white',
+        width: 400
+    },
+    '.MuiFormLabel-root': {
+        backgroundColor: '#191c24 !important'
+    }
+});
+
+const Android12Switch = styled(Switch)(({ theme }) => ({
+    padding: 8,
+    '& .MuiSwitch-track': {
+        borderRadius: 22 / 2,
+        '&:before, &:after': {
+            content: '""',
+            position: 'absolute',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 16,
+            height: 16,
+        },
+        '&:before': {
+            backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+                theme.palette.getContrastText(theme.palette.primary.main),
+            )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
+            left: 12,
+        },
+        '&:after': {
+            backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+                theme.palette.getContrastText(theme.palette.primary.main),
+            )}" d="M19,13H5V11H19V13Z" /></svg>')`,
+            right: 12,
+        },
+    },
+    '& .MuiSwitch-thumb': {
+        boxShadow: 'none',
+        width: 16,
+        height: 16,
+        margin: 2,
+    },
+}));
 
 export const Airlines = (props) => {
 
@@ -85,7 +148,7 @@ export const Airlines = (props) => {
     const [loader, setLoader] = useState("Create Airline");
     const [airlinePreferences, setAirlinePreferences] = useState([]);
     const [airlines, setAirlines] = useState([]);
-    const [airline, setAirline] = useState("airline-" + props.airline);
+    const [airline, setAirline] = useState();
     const [userPreferences, setUserPreferences] = useState([]);
     const [flightProgress, setFlightProgress] = useState([]);
     const [triggers, setTriggers] = useState([]);
@@ -118,6 +181,43 @@ export const Airlines = (props) => {
     </>);
     const [focalRegistrationStatus, setfocalRegistrationStatus] = useState("");
     const [active, setActive] = React.useState(1);
+    const [manualSelect, setManualSelect] = useState(false);
+    const [disabled, setDisabled] = useState(true);
+    const [isDisabled, setIsDisabled] = useState(true);
+    const [disabledAirlines, setDisabledAirlines] = useState(false);
+    const [selectedValue, setSelectedValue] = React.useState('a');
+    const [open, setOpen] = useState(true);
+    const [showEditPrefs, setShowEditPrefs] = useState(false);
+    const [snack, setSnack] = useState("");
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+    const controlProps = (item) => ({
+        checked: selectedValue === item,
+        onChange: handleChange,
+        value: item,
+        name: 'size-radio-button-demo',
+        inputProps: { 'aria-label': item },
+    });
+
+    const handleChange = (event) => {
+        setSelectedValue(event.target.value);
+        if (event.target.value === 'a') {
+            setManualSelect(false);
+            setDisabled(true);
+            setAirline();
+            setDisabledAirlines(false);
+            setIsDisabled(true);
+            setOpen(true);
+        }
+        else {
+            setManualSelect(true);
+            setDisabled(false);
+            setAirline("airline-fda");
+            setDisabledAirlines(true);
+            setIsDisabled(false);
+            setOpen(false);
+        }
+    };
 
     useEffect(() => {
         getOperators();
@@ -127,7 +227,7 @@ export const Airlines = (props) => {
         //generate zip on files change
         generateZip();
 
-    }, [configFiles, instructionFiles, airline, settings, statusText, ICAO]);
+    }, [configFiles, instructionFiles, airline, settings, statusText, ICAO, manualSelect, disabled, isDisabled]);
 
     const generateZip = () => {
         setFileBuffer([]);
@@ -175,7 +275,6 @@ export const Airlines = (props) => {
     }
 
     const getAirlinePreferences = async (airline) => {
-
         const headers = new Headers();
 
         const options = {
@@ -184,9 +283,22 @@ export const Airlines = (props) => {
         };
 
         const code = process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_GET_URI}?code=${code}&airline=${airline.replace("airline-", "")}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_GET_URI}?code=${code}&airline=${airline}`, options)
             .then(response => response.json())
             .then(data => {
+                /*
+                if (airline == "airline-fda") {
+                    data.forEach((preference) => {
+                        preference.enabled = false;
+                        preference.display = false;
+                        preference.choiceEFBAdmin = false;
+                        preference.choicePilot = false;
+                        preference.choiceCheckAirman = false;
+                        preference.choiceFocal = false;
+                        preference.choiceMaintenance = false;
+                    })
+                }
+                */
                 setAirlinePreferences(data);
             }
             )
@@ -202,10 +314,22 @@ export const Airlines = (props) => {
         };
 
         const code = process.env.REACT_APP_FUNCTION_FEATURE_MANAGEMENT_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_FEATURE_MANAGEMENT_GET_URI}?code=${code}&airline=${airline.replace("airline-", "")}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_FEATURE_MANAGEMENT_GET_URI}?code=${code}&airline=${airline}`, options)
             .then(response => response.json())
             .then(data => {
-                console.log("datos " + data)
+                /*
+                if (airline == "airline-fda") {
+                    data.forEach((preference) => {
+                        preference.enabled = false;
+                        preference.display = false;
+                        preference.choiceEFBAdmin = false;
+                        preference.choicePilot = false;
+                        preference.choiceCheckAirman = false;
+                        preference.choiceFocal = false;
+                        preference.choiceMaintenance = false;
+                    })
+                }
+                */
                 setFeatureManagement(data);
             }
             )
@@ -258,16 +382,49 @@ export const Airlines = (props) => {
             promises.push(blockBlobClient.uploadBrowserData(zip));
 
             await Promise.all(promises);
-            setStatusUploadConfig('Config uploaded <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>');
+            setStatusUploadConfig('Config uploaded <i class="mdi mdi-check-circle text-success"></i>');
+
+            setStatusCompleted(`Airline [${ICAO}] setup completed <i class="mdi mdi-check-circle text-success"></i></br>`);
+            setfocalRegistrationStatus("Waiting for Azure AAD to send focal initial registrations, can take up to a minute...");
+            setTimeout(() => {
+                createInitialRegistrations();
+            }, 72000);
         }
         catch (error) {
-            setStatusUploadConfig('Error uploading configuration <i class="mdi mdi mdi-alert-circle text-danger"></i>');
+            setStatusUploadConfig('Error uploading configuration <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
         }
-
-        setStatusCompleted(`Airline [${ICAO}] setup completed <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i></br>`);
-        setfocalRegistrationStatus("Waiting for Azure AAD to send focal initial registrations, can take up to 15 seconds...");
     }
 
+    const publishDemoTails = () => {
+
+        const headers = new Headers();
+        const options = {
+            method: "GET",
+            headers: headers
+        };
+
+        console.log(props.airline.toUpperCase())
+        const code = process.env.REACT_APP_FUNCTION_PUBLISH_TSP_CONFIG_PACKAG_CODE;
+        fetch(`${process.env.REACT_APP_FUNCTION_PUBLISH_TSP_CONFIG_PACKAGE_URI}?code=${code}&airlineId=${ICAO.toUpperCase()}`, options)
+            .then(response => response.status)
+            .then(status => {
+                console.log(status);
+                if (status === 200){
+                    setOKDisabled(false);
+                    setLoader2("OK");
+                    setStatusLoader();
+                    enqueueSnackbar(`Published demo tails for ${ICAO} successfully`, { variant: 'success' });
+                    enqueueSnackbar(`Airline ${ICAO} created successfully`, { variant: 'success' });
+                }
+                else{
+                    enqueueSnackbar(`Failed to publish demo tails for ${ICAO}`, { variant: 'error' });
+                }
+            }
+            )
+            .catch(error => console.log('error', error));
+
+        
+    }
 
     const getAirlines = () => {
         let airlines = [];
@@ -299,15 +456,24 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadAirlinePrefs('Airline preferences created <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>')
+                setStatusUploadAirlinePrefs('Airline preferences created <i class="mdi mdi-check-circle text-success"></i>');
+                uploadUserPreferences();
             }
             else {
-                setStatusUploadAirlinePrefs('Error creating airline preferences <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+                setStatusUploadAirlinePrefs('Error creating airline preferences <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+                setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert text-warning"></i></br>`);
+                setOKDisabled(false);
+                setLoader2("OK");
+                setStatusLoader(<i class="mdi mdi-alert text-warning"></i>);
             }
         }
         catch (e) {
             console.log(e);
-            setStatusUploadConfig('Error creating airline preferences <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+            setStatusUploadConfig('Error creating airline preferences <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+            setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert text-warning"></i></br>`);
+            setOKDisabled(false);
+            setLoader2("OK");
+            setStatusLoader(<i class="mdi mdi-alert text-warning"></i>);
         }
     }
 
@@ -329,15 +495,24 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadFeatureMgmt('Feature management created <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>');
+                setStatusUploadFeatureMgmt('Feature management created <i class="mdi mdi-check-circle text-success"></i>');
+                uploadConfig();
             }
             else {
-                setStatusUploadFeatureMgmt('Error creating feature management <i class="mdi mdi mdi-alert-circle text-danger"></i>');
+                setStatusUploadFeatureMgmt('Error creating feature management <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+                setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+                setOKDisabled(false);
+                setLoader2("OK");
+                setStatusLoader();
             }
         }
         catch (e) {
             console.log(e);
-            setStatusUploadFeatureMgmt('Error creating feature management <i class="mdi mdi mdi-alert-circle text-danger"></i>');
+            setStatusUploadFeatureMgmt('Error creating feature management <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+            setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+            setOKDisabled(false);
+            setLoader2("OK");
+            setStatusLoader();
         }
     }
 
@@ -361,16 +536,25 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadUserPrefs('User preferences created <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>')
+                setStatusUploadUserPrefs('User preferences created <i class="mdi mdi-check-circle text-success"></i>');
+                uploadFlightProgress();
             }
             else {
-                setStatusUploadUserPrefs('Error creating user preferences <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+                setStatusUploadUserPrefs('Error creating user preferences <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+                setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+                setOKDisabled(false);
+                setLoader2("OK");
+                setStatusLoader();
             }
 
         }
         catch (e) {
             console.log(e);
-            setStatusUploadUserPrefs('Error creating user preferences <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+            setStatusUploadUserPrefs('Error creating user preferences <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+            setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+            setOKDisabled(false);
+            setLoader2("OK");
+            setStatusLoader();
         }
     }
 
@@ -394,16 +578,24 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadFlightProgress('Flight progress created <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>')
+                setStatusUploadFlightProgress('Flight progress created <i class="mdi mdi-check-circle text-success"></i>');
+                uploadTriggers();
             }
             else {
-                setStatusUploadFlightProgress('Error creating flight progress <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+                setStatusUploadFlightProgress('Error creating flight progress <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+                setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+                setOKDisabled(false);
+                setLoader2("OK");
+                setStatusLoader();
             }
-
         }
         catch (e) {
             console.log(e);
-            setStatusUploadFlightProgress('Error creating flight progress <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+            setStatusUploadFlightProgress('Error creating flight progress <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+            setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+            setOKDisabled(false);
+            setLoader2("OK");
+            setStatusLoader();
         }
     }
 
@@ -427,29 +619,65 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadTriggers('Notification triggers created <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>')
+                setStatusUploadTriggers('Notification triggers created <i class="mdi mdi-check-circle text-success"></i>');
+                uploadFeatureManagement();
             }
             else {
-                setStatusUploadTriggers('Error creating notification triggers <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+                setStatusUploadTriggers('Error creating notification triggers <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+                setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+                setOKDisabled(false);
+                setLoader2("OK");
+                setStatusLoader();
             }
         }
         catch (e) {
             console.log(e);
-            setStatusUploadTriggers('Error creating airline preferences <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+            setStatusUploadTriggers('Error creating airline preferences <i class="mdi mdi mdi-alert-octagon text-danger"></i>');
+            setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert-octagon text-warning"></i></br>`);
+            setOKDisabled(false);
+            setLoader2("OK");
+            setStatusLoader();
         }
     }
 
-    const createAirlineGroup = () => {
-        createGroup(props.token, `airline-${ICAO.toLowerCase()}`, airlineDescription.current.value).then(response => {
-            console.log("Airline group created: " + response);
-            if (response == 201) {
-                setStatusCreateGroup('Airline group created <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i>')
-            }
-            else {
-                setStatusCreateGroup('Error creating group <i class="mdi mdi mdi-alert-circle text-danger"></i>')
+    const createAirlineGroup = async () => {
+        let groupExists = false;
 
-            }
+        await getAllGroups(props.token).then(response => {
+            response.value.forEach(group => {
+                if (group.displayName.startsWith(`airline-${ICAO.toLowerCase()}`) == true) {
+                    groupExists = true;
+                }
+            });
         });
+
+        if (groupExists === false) {
+            createGroup(props.token, `airline-${ICAO.toLowerCase()}`, airlineDescription.current.value).then(response => {
+                console.log("Airline group created: " + response);
+                if (response == 201) {
+                    setStatusCreateGroup('Airline group created in Active Directory <i class="mdi mdi-check-circle text-success"></i>');
+                    uploadAirlinePreferences();
+                }
+                else {
+                    setStatusCreateGroup('Error creating group <i class="mdi mdi mdi-alert-octagon text-danger"></i>')
+                    setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert text-warning"></i></br>`);
+                    setOKDisabled(false);
+                    setLoader2("OK");
+                    setStatusLoader(<i class="mdi mdi-alert text-warning"></i>);
+                    enqueueSnackbar(`Error creating group [${ICAO}]`, { variant: 'error' });
+
+                }
+            });
+        }
+        else {
+            setStatusCreateGroup(`Airline [${ICAO}] already exists <i class="mdi mdi mdi-alert-octagon text-danger"></i>`)
+            setStatusCompleted(`Airline [${ICAO}] setup aborted <i class="mdi mdi-alert text-warning"></i></br>`);
+            setOKDisabled(false);
+            setLoader2("OK");
+            setStatusLoader(<i class="mdi mdi-alert text-warning"></i>);
+            enqueueSnackbar(`Airline [${ICAO}] already exists`, { variant: 'error' });
+
+        }
     }
 
     const createInitialRegistrations = async () => {
@@ -457,6 +685,7 @@ export const Airlines = (props) => {
         try {
             // Update <placeholder> with your Blob service SAS URL string
             const blobSasUrl = process.env.REACT_APP_STORAGE_BLOB_SAS_URL;
+
             // Create a new BlobServiceClient
             const blobServiceClient = new BlobServiceClient(blobSasUrl);
 
@@ -474,10 +703,10 @@ export const Airlines = (props) => {
             const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
             const downloadBlockBlobResponse = await blockBlobClient.download();
-            console.log("\nDownloaded blob content...");
+
             let blob = await (downloadBlockBlobResponse.blobBody)
             json = await (new Response(blob)).json();
-            console.log(json)
+            console.log("JSON response:" + json)
         }
         catch (e) {
             console.log(e)
@@ -520,21 +749,22 @@ export const Airlines = (props) => {
                 let res = await fetch(process.env.REACT_APP_USERS_CREATE_URI, options)
                 let data = await res.json();
                 if (data.objectId) {
-                    x = x + 'Sent focal registration to [' + focal.otherMails + '] successfully <i class="mdi mdi-checkbox-marked-circle-outline text-success"></i></br>';
-                    setfocalRegistrationStatus(x)
+                    x = x + 'Sent focal registration to [' + focal.otherMails + '] successfully <i class="mdi mdi-check-circle text-success"></i></br>';
+                    setfocalRegistrationStatus(x);
                 }
                 else {
-                    x = x + 'Error sending focal registration to [' + focal.otherMails + '] <i class="mdi mdi mdi-alert-circle text-danger"></i> -> ' + data.errorDescription + '</br>';
-                    setfocalRegistrationStatus(x)
+                    x = x + 'Error sending focal registration to [' + focal.otherMails + '] <i class="mdi mdi mdi-alert-octagon text-danger"></i> -> ' + data.errorDescription + '</br>';
+                    setfocalRegistrationStatus(x);
+                    enqueueSnackbar(`Error creating airline ${ICAO}`, { variant: 'error' });
                 }
             }
             catch (error) {
                 console.log(error);
+                enqueueSnackbar(`Error sending focal registration to ${focal.otherMails}`, { variant: 'error' });
             }
         }
-        setOKDisabled(false);
-        setLoader2("OK");
-        setStatusLoader();
+
+        publishDemoTails();
 
     }
 
@@ -582,12 +812,13 @@ export const Airlines = (props) => {
             if (airlineDescription.current.value == "") {
                 airlineDescription.current.value = `Airline group for ${ICAO}`;
             }
-            setShow(true);
+            //setShow(true);
             setLoader2(<><Spinner animation="border" size="sm" /></>);
             setStatusLoader(<><Spinner variant="primary" animation="border" size="sm" /></>);
             setStatusText(`Creating airline [${ICAO}]...`);
 
             createAirlineGroup();
+            /*
             uploadAirlinePreferences();
             uploadUserPreferences();
             uploadFlightProgress();
@@ -597,8 +828,20 @@ export const Airlines = (props) => {
             setTimeout(() => {
                 createInitialRegistrations();
             }, 18000);
+            */
         }
 
+    }
+
+    const editPrefs = (e) => {
+        if (e.target.checked) {
+            setIsDisabled(false);
+            setDisabled(false);
+        }
+        else {
+            setIsDisabled(true);
+            setDisabled(true);
+        }
     }
 
     return (
@@ -615,77 +858,65 @@ export const Airlines = (props) => {
                 </div>
             </div>
             <MultiStepForm activeStep={active}>
+
                 <Step label='AAD'>
-                    <div className="col-xl-12 col-sm-6 grid-margin stretch-card">
+                    <div className="col-xl-12 col-sm-12 grid-margin stretch-card">
                         <div className="card">
                             <div className="card-body">
                                 <div className="d-flex flex-row justify-content-between">
                                     <h5 className="card-title mb-1">Airline Information</h5>
                                     <p className="text-muted mb-1">AAD Setup</p>
-                                </div >
-                                <br></br>
-                                {skeleton}
-                                {
-                                    operators
-                                        ?
-                                        <StyledAutocomplete
-
-
-                                            id="combo-box-demo"
-                                            getOptionLabel={(option) => option.AirlineID}
-                                            options={operators}
-                                            sx={{ width: 300 }}
-                                            onChange={(event, newValue) => {
-                                                try {
-                                                    setICAO(newValue.IcaoCode);
-                                                }
-                                                catch (e) {
-                                                    setICAO("");
-                                                    console.log(e);
-                                                }
-                                            }}
-                                            renderInput={(params) => <TextField className={isError ? "autocompleteError" : "autocomplete"} {...params} placeholder="ICAO" label="" />}
-                                            renderOption={(props, option) => (
-                                                <Box component="li" {...props}>
-
-                                                    {option.AirlineID} ({option.Name})
-                                                </Box>
-                                            )}
-                                        />
-
-                                        :
-                                        <></>
-                                }
-                                <br></br>
-                                <div className="row col-xl-8 col-sm-6 grid-margin stretch-card">
-                                    <div className="input-group">
-                                        <label className="borderLabelAlt"></label>
-                                        <input
-                                            type="text"
-                                            className={isError ? "inpError2" : "inp2"}
-                                            placeholder="Airline Description"
-                                            aria-label="Airline Description"
-                                            ref={airlineDescription}
-                                            style={{ borderRadius: 10, fontStyle: 'italic' }}
-                                        />
-                                    </div>
                                 </div>
                                 <br></br>
-                                {
-                                    /*
-                                    Is .mp for registration?
-                                    <Checkbox
-                                        defaultChecked={false}
-                                        value={isMP}
-                                        style={{ color: "#0d6efd" }}
-                                        onChange={e => {
-                                            setIsMP(e.target.checked);
-                                            generateZip();
-                                        }}
-    
+                                {skeleton}
+
+                                <div className="col-sm-12 grid-margin stretch-card">
+
+                                    {
+                                        operators
+                                            ?
+                                            <StyledAutocomplete
+                                                sx={{ width: 300 }}
+                                                id="combo-box-demo"
+                                                getOptionLabel={(option) => option.AirlineID}
+                                                options={operators}
+                                                onChange={(event, newValue) => {
+                                                    try {
+                                                        setICAO(newValue.IcaoCode);
+                                                    }
+                                                    catch (e) {
+                                                        setICAO("");
+                                                        console.log(e);
+                                                    }
+                                                }}
+                                                renderInput={(params) => <TextField {...params} placeholder="ICAO" />}
+                                                renderOption={(props, option) => (
+                                                    <Box component="li" {...props}>
+
+                                                        {option.AirlineID} ({option.Name})
+                                                    </Box>
+                                                )}
+                                            />
+
+                                            :
+                                            <></>
+                                    }
+                                </div>
+                                <br></br>
+                                <div className="col-sm-12 grid-margin stretch-card">
+
+
+                                    <StyledTextArea
+                                        label="Description"
+                                        required
+                                        variant="outlined"
+                                        value={`Airline Group for ${ICAO}`}
+                                        id="validation-outlined-input"
+                                        ref={airlineDescription}
                                     />
-                                    */
-                                }
+                                </div>
+                                <br></br>
+
 
                             </div>
                         </div>
@@ -718,12 +949,39 @@ export const Airlines = (props) => {
                         </div>
                     </div>
                 </Step>
+
                 <Step label='Db'>
-                    <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
-                        Select an airline to create a preference snapshot from:
+                    <p>Select one of the below options to create a preference snapshot from an existing airline or set them manually from scratch:</p>
+                    <div className="col-xl-12 col-sm-12 grid-margin stretch-card">
+
+                        <div className="col-sm-6 grid-margin stretch-card">
+
+                            <FormControlLabel value="end"
+                                control={
+                                    <Radio
+                                        {...controlProps('a')}
+                                        sx={{
+                                            color: "#fff",
+                                        }}
+                                    />}
+                                label="Select an airline to create a preferences snapshot"
+                            />
+                        </div>
+                        <div className="col-sm-6 grid-margin stretch-card">
+
+                            <FormControlLabel value="end"
+                                control={
+                                    <Radio
+                                        {...controlProps('b')}
+                                        sx={{
+                                            color: "#fff",
+                                        }}
+                                    />}
+                                label="If you don't want to use a snapshot you can set them manually"
+                            />
+                        </div>
                     </div>
-                    <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
-                        <div className="input-group" style={{ marginTop: 0 }}>
+                    {/*<div className="input-group" style={{ marginTop: 0 }}>
                             <label className="borderLabel2">clone preferences from</label>
                             <select
                                 name="airlines"
@@ -753,178 +1011,249 @@ export const Airlines = (props) => {
                                     })
                                 }
                             </select>
+
+                        </div>*/}
+                    <Collapse in={open} timeout="auto" unmountOnExit>
+
+                        <div className="col-xl-12 col-sm-12 grid-margin stretch-card">
+
+                            <div className="col-sm-3 grid-margin stretch-card">
+
+                                <TextField
+                                    key={uuidv4()} /* fixed issue */
+                                    disabled={disabledAirlines}
+                                    show={false}
+                                    select
+                                    label="Select airline"
+                                    value={airline}
+                                    onChange={e => {
+                                        //getAirlinePreferences(e.target.value);
+                                        setAirline(e.target.value);
+                                        setShowEditPrefs(true);
+
+                                    }}
+                                    helperText="Create preference snapshot from"
+                                    variant="standard"
+                                >
+                                    {airlines.map((airline) => (
+                                        <MenuItem key={airline} value={airline}>
+                                            {airline}
+                                        </MenuItem>
+                                    ))}
+
+                                </TextField>
+                            </div>
+                            <div className="col-sm-3 grid-margin stretch-card">
+                                {
+                                    showEditPrefs
+                                        ?
+                                        <FormControlLabel
+                                            control={
+                                                <Android12Switch
+                                                    onChange={editPrefs}
+                                                />
+                                            }
+                                            label="Edit preferences"
+                                        />
+                                        :
+                                        <></>
+                                }
+                            </div>
+                        </div>
+                    </Collapse>
+
+                    <div className={isDisabled ? "preferenceGridDisabled" : "preferenceGrid"}
+                    >
+                        <Tabs
+                            id="controlled-tab-example"
+                            activeKey={key}
+                            onSelect={(k) => setKey(k)}
+                            className="mb-3"
+                        >
+                            <Tab eventKey="home" title="User Preferences">
+                                <div className="row">
+                                    <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
+                                        <div className="card">
+                                            <div className="card-body">
+                                                <div className="d-flex flex-row justify-content-between">
+                                                    <h5 className="card-title mb-1">User Preferences</h5>
+                                                    <p className="text-muted mb-1">DB Setup</p>
+                                                </div >
+                                                {
+                                                    airlinePreferences
+                                                        ?
+                                                        <CreateUserPreferencesForm airline={airline} setUserPreferences={setUserPreferences} manualSelect={manualSelect} disabled={disabled} />
+                                                        :
+                                                        <></>
+                                                }
+                                                <br></br>
+                                                <div className="d-flex flex-row justify-content-between">
+                                                    <h5 className="card-title mb-1">Flight Progress Table Default Setting:</h5>
+                                                    <p className="text-muted mb-1">DB Setup</p>
+                                                </div >
+                                                Turn on to automatically save values for each flight.
+                                                {
+                                                    airlinePreferences
+                                                        ?
+                                                        <CreateFlightProgressForm token={props.token} airline={airline} setFlightProgress={setFlightProgress} manualSelect={manualSelect} disabled={disabled} />
+                                                        :
+                                                        <div></div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
+                                        <div className="card">
+                                            <div className="card-body">
+                                                <div className="d-flex flex-row justify-content-between">
+                                                    <h5 className="card-title mb-1">Notification Triggers</h5>
+                                                    <p className="text-muted mb-1">DB Setup</p>
+                                                </div >
+                                                {
+                                                    airlinePreferences
+                                                        ?
+
+                                                        <CreateTriggersForm token={props.token} airline={airline} setTriggers={setTriggers} setFlightProgress={props.setFlightProgress} manualSelect={manualSelect} disabled={disabled} />
+                                                        :
+                                                        <div></div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Tab>
+                            <Tab eventKey="profile" title="Airline Preferences">
+                                <div className="row">
+                                    <div className="col-xl-12 col-sm-12 grid-margin stretch-card">
+                                        <div className="card">
+                                            <div className="card-body">
+                                                <div className="d-flex flex-row justify-content-between">
+                                                    <h5 className="card-title mb-1">Airline Preferences</h5>
+                                                    <p className="text-muted mb-1">DB Setup</p>
+                                                </div >
+                                                <br></br>
+                                                <div className="row">
+                                                    <div className="col-3">
+
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Enabled
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Display
+                                                    </div>
+                                                    <div className="col-1">
+                                                        EFB Admin
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Focal
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Check Airmen
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Pilot
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Maint.
+                                                    </div>
+                                                    <div className="col-2">
+                                                        Updated By
+                                                    </div>
+                                                </div>
+                                                {
+                                                    airlinePreferences
+                                                        ?
+                                                        <CreateAirlinePreferencesForm airlinePreferences={airlinePreferences} airline={airline} graphData={props.graphData} setAirlinePreferences={setAirlinePreferences} manualSelect={manualSelect} disabled={disabled} />
+                                                        :
+                                                        <></>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Tab>
+                            <Tab eventKey="contact" title="Feature Management">
+                                <div className="row">
+                                    <div className="col-xl-12 col-sm-12 grid-margin stretch-card">
+                                        <div className="card">
+                                            <div className="card-body">
+                                                <div className="d-flex flex-row justify-content-between">
+                                                    <h5 className="card-title mb-1">Airline Preferences</h5>
+                                                    <p className="text-muted mb-1">DB Setup</p>
+                                                </div >
+                                                <br></br>
+                                                <div className="row">
+                                                    <div className="col-3">
+
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Enabled
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Display
+                                                    </div>
+                                                    <div className="col-1">
+                                                        EFB Admin
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Focal
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Check Airmen
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Pilot
+                                                    </div>
+                                                    <div className="col-1">
+                                                        Maint.
+                                                    </div>
+                                                    <div className="col-2">
+                                                        Updated By
+                                                    </div>
+                                                </div>
+                                                {
+                                                    featureManagement
+                                                        ?
+                                                        <CreateFeatureManagementForm featureManagement={featureManagement} airline={airline} graphData={props.graphData} setFeatureManagement={setFeatureManagement} manualSelect={manualSelect} disabled={disabled} />
+                                                        :
+                                                        <></>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Tab>
+                        </Tabs>
+                    </div>
+                </Step>
+                <Step label='Done'>
+                    <div className="col-xl-12 col-sm-6 grid-margin stretch-card">
+                        <div className="card">
+                            <div className="card-body">
+                                <div className="d-flex flex-row justify-content-between">
+                                    <h5 className="card-title mb-1">Create Airline</h5>
+                                    <h5>{statusLoader}</h5>
+                                </div >
+                                <br></br>
+                                <div dangerouslySetInnerHTML={{ __html: statusText }} />
+                                <br></br>
+                                <div dangerouslySetInnerHTML={{ __html: statusCreateGroup }} />
+                                <div dangerouslySetInnerHTML={{ __html: statusUploadAirlinePrefs }} />
+                                <div dangerouslySetInnerHTML={{ __html: statusUploadUserPrefs }} />
+                                <div dangerouslySetInnerHTML={{ __html: statusUploadFlightProgress }} />
+                                <div dangerouslySetInnerHTML={{ __html: statusUploadTriggers }} />
+                                <div dangerouslySetInnerHTML={{ __html: statusUploadFeatureMgmt }} />
+                                <div dangerouslySetInnerHTML={{ __html: statusUploadConfig }} />
+                                <br></br>
+                                <div dangerouslySetInnerHTML={{ __html: statusCompleted }} />
+                                <br></br>
+                                <div dangerouslySetInnerHTML={{ __html: focalRegistrationStatus }} />
+                            </div>
                         </div>
                     </div>
-
-                    <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
-                        If you don't want to use a snapshot you can also set them manually:
-                    </div>
-
-                    <Tabs
-                        id="controlled-tab-example"
-                        activeKey={key}
-                        onSelect={(k) => setKey(k)}
-                        className="mb-3"
-                    >
-                        <Tab eventKey="home" title="User Preferences">
-                            <div className="row">
-                                <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
-                                    <div className="card">
-                                        <div className="card-body">
-                                            <div className="d-flex flex-row justify-content-between">
-                                                <h5 className="card-title mb-1">User Preferences</h5>
-                                                <p className="text-muted mb-1">DB Setup</p>
-                                            </div >
-                                            {
-                                                airlinePreferences
-                                                    ?
-                                                    <CreateUserPreferencesForm airline={airline} setUserPreferences={setUserPreferences} />
-                                                    :
-                                                    <></>
-                                            }
-                                            <br></br>
-                                            <div className="d-flex flex-row justify-content-between">
-                                                <h5 className="card-title mb-1">Flight Progress Table Default Setting:</h5>
-                                                <p className="text-muted mb-1">DB Setup</p>
-                                            </div >
-                                            Turn on to automatically save values for each flight.
-                                            {
-                                                airlinePreferences
-                                                    ?
-
-                                                    <CreateFlightProgressForm token={props.token} airline={airline} setFlightProgress={setFlightProgress} />
-                                                    :
-                                                    <div></div>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
-                                    <div className="card">
-                                        <div className="card-body">
-                                            <div className="d-flex flex-row justify-content-between">
-                                                <h5 className="card-title mb-1">Notification Triggers</h5>
-                                                <p className="text-muted mb-1">DB Setup</p>
-                                            </div >
-                                            {
-                                                airlinePreferences
-                                                    ?
-
-                                                    <CreateTriggersForm token={props.token} airline={airline} setTriggers={setTriggers} />
-                                                    :
-                                                    <div></div>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Tab>
-                        <Tab eventKey="profile" title="Airline Preferences">
-                            <div className="row">
-                                <div className="col-xl-12 col-sm-6 grid-margin stretch-card">
-                                    <div className="card">
-                                        <div className="card-body">
-                                            <div className="d-flex flex-row justify-content-between">
-                                                <h5 className="card-title mb-1">Airline Preferences</h5>
-                                                <p className="text-muted mb-1">DB Setup</p>
-                                            </div >
-                                            <br></br>
-                                            <div className="row">
-                                                <div className="col-3">
-
-                                                </div>
-                                                <div className="col-1">
-                                                    Enabled
-                                                </div>
-                                                <div className="col-1">
-                                                    Display
-                                                </div>
-                                                <div className="col-1">
-                                                    EFB Admin
-                                                </div>
-                                                <div className="col-1">
-                                                    Focal
-                                                </div>
-                                                <div className="col-1">
-                                                    Check Airmen
-                                                </div>
-                                                <div className="col-1">
-                                                    Pilot
-                                                </div>
-                                                <div className="col-1">
-                                                    Maint.
-                                                </div>
-                                                <div className="col-2">
-                                                    Updated By
-                                                </div>
-                                            </div>
-                                            {
-                                                airlinePreferences
-                                                    ?
-                                                    <CreateAirlinePreferencesForm airlinePreferences={airlinePreferences} airline={airline} graphData={props.graphData} setAirlinePreferences={setAirlinePreferences} />
-                                                    :
-                                                    <></>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Tab>
-                        <Tab eventKey="contact" title="Feature Management">
-                            <div className="row">
-                                <div className="col-xl-12 col-sm-6 grid-margin stretch-card">
-                                    <div className="card">
-                                        <div className="card-body">
-                                            <div className="d-flex flex-row justify-content-between">
-                                                <h5 className="card-title mb-1">Airline Preferences</h5>
-                                                <p className="text-muted mb-1">DB Setup</p>
-                                            </div >
-                                            <br></br>
-                                            <div className="row">
-                                                <div className="col-3">
-
-                                                </div>
-                                                <div className="col-1">
-                                                    Enabled
-                                                </div>
-                                                <div className="col-1">
-                                                    Display
-                                                </div>
-                                                <div className="col-1">
-                                                    EFB Admin
-                                                </div>
-                                                <div className="col-1">
-                                                    Focal
-                                                </div>
-                                                <div className="col-1">
-                                                    Check Airmen
-                                                </div>
-                                                <div className="col-1">
-                                                    Pilot
-                                                </div>
-                                                <div className="col-1">
-                                                    Maint.
-                                                </div>
-                                                <div className="col-2">
-                                                    Updated By
-                                                </div>
-                                            </div>
-                                            {
-                                                featureManagement
-                                                    ?
-                                                    <CreateFeatureManagementForm featureManagement={featureManagement} airline={airline} graphData={props.graphData} setFeatureManagement={setFeatureManagement} />
-                                                    :
-                                                    <></>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Tab>
-                    </Tabs>
                 </Step>
             </MultiStepForm>
-
             {
                 /*
                 {
@@ -953,7 +1282,6 @@ export const Airlines = (props) => {
                 }
                 */
             }
-
             {
                 active === 1 && (
                     <>
@@ -995,17 +1323,24 @@ export const Airlines = (props) => {
                 active === 3
                     ?
                     <>
-                        <div className="row">
-                            <div className="col-sm-12 grid-margin stretch-card">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <button type="submit" disabled={false} size="sm" className="btn btn-primary btn-lg btn-block" onClick={createAirline}>
-                                            {loader}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        {
+                            /*
+                            <button type="submit" disabled={false} size="sm" className="btn btn-primary btn-lg btn-block" onClick={createAirline}>
+                                {loader}
+                            </button>
+                            */
+                        }
+                        <Button
+                            onClick={() => {
+                                setActive(active + 1);
+                                createAirline();
+                            }
+                            }
+                            style={{ float: 'right' }}
+                        >
+                            Next
+                        </Button>
+
                     </>
                     :
                     <></>
@@ -1015,7 +1350,6 @@ export const Airlines = (props) => {
                     <Button onClick={() => setActive(active - 1)}>Previous</Button>
                 )
             }
-
             <Modal show={show} size="lg" onHide={handleClose} scrollable="true" backdrop="static" contentClassName={"modal"}
                 keyboard={false}>
                 <Modal.Header>
@@ -1023,13 +1357,15 @@ export const Airlines = (props) => {
                 </Modal.Header>
                 <Modal.Body>
                     <div dangerouslySetInnerHTML={{ __html: statusText }} />
+                    <br></br>
+                    <div dangerouslySetInnerHTML={{ __html: statusCreateGroup }} />
                     <div dangerouslySetInnerHTML={{ __html: statusUploadAirlinePrefs }} />
                     <div dangerouslySetInnerHTML={{ __html: statusUploadUserPrefs }} />
                     <div dangerouslySetInnerHTML={{ __html: statusUploadFlightProgress }} />
                     <div dangerouslySetInnerHTML={{ __html: statusUploadTriggers }} />
                     <div dangerouslySetInnerHTML={{ __html: statusUploadFeatureMgmt }} />
-                    <div dangerouslySetInnerHTML={{ __html: statusCreateGroup }} />
                     <div dangerouslySetInnerHTML={{ __html: statusUploadConfig }} />
+                    <br></br>
                     <div dangerouslySetInnerHTML={{ __html: statusCompleted }} />
                     <br></br>
                     <div dangerouslySetInnerHTML={{ __html: focalRegistrationStatus }} />

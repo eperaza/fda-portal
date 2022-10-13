@@ -17,15 +17,15 @@ export const CreateTriggersForm = (props) => {
     const [skeleton, setSkeleton] = useState(<>
         <br></br>
         <Stack spacing={1.5}>
-          <Skeleton variant="rectangular"  height={118} sx={{ bgcolor: "grey.900" }} />
-          <Skeleton variant="text" sx={{ bgcolor: "grey.900" }}/>
-          <Skeleton variant="text" sx={{ bgcolor: "grey.900" }}/>
-          <Skeleton variant="text" sx={{ bgcolor: "grey.900" }}/>
-          <Skeleton variant="text" sx={{ bgcolor: "grey.900" }}/>
-          <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} width="60%"/>
-          <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} width="60%"/>
+            <Skeleton variant="rectangular" height={118} sx={{ bgcolor: "grey.900" }} />
+            <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} />
+            <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} />
+            <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} />
+            <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} />
+            <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} width="60%" />
+            <Skeleton variant="text" sx={{ bgcolor: "grey.900" }} width="60%" />
         </Stack>
-        </>);
+    </>);
 
     useEffect(() => {
         getPreferences();
@@ -41,11 +41,30 @@ export const CreateTriggersForm = (props) => {
             headers: headers
         };
 
-        console.log(props.airline.toUpperCase())
         const code = process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline.replace("airline-","")}`, options)
+        fetch(`${process.env.REACT_APP_FUNCTION_USER_PREFERENCES_GET_URI}?code=${code}&airline=${props.airline}`, options)
             .then(response => response.json())
             .then(data => {
+                /*
+                if (props.airline == "airline-fda") {
+                    data.forEach((preference) => {
+                        if (preference.userKey == "fuelWeightUnit") {
+                            preference.value = "kg";
+                        }
+                        else if (preference.userKey == "speedUnit") {
+                            preference.value = "mach";
+                        }
+                        else if (preference.userKey == "fuelMileageUnit") {
+                            preference.value = "nm100kg";
+                        }
+                        else if (preference.userKey == "altitudeUnit") {
+                            preference.value = "feetX100";
+                        }
+                        else {
+                            preference.value = false;
+                        }
+                    })
+                }*/
                 setRowData(data);
                 props.setTriggers(data);
                 setSkeleton();
@@ -60,7 +79,7 @@ export const CreateTriggersForm = (props) => {
             {
                 rowData
                     ?
-                    <CreateTriggers rowData={rowData} airline={props.airline} setTriggers={props.setTriggers}/>
+                    <CreateTriggers rowData={rowData} airline={props.airline} setTriggers={props.setTriggers} manualSelect={props.manualSelect} disabled={props.disabled}/>
                     :
                     <></>
             }

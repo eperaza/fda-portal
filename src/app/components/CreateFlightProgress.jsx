@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-
+const { v4: uuidv4 } = require('uuid');
 
 export const CreateFlightProgress = (props) => {
 
@@ -47,8 +47,11 @@ export const CreateFlightProgress = (props) => {
 
                                                         <div className="col-3">
                                                             {
-                                                                <BootstrapSwitchButton checked={
-                                                                    data.airline == "airline-fda"
+                                                                <BootstrapSwitchButton 
+                                                                key={uuidv4()} /* fixed issue */
+                                                                disabled={props.disabled}
+                                                                checked={
+                                                                    props.manualSelect == true
                                                                         ?
                                                                         false
                                                                         :
