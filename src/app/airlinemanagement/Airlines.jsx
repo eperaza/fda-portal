@@ -173,6 +173,7 @@ export const Airlines = (props) => {
     const [statusUploadTriggers, setStatusUploadTriggers] = useState("");
     const [statusUploadFeatureMgmt, setStatusUploadFeatureMgmt] = useState("");
     const [statusCompleted, setStatusCompleted] = useState("");
+    const [statusDemoTails, setStatusDemoTails] = useState("");
     const [skeleton, setSkeleton] = useState(<>
         <br></br>
         <Stack spacing={1.5}>
@@ -404,26 +405,30 @@ export const Airlines = (props) => {
         };
 
         console.log(props.airline.toUpperCase())
-        const code = process.env.REACT_APP_FUNCTION_PUBLISH_TSP_CONFIG_PACKAG_CODE;
+        const code = process.env.REACT_APP_FUNCTION_PUBLISH_TSP_CONFIG_PACKAGE_CODE;
         fetch(`${process.env.REACT_APP_FUNCTION_PUBLISH_TSP_CONFIG_PACKAGE_URI}?code=${code}&airlineId=${ICAO.toUpperCase()}`, options)
             .then(response => response.status)
             .then(status => {
                 console.log(status);
-                if (status === 200){
+                if (status === 200) {
                     setOKDisabled(false);
                     setLoader2("OK");
                     setStatusLoader();
+                    setStatusDemoTails(`Published demo tails for ${ICAO} successfully <i class="mdi mdi-check-circle text-success"></i></br>`);
                     enqueueSnackbar(`Published demo tails for ${ICAO} successfully`, { variant: 'success' });
                     enqueueSnackbar(`Airline ${ICAO} created successfully`, { variant: 'success' });
                 }
-                else{
+                else {
+                    setStatusDemoTails(`Error publishing demo tails for ${ICAO} <i class="mdi mdi mdi-alert-octagon text-danger"></i></br>`);
                     enqueueSnackbar(`Failed to publish demo tails for ${ICAO}`, { variant: 'error' });
                 }
             }
             )
-            .catch(error => console.log('error', error));
-
-        
+            .catch(error => {
+                setStatusDemoTails(`Error publishing demo tails for ${ICAO} <i class="mdi mdi mdi-alert-octagon text-danger"></i></br>`);
+                enqueueSnackbar(`Failed to publish demo tails for ${ICAO}`, { variant: 'error' });
+                console.log('error', error);
+            });
     }
 
     const getAirlines = () => {
@@ -1249,6 +1254,8 @@ export const Airlines = (props) => {
                                 <div dangerouslySetInnerHTML={{ __html: statusCompleted }} />
                                 <br></br>
                                 <div dangerouslySetInnerHTML={{ __html: focalRegistrationStatus }} />
+                                <br></br>
+                                <div dangerouslySetInnerHTML={{ __html: statusDemoTails }} />
                             </div>
                         </div>
                     </div>
@@ -1369,7 +1376,8 @@ export const Airlines = (props) => {
                     <div dangerouslySetInnerHTML={{ __html: statusCompleted }} />
                     <br></br>
                     <div dangerouslySetInnerHTML={{ __html: focalRegistrationStatus }} />
-
+                    <br></br>
+                    <div dangerouslySetInnerHTML={{ __html: statusDemoTails }} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button disabled={okDisabled} variant="secondary" onClick={e => {

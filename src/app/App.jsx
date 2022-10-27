@@ -24,6 +24,7 @@ import { Groups, Roles } from './usermanagement/Roles';
 import { Airlines } from './airlinemanagement/Airlines';
 import { OptimalCI } from './fdalite/OptimalCI';
 import CircularProgress from '@mui/material/CircularProgress';
+import { FaWindows } from 'react-icons/fa';
 
 const App = () => {
 
@@ -42,7 +43,7 @@ const App = () => {
 
   useEffect(() => {
     let airline = null;
-
+    console.log(accounts);
     if (inProgress === "none" && accounts.length > 0) {
       // Retrieve an access token
       accessToken = instance.acquireTokenSilent({
@@ -50,22 +51,31 @@ const App = () => {
         ...loginRequest
       }).then(response => {
         if (response.accessToken) {
+          console.log(response.accessToken)
           callMsGraph(response.accessToken).then(response => setGraphData(response));
           getGroupNames(response.accessToken).then(response => {
-            response.value.forEach(group => {
-              if (group.displayName.startsWith("airline") == true) {
-                setAirline(group.displayName.replace("airline-", ""));
-                setGroupId(group.id);
-                getFeatureManagement(group.displayName);
-              }
-              if (group.displayName.startsWith("role") == true) {
-                setRole(group.displayName.replace("role-", ""));
-              }
-              if (group.displayName.startsWith("portal") == true) {
-                setRole(group.displayName.replace("portal-", ""));
-              }
-            });
+            try {
+              response.value.forEach(group => {
+                if (group.displayName.startsWith("airline") == true) {
+                  setAirline(group.displayName.replace("airline-", ""));
+                  setGroupId(group.id);
+                  getFeatureManagement(group.displayName);
+                }
+                if (group.displayName.startsWith("role") == true) {
+                  setRole(group.displayName.replace("role-", ""));
+                }
+                if (group.displayName.startsWith("portal") == true) {
+                  setRole(group.displayName.replace("portal-", ""));
+                }
+              });
+            }
+            catch (e) {
+              setTimeout(() => {
+                window.location.reload(true)
+              }, 5000);
+            }
           });
+
           setToken(response.accessToken);
           return response.accessToken;
         }
@@ -435,7 +445,7 @@ const App = () => {
               </>
               :
               <><div class="loader">
-                <Spinner animation="border" variant="primary"/>
+                <Spinner animation="border" variant="primary" />
               </div>
               </>
           }

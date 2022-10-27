@@ -18,10 +18,10 @@ export const Login = () => {
   const { instance } = useMsal();
   const [email, setEmail] = useState(""),
     onInputEmail = ({ target: { value } }) => setEmail(value);
-    const [code, setCode] = useState();
-    const onInputCode = (e) => {
-      setCode(e);
-    };
+  const [code, setCode] = useState();
+  const onInputCode = (e) => {
+    setCode(e);
+  };
   const [password, setPassword] = useState(""),
     onInputPassword = ({ target: { value } }) => setPassword(value);
   const [passwordConfirm, setPasswordConfirm] = useState(""),
@@ -34,20 +34,23 @@ export const Login = () => {
   const [registerLabel, setRegisterLabel] = useState("Register");
   const [registrationErrorText, setRegistrationErrorText] = useState("Registration Failed");
 
-  const handleLogin = (loginType) => {
+  const handleLogin = (loginType, userId) => {
     if (loginType === "popup") {
       instance.loginPopup(loginRequest).catch(e => {
         console.log(e);
       });
     } else if (loginType === "redirect") {
       if (userId) {
-        const loginRequest = {
-          scopes: ["User.Read"],
-          loginHint: userId
-        };
-        instance.loginRedirect(loginRequest).catch(e => {
-          console.log(e);
-        });
+        setRegisterLabel(<><Spinner animation="border" size="sm" /></>);
+        setTimeout(() => {
+          const loginRequest = {
+            scopes: ["User.Read"],
+            loginHint: userId
+          };
+          instance.loginRedirect(loginRequest).catch(e => {
+            console.log(e);
+          });
+        }, 5000);
       }
       else {
         instance.loginRedirect(loginRequest).catch(e => {
@@ -110,25 +113,29 @@ export const Login = () => {
 
           let res = await fetch(process.env.REACT_APP_USER_REGISTER_URI, options)
           let data = await res.json();
-          let status = await res.status;
+          let status = res.status;
 
           if (status == 200) {
             setUserId(userAccount[0]);
             setOpen(true);
             setOpenError(false);
-            //optional
-            const loginRequest = {
+            /*optional
+
+            const customLogin = {
               scopes: ["User.Read"],
               loginHint: userAccount[0]
             };
-            instance.loginRedirect(loginRequest).catch(e => {
+            
+            instance.loginRedirect(customLogin).catch(e => {
               console.log(e);
             });
+            */
+            handleLogin("redirect", userAccount[0])
           }
           else {
             setOpen(false);
             setOpenError(true);
-            setRegistrationErrorText("Registration Failed");
+            setRegistrationErrorText(data.errorDescription);
 
           }
 
@@ -136,12 +143,12 @@ export const Login = () => {
         catch (error) {
           setOpen(false);
           setOpenError(true);
-          setRegistrationErrorText("Registration Failed");
-
+          setRegistrationErrorText("Certificate Retrieval Failed. Invalid Credentials");
+          setRegisterLabel("Register");
         }
 
         setDisabled(false);
-        setRegisterLabel("Register");
+        setRegisterLabel(<><Spinner animation="border" size="sm" /> Redirecting...</>);
       }
       else {
         setRegistrationErrorText("Empty fields")
@@ -174,15 +181,15 @@ export const Login = () => {
 
 
               <Form className="pt-3">
-              <Form.Group className="d-flex search-field">
+                <Form.Group className="d-flex search-field">
                   {
                     //<Form.Control type="password" onChange={onInputCode} value={code} placeholder="Activation Code" size="lg" className="h-auto" />
                   }
                   <AuthCode
-                    allowedCharacters="alpha"
+                    allowedCharacters="alphanumeric"
                     inputClassName='inputCode'
                     onChange={onInputCode} />
-                    <i class="mdi mdi-arrow-left-bold text-primary">activation code</i>
+                  <i class="mdi mdi-arrow-left-bold text-primary">activation code</i>
                 </Form.Group>
                 <Form.Group className="d-flex search-field">
                   <Form.Control type="text" onChange={onInputEmail} value={email} placeholder="Email" size="lg" className="h-auto" />
@@ -191,7 +198,7 @@ export const Login = () => {
                   <Form.Control type="password" onChange={onInputPassword} value={password} placeholder="Set Password" size="lg" className="h-auto" />
                   <Form.Control type="password" onChange={onInputPasswordConfirm} value={passwordConfirm} placeholder="Confirm Password" size="lg" className="h-auto" />
                 </Form.Group>
-                
+
                 <Collapse in={open}>
                   <Alert
                     action={
