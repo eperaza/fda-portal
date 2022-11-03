@@ -2,11 +2,21 @@ import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { Collapse, Dropdown } from 'react-bootstrap';
 import { Trans } from 'react-i18next';
+import { getAllGroups } from "../../graph";
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
+
+const { v4: uuidv4 } = require('uuid');
 
 class Sidebar extends Component {
 
-  state = {
-  };
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      airlines: []
+    };
+  }
 
   toggleMenuState(menuState) {
     if (this.state[menuState]) {
@@ -49,6 +59,19 @@ class Sidebar extends Component {
 
   }
 
+  getAirlines() {
+    let airlines = [];
+    getAllGroups(this.props.token).then(response => {
+      response.value.forEach(group => {
+        if (group.displayName.startsWith("airline") == true) {
+          airlines.push(group.displayName);
+        }
+      });
+      this.setState({ airlines: airlines });
+      console.log(this.state.airlines)
+    });
+  }
+
   render() {
     return (
       <nav className="sidebar sidebar-offcanvas" id="sidebar">
@@ -68,7 +91,9 @@ class Sidebar extends Component {
                   <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>
                   <span className='text-warning'><Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>
                 </div>
+
               </div>
+
               {/*
               <Dropdown alignRight>
                 <Dropdown.Toggle as="a" className="cursor-pointer no-caret">
@@ -110,6 +135,37 @@ class Sidebar extends Component {
                 </Dropdown.Menu>
               </Dropdown>
             */}
+            </div>
+          </li>
+          <li>
+            <div className="nav-item nav-category">
+              <TextField
+                key={uuidv4()} /* fixed issue */
+                show={false}
+                select
+                label="Switch airline"
+                value={this.props.membership}
+                onChange={e => {
+                  //getAirlinePreferences(e.target.value);
+                  this.props.setAirline(e.target.value);
+                }}
+                helperText="Fetch data from another airline"
+                variant="standard"
+              >
+                {
+                  this.state.airlines
+                    ?
+                    this.state.airlines.map((airline) => (
+                      <MenuItem key={airline} value={airline}>
+                        {airline}
+                      </MenuItem>
+                    ))
+                    :
+                    <></>
+                }
+
+
+              </TextField>
             </div>
           </li>
           <li className="nav-item nav-category">
@@ -235,6 +291,7 @@ class Sidebar extends Component {
         }
       });
     });
+    this.getAirlines();
   }
 
 }

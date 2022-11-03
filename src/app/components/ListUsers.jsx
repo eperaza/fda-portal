@@ -15,6 +15,7 @@ import CustomNoRowsOverlay from "./CustomNoRowsOverlay.jsx";
 import { VersionCellRenderer } from "./VersionCellRenderer";
 import Alert from '@mui/material/Alert';
 import Collapse from '@mui/material/Collapse';
+import TSPFilter from "./TSPFilter";
 
 const axios = require('axios');
 
@@ -925,9 +926,9 @@ export const ListUsers = (props) => {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
                                     <AgGridColumn field="accountEnabled" sortable={true} filter={false} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
-                                    <AgGridColumn field="version" sortable={true} filter={true} editable={false} cellRenderer={VersionCellRenderer}
+                                    <AgGridColumn field="version" sortable={true} filter={TSPFilter} filterParams={{tspLastModified:TSP}} editable={false} cellRenderer={VersionCellRenderer}
                                         cellRendererParams={{ tspLastModified: TSP }} headerName={"TSP Version"}></AgGridColumn>
-                                    <AgGridColumn field="lastUpdated" sortable={true} filter={true} editable={false} headerName={"TSP Last Update"}></AgGridColumn>
+                                    <AgGridColumn field="lastUpdated" sortable={true} filter={true} editable={false} headerName={"Last Connection (UTC)"}></AgGridColumn>
                                     <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
                                         values: roles,
                                     }}></AgGridColumn>

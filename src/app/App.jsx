@@ -57,7 +57,7 @@ const App = () => {
             try {
               response.value.forEach(group => {
                 if (group.displayName.startsWith("airline") == true) {
-                  setAirline(group.displayName.replace("airline-", ""));
+                  setAirline(group.displayName);
                   setGroupId(group.id);
                   getFeatureManagement(group.displayName);
                 }
@@ -365,7 +365,7 @@ const App = () => {
                           {
                             accounts[0]
                               ?
-                              <Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />
+                              <Sidebar account={accounts[0].name} membership={airline} setAirline={setAirline} role={role} token={token} />
                               :
                               <></>
                           }
@@ -399,7 +399,7 @@ const App = () => {
                           {
                             accounts[0]
                               ?
-                              <Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />
+                              <Sidebar account={accounts[0].name} membership={airline} setAirline={setAirline} role={role} token={token}/>
                               :
                               <></>
                           }
