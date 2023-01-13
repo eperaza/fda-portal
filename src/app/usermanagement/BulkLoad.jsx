@@ -18,6 +18,7 @@ import "../aggrid.css";
 import { composeInitialProps } from 'react-i18next';
 import Ajv, { JSONSchemaType } from "ajv"
 import addFormats from "ajv-formats"
+import { SelectPosition } from '@patternfly/react-core';
 const ajv = new Ajv()
 addFormats(ajv)
 
@@ -136,7 +137,7 @@ export const BulkLoad = (props) => {
                     ]
                 },
                 minItems: 1,
-                maxItems: 300
+                maxItems: 1000
             }
 
             const valid = ajv.validate(schema, items)
@@ -162,13 +163,12 @@ export const BulkLoad = (props) => {
                 setLoader2(<><Spinner animation="border" size="sm" /></>);
                 abort.current = 0;
                 for (let node of items) {
-                    console.log("entra")
                     if (abort.current == 0) {
                         let status = await createPreUser(node);
                         console.log(status);
                         if (status == 201) {
                             created.push(node);
-                            x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.user + '] successfully</br>'
+                            x = x + '<i class="mdi mdi-account-check text-success"></i> Pre-loaded [<a class="text-info">' + node.user + '</a>] -> ' + node.first + ' ' + node.last + ' as [<a class="text-warning">' + node.role + '<a/>] with email [<a class=text-primary" href="#">' + node.email + '</a>] successfully.</br>'
                             setStatusText(x);
                             setCreatedCount(created.length);
                         }
@@ -176,10 +176,10 @@ export const BulkLoad = (props) => {
                             try {
                                 let error = status;
                                 if (error.includes("Unique_User_Id")) {
-                                    error = "User already exists on database. Violation of UNIQUE KEY constraint, can't insert duplicate values."
+                                    error = 'User already exists on database. Violation of <a class="text-danger">UNIQUE KEY</a> constraint, can not insert duplicate values.'
                                 }
                                 notCreated.push(node.user);
-                                x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.user + '] -> ' + error + '</br>'
+                                x = x + '<i class="mdi mdi mdi-account-remove text-danger"></i> Error pre-loading [<a class="text-danger">' + node.user + '<a/>] -> ' + error + '</br>'
                                 setStatusText(x);
                                 setnotCreatedCount(notCreated.length);
                             }
@@ -254,7 +254,7 @@ export const BulkLoad = (props) => {
             "userId": `${element.user}`,
             "first": `${element.first}`,
             "last": `${element.last}`,
-            "email": `${element.email}`,
+            "email": `${element.email.toLowerCase()}`,
             "role": `${element.role}`,
             "airline": `airline-${props.airline}`,
         });
@@ -334,16 +334,17 @@ export const BulkLoad = (props) => {
                 if (abort.current == 0) {
                     let status = await createUser(node, accessToken);
                     if (status.objectId) {
-                        //setCheck("true")
+                        //giving some time before sending request to delete pre-registration record
+                        await sleep(2000);
                         let statusDelete = await deletePreUsers(node.userId);
                         created.push(node);
-                        x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Created [' + node.userId + '] successfully.</br>'
+                        x = x + '<i class="mdi mdi-account-check text-success"></i> Registered [<a class="text-info" href="#">' + node.userId + '</a>] -> ' + node.first + ' ' + node.last + ' as [<a class="text-warning" href="#">' + node.role + '<a/>] with email [<a href="#">' + node.email + '</a>] successfully.</br>'
                         setStatusText(x);
                         setCreatedCount(created.length);
                     }
                     else {
                         notCreated.push(node);
-                        x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error creating [' + node.userId + '] -> ' + status.errorDescription + '</br>'
+                        x = x + '<i class="mdi mdi mdi-account-remove text-danger"></i> Error creating [<a class="text-danger">' + node.userId + '</a>] -> ' + status.errorDescription + '</br>'
                         setStatusText(x)
                         setnotCreatedCount(notCreated.length);
                     }
@@ -407,6 +408,10 @@ export const BulkLoad = (props) => {
         else {
             alert("Maximum batch size of " + process.env.REACT_APP_MAX_BATCH_SIZE + " users exceeded. Users selected: " + rows);
         }
+    }
+
+    const sleep = async (time) => {
+        return new Promise(res => setTimeout(res, time));
     }
 
     const login = async () => {
@@ -520,7 +525,7 @@ export const BulkLoad = (props) => {
     }
 
     const handleShowDelete = e => {
-        setLoader2(": Warning");
+        setLoader2(" (Better know what you're doing!)");
         setTitleWarning(" <i class='mdi mdi-alert-octagon text-danger'></i>");
         let users = [];
         var x = "<br></br>";
@@ -532,11 +537,11 @@ export const BulkLoad = (props) => {
         if (deleteUsers.length != 0) {
 
             users.forEach(user => {
-                x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.userId + '] ' + user.last + ', ' + user.first + '</br>'
+                x = x + '<i class="mdi mdi-account-minus text-danger"></i> ' + user.first + ' ' + user.last + ' with ID [<a class="text-danger">' + user.userId + '</a>] </br>'
 
             });
 
-            setDeleteLabel(`Do you really want to delete: ${x}`);
+            setDeleteLabel(`You are about to delete: ${x}`);
             if (deleteUsers.length != 0) {
                 setShowDelete(true)
             }
@@ -855,7 +860,7 @@ export const BulkLoad = (props) => {
                                     stopEditingWhenCellsLoseFocus={true}
                                     enableCellTextSelection={false}>
                                     <AgGridColumn field="registrationToken" sortable={true} filter={true} editable={false} hide={true}></AgGridColumn>
-                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} headerCheckboxSelection={true} editable={true}
+                                    <AgGridColumn field="userId" sortable={true} filter={true} checkboxSelection={true} headerCheckboxSelection={true} headerCheckboxSelectionFilteredOnly={true} editable={true}
                                         valueSetter={params => {
                                             if (params.newValue == "") {
                                                 alert("Value can't be empty");
@@ -1026,7 +1031,7 @@ export const BulkLoad = (props) => {
                 </Modal>
                 <Modal scrollable="true" show={showDelete} contentClassName={"modal"} onHide={handleClose}>
                     <Modal.Header>
-                        <Modal.Title> Delete Users {loader2}
+                        <Modal.Title> Delete Pre-loaded Users {loader2}
                             <a dangerouslySetInnerHTML={{ __html: titleWarning }} />
                         </Modal.Title>
                     </Modal.Header>

@@ -97,7 +97,7 @@ export const Preferences = (props) => {
           <div className="card">
             <div className="card-body" style={{ overflowY: 'scroll', height: 500, marginBottom: 20 }} >
               <div className="d-flex flex-row justify-content-between">
-                <h4 className="card-title mb-1">Airline Preferences:</h4>
+                <h4 className="card-title mb-1"></h4>
                 <p className="text-muted mb-1">Airline preferences</p>
               </div >
               {

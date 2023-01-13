@@ -4,7 +4,7 @@ import { Form } from 'react-bootstrap';
 import Checkbox from '@mui/material/Checkbox';
 import { useSnackbar } from 'notistack';
 
-export const AirlinePreferences = (props) => {
+export const FeatureManagement = (props) => {
     const [snack, setSnack] = useState("");
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -19,8 +19,8 @@ export const AirlinePreferences = (props) => {
             headers: headers
         };
 
-        const code = process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_UPDATE_CODE;
-        fetch(`${process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_UPDATE_URI}?code=${code}&airline=${props.airline}&value=${value}&airlineKey=${key}&role=${role}`, options)
+        const code = process.env.REACT_APP_FUNCTION_FEATURE_MANAGEMENT_UPDATE_CODE;
+        fetch(`${process.env.REACT_APP_FUNCTION_FEATURE_MANAGEMENT_UPDATE_URI}?code=${code}&airline=${props.airline}&value=${value}&featureKey=${key}&role=${role}`, options)
             .then(response => response.text())
             .then(data => {
                 console.log("Rows updated: " + data);
@@ -54,55 +54,55 @@ export const AirlinePreferences = (props) => {
                                                 <div className="row">
 
                                                     <div className="col-4">
-                                                        {data.preference}
+                                                        {data.title}
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             defaultChecked={data.enabled}
                                                             style={{ color: "#0d6efd" }}
-                                                            onChange={e => updatePreference(data.airlineKey, e.target.checked, "enabled")}
+                                                            onChange={e => updatePreference(data.featureKey, e.target.checked, "enabled")}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             defaultChecked={data.display}
                                                             style={{ color: "#0d6efd" }}
-                                                            onChange={e => updatePreference(data.airlineKey, e.target.checked, "display")}
+                                                            onChange={e => updatePreference(data.featureKey, e.target.checked, "display")}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             defaultChecked={data.choiceEFBAdmin}
                                                             style={{ color: "#0d6efd" }}
-                                                            onChange={e => updatePreference(data.airlineKey, e.target.checked, "choice_efbadmin")}
+                                                            onChange={e => updatePreference(data.featureKey, e.target.checked, "choice_efbadmin")}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             defaultChecked={data.choiceFocal}
                                                             style={{ color: "#0d6efd" }}
-                                                            onChange={e => updatePreference(data.airlineKey, e.target.checked, "choice_focal")}
+                                                            onChange={e => updatePreference(data.featureKey, e.target.checked, "choice_focal")}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             defaultChecked={data.choiceCheckAirman}
                                                             style={{ color: "#0d6efd" }}
-                                                            onChange={e => updatePreference(data.airlineKey, e.target.checked, "choice_check_airman")}
+                                                            onChange={e => updatePreference(data.featureKey, e.target.checked, "choice_check_airman")}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             defaultChecked={data.choicePilot}
                                                             style={{ color: "#0d6efd" }}
-                                                            onChange={e => updatePreference(data.airlineKey, e.target.checked, "choice_pilot")}
+                                                            onChange={e => updatePreference(data.featureKey, e.target.checked, "choice_pilot")}
                                                         />
                                                     </div>
                                                     <div className="col-1">
                                                         <Checkbox
                                                             defaultChecked={data.choiceMaintenance}
                                                             style={{ color: "#0d6efd" }}
-                                                            onChange={e => updatePreference(data.airlineKey, e.target.checked, "choice_maintenance")}
+                                                            onChange={e => updatePreference(data.featureKey, e.target.checked, "choice_maintenance")}
                                                         />
                                                     </div>
                                                 </div>
@@ -153,7 +153,7 @@ export const AirlinePreferences = (props) => {
                 </div>
             </div>
             {
-                props.rowData.map(renderPreferences)
+                props.featureManagement.map(renderPreferences)
             }
         </>
     );

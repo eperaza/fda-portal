@@ -150,7 +150,7 @@ export const Navbar = (props) => {
               </Dropdown.Toggle>
 
               <Dropdown.Menu className="navbar-dropdown preview-list navbar-profile-dropdown-menu">
-                <h6 className="p-3 mb-0"><Trans>Profile</Trans></h6>
+                <h6 className="p-3 mb-0">{props.graphData.userPrincipalName}</h6>
                 <Dropdown.Divider />
                 {/*<Dropdown.Item href="!#" onClick={evt =>evt.preventDefault()} className="preview-item">
                   <div className="preview-thumbnail">

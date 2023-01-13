@@ -22,10 +22,10 @@ class Sidebar extends Component {
     if (this.state[menuState]) {
       this.setState({ [menuState]: false });
     } else if (Object.keys(this.state).length === 0) {
-      this.setState({ [menuState]: true });
+      //this.setState({ [menuState]: true });
     } else {
       Object.keys(this.state).forEach(i => {
-        this.setState({ [i]: false });
+        //this.setState({ [i]: false });
       });
       this.setState({ [menuState]: true });
     }
@@ -35,12 +35,13 @@ class Sidebar extends Component {
     if (this.props.location !== prevProps.location) {
       this.onRouteChanged();
     }
+
   }
 
   onRouteChanged() {
     document.querySelector('#sidebar').classList.remove('active');
     Object.keys(this.state).forEach(i => {
-      this.setState({ [i]: false });
+      //this.setState({ [i]: false });
     });
 
     const dropdownPaths = [
@@ -67,8 +68,8 @@ class Sidebar extends Component {
           airlines.push(group.displayName);
         }
       });
+      airlines.sort();
       this.setState({ airlines: airlines });
-      console.log(this.state.airlines)
     });
   }
 
@@ -81,20 +82,23 @@ class Sidebar extends Component {
 
         </div>
         <ul className="nav">
-          <li className="nav-item profile">
-            <div className="profile-desc">
-              <div className="profile-pic">
-                <div className="">
-                  <span className="count bg-success"></span>
-                </div>
-                <div className="profile-name">
-                  <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>
-                  <span className='text-warning'><Trans>{this.props.membership.replace("airline-", "").toUpperCase()}</Trans></span>
-                </div>
+          {
+            this.props.membership != "airline-fda"
+              ?
+              <li className="nav-item profile">
+                <div className="profile-desc">
+                  <div className="profile-pic">
+                    <div className="">
+                      <span className="count bg-success"></span>
+                    </div>
+                    <div className="profile-name">
+                      <h5 className="mb-0 font-weight-normal"><Trans>{this.props.account}</Trans></h5>
+                      <span className='text-warning'><Trans>{this.props.airline.replace("airline-", "").toUpperCase()}</Trans></span>
+                    </div>
 
-              </div>
+                  </div>
 
-              {/*
+                  {/*
               <Dropdown alignRight>
                 <Dropdown.Toggle as="a" className="cursor-pointer no-caret">
                   <i className="mdi mdi-dots-vertical"></i>
@@ -135,39 +139,39 @@ class Sidebar extends Component {
                 </Dropdown.Menu>
               </Dropdown>
             */}
-            </div>
-          </li>
-          <li>
-            <div className="nav-item nav-category">
-              <TextField
-                key={uuidv4()} /* fixed issue */
-                show={false}
-                select
-                label="Switch airline"
-                value={this.props.membership}
-                onChange={e => {
-                  //getAirlinePreferences(e.target.value);
-                  this.props.setAirline(e.target.value);
-                }}
-                helperText="Fetch data from another airline"
-                variant="standard"
-              >
-                {
-                  this.state.airlines
-                    ?
-                    this.state.airlines.map((airline) => (
-                      <MenuItem key={airline} value={airline}>
-                        {airline}
-                      </MenuItem>
-                    ))
-                    :
-                    <></>
-                }
-
-
-              </TextField>
-            </div>
-          </li>
+                </div>
+              </li>
+              :
+              <li>
+                <div className="nav-item nav-category">
+                  <TextField
+                    key={uuidv4()} /* fixed issue */
+                    show={false}
+                    select
+                    label="Airline Mode"
+                    value={this.props.airline}
+                    onChange={e => {
+                      //getAirlinePreferences(e.target.value);
+                      this.props.setAirline(e.target.value);
+                    }}
+                    helperText="Fetch data from another airline"
+                    variant="standard"
+                  >
+                    {
+                      this.state.airlines
+                        ?
+                        this.state.airlines.map((airline) => (
+                          <MenuItem key={airline} value={airline}>
+                            {airline}
+                          </MenuItem>
+                        ))
+                        :
+                        <></>
+                    }
+                  </TextField>
+                </div>
+              </li>
+          }
           <li className="nav-item nav-category">
             <span className="nav-link"><Trans>Navigation</Trans></span>
           </li>

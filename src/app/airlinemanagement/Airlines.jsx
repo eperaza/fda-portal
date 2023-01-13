@@ -34,6 +34,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { Collapse } from '@mui/material';
 import Switch, { SwitchProps } from '@mui/material/Switch';
 import { useSnackbar } from 'notistack';
+import LinearProgress from '@mui/material/LinearProgress';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -191,6 +192,7 @@ export const Airlines = (props) => {
     const [showEditPrefs, setShowEditPrefs] = useState(false);
     const [snack, setSnack] = useState("");
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const [linearProgress, setLinearProgress] = useState();
 
     const controlProps = (item) => ({
         checked: selectedValue === item,
@@ -287,19 +289,6 @@ export const Airlines = (props) => {
         fetch(`${process.env.REACT_APP_FUNCTION_AIRLINE_PREFERENCES_GET_URI}?code=${code}&airline=${airline}`, options)
             .then(response => response.json())
             .then(data => {
-                /*
-                if (airline == "airline-fda") {
-                    data.forEach((preference) => {
-                        preference.enabled = false;
-                        preference.display = false;
-                        preference.choiceEFBAdmin = false;
-                        preference.choicePilot = false;
-                        preference.choiceCheckAirman = false;
-                        preference.choiceFocal = false;
-                        preference.choiceMaintenance = false;
-                    })
-                }
-                */
                 setAirlinePreferences(data);
             }
             )
@@ -318,19 +307,6 @@ export const Airlines = (props) => {
         fetch(`${process.env.REACT_APP_FUNCTION_FEATURE_MANAGEMENT_GET_URI}?code=${code}&airline=${airline}`, options)
             .then(response => response.json())
             .then(data => {
-                /*
-                if (airline == "airline-fda") {
-                    data.forEach((preference) => {
-                        preference.enabled = false;
-                        preference.display = false;
-                        preference.choiceEFBAdmin = false;
-                        preference.choicePilot = false;
-                        preference.choiceCheckAirman = false;
-                        preference.choiceFocal = false;
-                        preference.choiceMaintenance = false;
-                    })
-                }
-                */
                 setFeatureManagement(data);
             }
             )
@@ -383,10 +359,14 @@ export const Airlines = (props) => {
             promises.push(blockBlobClient.uploadBrowserData(zip));
 
             await Promise.all(promises);
-            setStatusUploadConfig('Config uploaded <i class="mdi mdi-check-circle text-success"></i>');
+            setStatusUploadConfig('Config uploaded <i class="mdi mdi-check text-success"></i>');
 
-            setStatusCompleted(`Airline [${ICAO}] setup completed <i class="mdi mdi-check-circle text-success"></i></br>`);
+            setStatusCompleted(`Airline [${ICAO}] setup completed <i class="mdi mdi-check text-success"></i></br>`);
             setfocalRegistrationStatus("Waiting for Azure AAD to send focal initial registrations, can take up to a minute...");
+            setLinearProgress(
+                <Stack sx={{ width: '100%', color: '#0d6efd' }} spacing={2}>
+                    <LinearProgress color="inherit" />
+                </Stack>);
             setTimeout(() => {
                 createInitialRegistrations();
             }, 72000);
@@ -414,7 +394,7 @@ export const Airlines = (props) => {
                     setOKDisabled(false);
                     setLoader2("OK");
                     setStatusLoader();
-                    setStatusDemoTails(`Published demo tails for ${ICAO} successfully <i class="mdi mdi-check-circle text-success"></i></br>`);
+                    setStatusDemoTails(`Published demo tails for ${ICAO} successfully <i class="mdi mdi-check text-success"></i></br>`);
                     enqueueSnackbar(`Published demo tails for ${ICAO} successfully`, { variant: 'success' });
                     enqueueSnackbar(`Airline ${ICAO} created successfully`, { variant: 'success' });
                 }
@@ -429,6 +409,8 @@ export const Airlines = (props) => {
                 enqueueSnackbar(`Failed to publish demo tails for ${ICAO}`, { variant: 'error' });
                 console.log('error', error);
             });
+
+        setStatusText(`Airline [${ICAO}] created`);
     }
 
     const getAirlines = () => {
@@ -437,6 +419,7 @@ export const Airlines = (props) => {
             response.value.forEach(group => {
                 if (group.displayName.startsWith("airline") == true) {
                     airlines.push(group.displayName);
+                    airlines.sort();
                 }
             });
             setAirlines(airlines);
@@ -461,7 +444,7 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadAirlinePrefs('Airline preferences created <i class="mdi mdi-check-circle text-success"></i>');
+                setStatusUploadAirlinePrefs('Airline preferences created <i class="mdi mdi-check text-success"></i>');
                 uploadUserPreferences();
             }
             else {
@@ -500,7 +483,7 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadFeatureMgmt('Feature management created <i class="mdi mdi-check-circle text-success"></i>');
+                setStatusUploadFeatureMgmt('Feature management created <i class="mdi mdi-check text-success"></i>');
                 uploadConfig();
             }
             else {
@@ -541,7 +524,7 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadUserPrefs('User preferences created <i class="mdi mdi-check-circle text-success"></i>');
+                setStatusUploadUserPrefs('User preferences created <i class="mdi mdi-check text-success"></i>');
                 uploadFlightProgress();
             }
             else {
@@ -583,7 +566,7 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadFlightProgress('Flight progress created <i class="mdi mdi-check-circle text-success"></i>');
+                setStatusUploadFlightProgress('Flight progress created <i class="mdi mdi-check text-success"></i>');
                 uploadTriggers();
             }
             else {
@@ -624,7 +607,7 @@ export const Airlines = (props) => {
             let status = res.status;
             console.log(status);
             if (status == 200) {
-                setStatusUploadTriggers('Notification triggers created <i class="mdi mdi-check-circle text-success"></i>');
+                setStatusUploadTriggers('Notification triggers created <i class="mdi mdi-check text-success"></i>');
                 uploadFeatureManagement();
             }
             else {
@@ -660,7 +643,7 @@ export const Airlines = (props) => {
             createGroup(props.token, `airline-${ICAO.toLowerCase()}`, airlineDescription.current.value).then(response => {
                 console.log("Airline group created: " + response);
                 if (response == 201) {
-                    setStatusCreateGroup('Airline group created in Active Directory <i class="mdi mdi-check-circle text-success"></i>');
+                    setStatusCreateGroup('Airline group created in Active Directory <i class="mdi mdi-check text-success"></i>');
                     uploadAirlinePreferences();
                 }
                 else {
@@ -670,7 +653,6 @@ export const Airlines = (props) => {
                     setLoader2("OK");
                     setStatusLoader(<i class="mdi mdi-alert text-warning"></i>);
                     enqueueSnackbar(`Error creating group [${ICAO}]`, { variant: 'error' });
-
                 }
             });
         }
@@ -681,7 +663,6 @@ export const Airlines = (props) => {
             setLoader2("OK");
             setStatusLoader(<i class="mdi mdi-alert text-warning"></i>);
             enqueueSnackbar(`Airline [${ICAO}] already exists`, { variant: 'error' });
-
         }
     }
 
@@ -725,7 +706,9 @@ export const Airlines = (props) => {
         headers.append("Content-Type", "application/json");
         headers.append("Ocp-Apim-Subscription-Key", `${process.env.REACT_APP_APIM_KEY}`);
         var x = "";
+
         setfocalRegistrationStatus();
+        setLinearProgress();
 
         for (let focal of json) {
             console.log(`${focal.userPrincipalName}.${ICAO}`)
@@ -754,7 +737,7 @@ export const Airlines = (props) => {
                 let res = await fetch(process.env.REACT_APP_USERS_CREATE_URI, options)
                 let data = await res.json();
                 if (data.objectId) {
-                    x = x + 'Sent focal registration to [' + focal.otherMails + '] successfully <i class="mdi mdi-check-circle text-success"></i></br>';
+                    x = x + 'Sent focal registration to [' + focal.otherMails + '] successfully <i class="mdi mdi-check text-success"></i></br>';
                     setfocalRegistrationStatus(x);
                 }
                 else {
@@ -770,7 +753,6 @@ export const Airlines = (props) => {
         }
 
         publishDemoTails();
-
     }
 
     const login = async () => {
@@ -799,15 +781,17 @@ export const Airlines = (props) => {
     }
 
     const createAirline = () => {
-        setStatusCompleted()
-        setStatusCreateGroup()
-        setStatusUploadAirlinePrefs()
-        setStatusUploadUserPrefs()
-        setStatusUploadConfig()
-        setStatusUploadFeatureMgmt()
-        setStatusUploadFlightProgress()
-        setStatusUploadTriggers()
-        setfocalRegistrationStatus()
+        setStatusCompleted();
+        setStatusCreateGroup();
+        setStatusUploadAirlinePrefs();
+        setStatusUploadUserPrefs();
+        setStatusUploadConfig();
+        setStatusUploadFeatureMgmt();
+        setStatusUploadFlightProgress();
+        setStatusUploadTriggers();
+        setfocalRegistrationStatus();
+        setStatusDemoTails();
+        setLinearProgress();
 
         if (ICAO == "" || configFiles.length == 0 || instructionFiles.length == 0 || airlinePreferences.length == 0 || userPreferences.length == 0 || flightProgress.length == 0 || triggers == 0) {
             setIsError(true);
@@ -820,7 +804,7 @@ export const Airlines = (props) => {
             //setShow(true);
             setLoader2(<><Spinner animation="border" size="sm" /></>);
             setStatusLoader(<><Spinner variant="primary" animation="border" size="sm" /></>);
-            setStatusText(`Creating airline [${ICAO}]...`);
+            setStatusText(`Creating airline [${ICAO}]... DO NOT CLOSE YOUR BROWSER!`);
 
             createAirlineGroup();
             /*
@@ -874,9 +858,7 @@ export const Airlines = (props) => {
                                 </div>
                                 <br></br>
                                 {skeleton}
-
                                 <div className="col-sm-12 grid-margin stretch-card">
-
                                     {
                                         operators
                                             ?
@@ -1067,8 +1049,7 @@ export const Airlines = (props) => {
                         </div>
                     </Collapse>
 
-                    <div className={isDisabled ? "preferenceGridDisabled" : "preferenceGrid"}
-                    >
+                    <div>
                         <Tabs
                             id="controlled-tab-example"
                             activeKey={key}
@@ -1076,7 +1057,7 @@ export const Airlines = (props) => {
                             className="mb-3"
                         >
                             <Tab eventKey="home" title="User Preferences">
-                                <div className="row">
+                                <div className={isDisabled ? "row preferenceGridDisabled" : "row preferenceGrid"}>
                                     <div className="col-xl-6 col-sm-6 grid-margin stretch-card">
                                         <div className="card">
                                             <div className="card-body">
@@ -1128,7 +1109,7 @@ export const Airlines = (props) => {
                                 </div>
                             </Tab>
                             <Tab eventKey="profile" title="Airline Preferences">
-                                <div className="row">
+                                <div className={isDisabled ? "row preferenceGridDisabled" : "row preferenceGrid"}>
                                     <div className="col-xl-12 col-sm-12 grid-margin stretch-card">
                                         <div className="card">
                                             <div className="card-body">
@@ -1179,7 +1160,7 @@ export const Airlines = (props) => {
                                 </div>
                             </Tab>
                             <Tab eventKey="contact" title="Feature Management">
-                                <div className="row">
+                                <div className={isDisabled ? "row preferenceGridDisabled" : "row preferenceGrid"}>
                                     <div className="col-xl-12 col-sm-12 grid-margin stretch-card">
                                         <div className="card">
                                             <div className="card-body">
@@ -1254,6 +1235,7 @@ export const Airlines = (props) => {
                                 <div dangerouslySetInnerHTML={{ __html: statusCompleted }} />
                                 <br></br>
                                 <div dangerouslySetInnerHTML={{ __html: focalRegistrationStatus }} />
+                                {linearProgress}
                                 <br></br>
                                 <div dangerouslySetInnerHTML={{ __html: statusDemoTails }} />
                             </div>
@@ -1376,6 +1358,7 @@ export const Airlines = (props) => {
                     <div dangerouslySetInnerHTML={{ __html: statusCompleted }} />
                     <br></br>
                     <div dangerouslySetInnerHTML={{ __html: focalRegistrationStatus }} />
+                    <div dangerouslySetInnerHTML={{ __html: linearProgress }} />
                     <br></br>
                     <div dangerouslySetInnerHTML={{ __html: statusDemoTails }} />
                 </Modal.Body>

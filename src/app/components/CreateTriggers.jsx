@@ -12,10 +12,10 @@ export const CreateTriggers = (props) => {
         props.rowData.forEach((preference, index) => {
             if (preference.userKey == userKey) {
                 if (value == true) {
-                    props.rowData[index]["value"] = "1";
+                    props.rowData[index]["value"] = "true";
                 }
                 else {
-                    props.rowData[index]["value"] = "0";
+                    props.rowData[index]["value"] = "false";
                 }
             }
         });

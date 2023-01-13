@@ -33,17 +33,17 @@ const App = () => {
   const [graphData, setGraphData] = useState([]);
   const [groupName, setGroupName] = useState([]);
   const [token, setToken] = useState();
-  const [airline, setAirline] = useState("");
+  const [airline, setAirline] = useState();
   const [groupId, setGroupId] = useState();
   const [dirRoles, setDirRoles] = useState();
   const [role, setRole] = useState();
   const [featureManagement, setFeatureManagement] = useState([]);
+  const [membership, setMembership] = useState();
 
   let accessToken = null;
 
   useEffect(() => {
     let airline = null;
-    console.log(accounts);
     if (inProgress === "none" && accounts.length > 0) {
       // Retrieve an access token
       accessToken = instance.acquireTokenSilent({
@@ -51,12 +51,12 @@ const App = () => {
         ...loginRequest
       }).then(response => {
         if (response.accessToken) {
-          console.log(response.accessToken)
           callMsGraph(response.accessToken).then(response => setGraphData(response));
           getGroupNames(response.accessToken).then(response => {
             try {
               response.value.forEach(group => {
                 if (group.displayName.startsWith("airline") == true) {
+                  setMembership(group.displayName);
                   setAirline(group.displayName);
                   setGroupId(group.id);
                   getFeatureManagement(group.displayName);
@@ -85,7 +85,7 @@ const App = () => {
 
     setTimeout(() => {
       handleLogin();
-    }, 1800000);
+    }, 10800000);
 
   }, [inProgress, accounts, instance, token]);
 
@@ -124,21 +124,20 @@ const App = () => {
         if (role == "airlinemaintenance") choice = feature.choiceMaintenance;
 
         if (choice == true || role == "superadmin") {
-          console.log(feature.choiceFocal)
           return (
             <Route path="/usermanagement/Preferences" exact component={() => {
               return (
                 <div>
                   <div className="container-scroller">
-                    {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />}
+                  <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
                     <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
+                      {<Navbar account={accounts[0].name} graphData={graphData}/>}
                       <div className="main-panel">
                         <div className="content-wrapper">
                           {
                             airline
                               ?
-                              <Preferences airline={airline} token={token} graphData={graphData} groupId={groupId} />
+                              <Preferences airline={airline.replace("airline-","")} token={token} graphData={graphData} groupId={groupId} />
                               :
                               <div></div>
                           }
@@ -172,18 +171,17 @@ const App = () => {
         if (role == "airlinemaintenance") choice = feature.choiceMaintenance;
 
         if (choice == true || role == "superadmin") {
-          console.log(feature.choiceFocal)
           return (
             <Route path="/usermanagement/UserGrid" exact component={() => {
               return (
                 <div>
                   <div className="container-scroller">
-                    {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />}
+                  <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
                     <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
+                      {<Navbar account={accounts[0].name} graphData={graphData}/>}
                       <div className="main-panel">
                         <div className="content-wrapper">
-                          <UserGrid />
+                          <UserGrid airline={airline.replace("airline-","")}/>
                         </div>
                         {<Footer />}
                       </div>
@@ -211,20 +209,19 @@ const App = () => {
         if (role == "airlinemaintenance") choice = feature.choiceMaintenance;
 
         if (choice == true || role == "superadmin") {
-          console.log(feature.choiceFocal)
           return (
             <Route path="/usermanagement/BulkLoad" exact component={() => {
               return (
                 <div>
                   <div className="container-scroller">
-                    {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />}
+                  <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
                     <div className="container-fluid page-body-wrapper">
-                      {<Navbar account={accounts[0].name} />}
+                      {<Navbar account={accounts[0].name} graphData={graphData}/>}
                       <div className="main-panel">
                         <div className="content-wrapper">
                           {airline
                             ?
-                            <BulkLoad airline={airline} token={token} />
+                            <BulkLoad airline={airline.replace("airline-","")} token={token} />
                             :
                             <div></div>}
                         </div>
@@ -248,9 +245,9 @@ const App = () => {
           return (
             <div>
               <div className="container-scroller">
-                {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />}
+              <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
                 <div className="container-fluid page-body-wrapper">
-                  {<Navbar account={accounts[0].name} />}
+                  {<Navbar account={accounts[0].name} graphData={graphData}/>}
                   <div className="main-panel">
                     <div className="content-wrapper">
                       <Roles />
@@ -274,9 +271,9 @@ const App = () => {
         return (
           <div>
             <div className="container-scroller">
-              {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />}
+            <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
               <div className="container-fluid page-body-wrapper">
-                {<Navbar account={accounts[0].name} />}
+                {<Navbar account={accounts[0].name} graphData={graphData}/>}
                 <div className="main-panel">
                   <div className="content-wrapper">
                     <FDR />
@@ -295,15 +292,15 @@ const App = () => {
   }
 
   const renderAirlines = () => {
-    if (airline == "fda") {
+    if (membership == "airline-fda") {
       return (
         <Route path="/airlinemanagement/Airlines" exact component={() => {
           return (
             <div>
               <div className="container-scroller">
-                {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />}
+              <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
                 <div className="container-fluid page-body-wrapper">
-                  {<Navbar account={accounts[0].name} />}
+                  {<Navbar account={accounts[0].name} graphData={graphData}/>}
                   <div className="main-panel">
                     <div className="content-wrapper">
                       <Airlines airline={airline} token={token} graphData={graphData} />
@@ -328,9 +325,9 @@ const App = () => {
         return (
           <div>
             <div className="container-scroller">
-              {<Sidebar account={accounts[0].name} membership={`airline-${airline}`} role={role} />}
+            <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
               <div className="container-fluid page-body-wrapper">
-                {<Navbar account={accounts[0].name} />}
+                {<Navbar account={accounts[0].name} graphData={graphData}/>}
                 <div className="main-panel">
                   <div className="content-wrapper">
                     <OptimalCI airline={airline} />
@@ -365,18 +362,18 @@ const App = () => {
                           {
                             accounts[0]
                               ?
-                              <Sidebar account={accounts[0].name} membership={airline} setAirline={setAirline} role={role} token={token} />
+                              <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
                               :
                               <></>
                           }
                           <div className="container-fluid page-body-wrapper">
-                            {<Navbar account={accounts[0].name} />}
+                            {<Navbar account={accounts[0].name} graphData={graphData}/>}
                             <div className="main-panel">
                               <div className="content-wrapper">
                                 {
                                   airline
                                     ?
-                                    <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId} role={role}></Dashboard>
+                                    <Dashboard airline={airline.replace("airline-","")} token={token} graphData={graphData} groupId={groupId} role={role}></Dashboard>
                                     :
                                     <>
                                       No airline membership (Unauthorized).
@@ -399,18 +396,18 @@ const App = () => {
                           {
                             accounts[0]
                               ?
-                              <Sidebar account={accounts[0].name} membership={airline} setAirline={setAirline} role={role} token={token}/>
+                              <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token}/>
                               :
                               <></>
                           }
                           <div className="container-fluid page-body-wrapper">
-                            {<Navbar account={accounts[0].name} />}
+                            {<Navbar account={accounts[0].name} graphData={graphData}/>}
                             <div className="main-panel">
                               <div className="content-wrapper">
                                 {
                                   airline
                                     ?
-                                    <Dashboard airline={airline} token={token} graphData={graphData} groupId={groupId} role={role}></Dashboard>
+                                    <Dashboard airline={airline.replace("airline-","")} token={token} graphData={graphData} groupId={groupId} role={role}></Dashboard>
                                     :
                                     <></>
                                 }
@@ -444,7 +441,7 @@ const App = () => {
                 </Switch>
               </>
               :
-              <><div class="loader">
+              <><div className="loader">
                 <Spinner animation="border" variant="primary" />
               </div>
               </>

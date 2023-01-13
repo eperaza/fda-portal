@@ -7,7 +7,7 @@ import { callMsGraph, getGroupNames } from "../../graph";
 //import '../bootstrap.scss';
 
 
-export const UserGrid = () => {
+export const UserGrid = (props) => {
 
   const { instance, accounts, inProgress } = useMsal();
   const [graphData, setGraphData] = useState([]);
@@ -33,7 +33,7 @@ export const UserGrid = () => {
           getGroupNames(response.accessToken).then(response => {
             response.value.forEach(group => {
               if (group.displayName.startsWith("airline") == true) {
-                setAirline(group.displayName.replace("airline-", ""));
+                //setAirline(group.displayName.replace("airline-", ""));
                 setGroupId(group.id);
               }
               if (group.displayName.startsWith("role") == true) {
@@ -71,7 +71,7 @@ export const UserGrid = () => {
       {
         groupId
           ?
-          <ListUsers groupId={groupId} token={token} airline={airline} role={role} dirRole={dirRole} graphData={graphData} objectId={objectId} />
+          <ListUsers groupId={groupId} token={token} airline={props.airline} role={role} dirRole={dirRole} graphData={graphData} objectId={objectId} />
           :
           <div></div>
       }

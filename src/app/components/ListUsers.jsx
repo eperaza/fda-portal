@@ -51,6 +51,11 @@ export const ListUsers = (props) => {
     const [isError, setIsError] = useState(false);
     const [roles, setRoles] = useState([]);
     const [resetSwitch, setResetSwitch] = useState(false);
+    const [disableSendButton, setDisableSendButton] = useState(false);
+    const [sendMassDisabled, setSendMassDisabled] = useState(true);
+    const [showMassSend, setShowMassSend] = useState(false);
+    const [sendMassLabel, setSendMassLabel] = useState("Send");
+
 
     useEffect(() => {
         getRoles();
@@ -61,7 +66,8 @@ export const ListUsers = (props) => {
     const handleClose = () => {
         setShow(false);
         setShowAlert(false);
-        setShowAdd(false)
+        setShowAdd(false);
+        setShowMassSend(false);
     }
 
     const getRoles = () => {
@@ -214,14 +220,14 @@ export const ListUsers = (props) => {
         const deleteUsers = selectedData.map(node => {
             users.push(node);
         });
-        setLoader2(": Warning");
+        setLoader2(" (Better know what you're doing!)");
         setTitleWarning(" <i class='mdi mdi-alert-octagon text-danger'></i>");
         setDisableDeleteButton(false);
         setStatusText();
         if (deleteUsers.length != 0) {
             setShow(true);
             users.forEach(user => {
-                x = x + '<i class="mdi mdi-account text-primary"></i> [' + user.mailNickname + '] ' + user.surname + ', ' + user.givenName + '</br>'
+                x = x + '<i class="mdi mdi-account-minus text-danger"></i> ' + user.givenName + ' ' + user.surname + ' with ID [<a class="text-danger">' + user.mailNickname + '</a>] </br>'
 
             });
             setDeleteUsersLabel(`You are about to delete: ${x}`);
@@ -583,11 +589,12 @@ export const ListUsers = (props) => {
         if (count == 0) {
             setDeleteDisabled(true);
             setExportDisabled(true);
-
+            setSendMassDisabled(true);
         }
         else {
             setDeleteDisabled(false);
             setExportDisabled(false);
+            setSendMassDisabled(false);
         }
     }, []);
 
@@ -635,6 +642,160 @@ export const ListUsers = (props) => {
         gridRef.current.api.showLoadingOverlay();
         getUsersAF();
     }, []);
+
+    const handleMassSendShow = e => {
+
+        let users = [];
+        var x = "<br></br>";
+        const selectedNodes = gridRef.current.api.getSelectedNodes();
+        const selectedData = selectedNodes.map(node => node.data);
+        const sendUsers = selectedData.map(node => {
+            users.push(node);
+        });
+        //setLoader2(": Warning");
+        //setTitleWarning(" <i class='mdi mdi-alert-octagon text-warning'></i>");
+        setDisableSendButton(false);
+        setStatusText();
+        if (sendUsers.length != 0) {
+            setShowMassSend(true);
+            users.forEach(user => {
+                x = x + '<i class="mdi mdi-account text-primary"></i> ' + user.givenName + ' ' + user.surname + ' [<a class="text-info">' + user.mailNickname + '</a>] on address [<a href="#">' + user.otherMails + '</a>]</br> '
+
+            });
+            setDeleteUsersLabel(`You are about to send a registration reminder to: ${x}`);
+        }
+        else {
+            alert("No users selected!")
+        }
+
+    };
+
+    const sendMassHandler = async (e) => {
+        e.preventDefault();
+        setDisableDeleteButton(true);
+        setShowDeleteProgressBar(true)
+        setDeleteUsersLabel("Sending Registration Reminders...");
+        setDeleteProgressBarCount(0);
+        setTitleWarning();
+        setDeleteLabel(<><Spinner animation="border" size="sm" /></>);
+        setLoader2(<><Spinner animation="border" size="sm" /></>);
+        setCloseDisable(true);
+        let selected = [];
+        const selectedNodes = gridRef.current.api.getSelectedNodes()
+        const selectedData = selectedNodes.map(node => node.data);
+        //const objectId = selectedData.map(node => `${node.objectId}`).join(', ');
+
+        let count = 0
+        let increment = (100 / gridRef.current.api.getSelectedNodes().length);
+        let countProgress = 0;
+
+        let sent = [];
+        let notSent = [];
+        var x = "";
+        abort.current = 0;
+
+        for (let node of selectedData) {
+            if (abort.current == 0) {
+                let status = await sendMassReminder(node);
+                console.log(status)
+                countProgress = countProgress + increment;
+                setDeleteProgressBarCount(countProgress);
+                count++;
+                try {
+                    if (status == 200) {
+                        sent.push(node);
+                        x = x + '<i class="mdi mdi-checkbox-marked-circle-outline text-success"></i> Sent [' + node.mailNickname + '] successfully.</br>';
+                        setDeleteUsersLabel(x)
+                    }
+
+                    else {
+                        notSent.push(node);
+                        x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error sending [' + node.mailNickname + '] -> ' + status.errorDescription + '</br>';
+                        setDeleteUsersLabel(x);
+                    }
+                }
+                catch (error) {
+                    notSent.push(node);
+                    x = x + '<i class="mdi mdi mdi-alert-circle text-danger"></i> Error deleting [' + node.mailNickname + '] -> ' + status + '</br>';
+                    setDeleteUsersLabel(x);
+                }
+
+                if (count == gridRef.current.api.getSelectedNodes().length) {
+                    setSendMassLabel("Send");
+                    setLoader2(": Done");
+                    setCancelButtonEnabled(false);
+                    //setStatusText(`${x} </br>`);
+                    //setDeleteUsersLabel("Done");
+                    let rows = gridRef.current.api.getDisplayedRowCount();
+                    setCount(rows);
+                    setTimeout(() => {
+                        setShowDeleteProgressBar(false);
+                        //setShow(false);
+                        //setStatusText();
+
+                    }, 1000);
+
+                }
+            }
+            else {
+                setSendMassLabel("Send");
+                setLoader2(": Aborted");
+                let rows = gridRef.current.api.getDisplayedRowCount();
+                setCount(rows);
+                setTimeout(() => {
+                    setShowDeleteProgressBar(false);
+                    //setShow(false);
+                    //setStatusText();
+
+                }, 1000);
+                setCloseDisable(false);
+                return;
+            }
+        }
+        setCloseDisable(false)
+    }
+
+    const sendMassReminder = async (node) => {
+
+        const code = process.env.REACT_APP_FUNCTION_SEND_MASS_REMINDER_CODE;
+
+        const headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        headers.append("x-functions-key", code);
+
+
+        var data = JSON.stringify({
+            "recipient": `${node.otherMails}`,
+            "airline": `${node.airline}`,
+            "activationCode": `${node.activationCode}`,
+            "firstName": `${node.firstName}`,
+            "role": `${node.role}`
+        });
+
+        const options = {
+            method: "POST",
+            headers: headers,
+            body: data
+        };
+
+        fetch(process.env.REACT_APP_FUNCTION_SEND_MASS_REMINDER_URI, options)
+            .then(response => response.status)
+            .then(status => {
+                if (status == 200) {
+                    return 200;
+                }
+                else {
+                    return 500;
+                }
+
+            }
+            )
+            .catch(error => {
+                console.log('error', error);
+                return 500;
+            });
+
+    }
 
     return (
         <div>
@@ -897,6 +1058,16 @@ export const ListUsers = (props) => {
                                             onBtnExport();
                                         }}><i className="mdi mdi-file-export text-primary mdi-18px"></i>Export</Button>
                                 }
+                                {/*
+                                    sendMassDisabled
+                                        ?
+                                        <></>
+                                        :
+                                        <Button className="btn-primary-override" variant="primary" disabled={false} style={{ borderRadius: 1, marginLeft: 3, fontWeight: "bold", borderColor: "transparent", backgroundColor: "transparent", color: "#777" }} size="md" onClick={e => {
+                                            handleMassSendShow();
+                                        }}><i className="mdi mdi-send-clock text-info mdi-18px"></i>Send Reminder</Button>
+                                
+                                */}
 
                                 <AgGridReact
                                     ref={gridRef}
@@ -918,7 +1089,7 @@ export const ListUsers = (props) => {
                                     suppressExcelExport={true}
                                 >
                                     <AgGridColumn field="objectId" sortable={true} filter={true} hide={true} editable={false}></AgGridColumn>
-                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true} headerCheckboxSelection={true} editable={false}></AgGridColumn>
+                                    <AgGridColumn field="mailNickname" sortable={true} filter={true} headerName={"User"} checkboxSelection={true} headerCheckboxSelection={true} headerCheckboxSelectionFilteredOnly={true} editable={false}></AgGridColumn>
                                     <AgGridColumn field="displayName" sortable={true} filter={true} hide={true} ></AgGridColumn>
                                     <AgGridColumn field="givenName" sortable={true} filter={true}></AgGridColumn>
                                     <AgGridColumn field="surname" sortable={true} filter={true} headerName={"Last Name"}></AgGridColumn>
@@ -926,7 +1097,7 @@ export const ListUsers = (props) => {
                                         //<AgGridColumn field="userPrincipalName" sortable={true} filter={true} hide={true}></AgGridColumn>
                                     }
                                     <AgGridColumn field="accountEnabled" sortable={true} filter={false} hide={false} cellRenderer={AccountEnabledCellRenderer} headerName={"Status"} editable={false}></AgGridColumn>
-                                    <AgGridColumn field="version" sortable={true} filter={TSPFilter} filterParams={{tspLastModified:TSP}} editable={false} cellRenderer={VersionCellRenderer}
+                                    <AgGridColumn field="version" sortable={true} filter={TSPFilter} filterParams={{ tspLastModified: TSP }} editable={false} cellRenderer={VersionCellRenderer}
                                         cellRendererParams={{ tspLastModified: TSP }} headerName={"TSP Version"}></AgGridColumn>
                                     <AgGridColumn field="lastUpdated" sortable={true} filter={true} editable={false} headerName={"Last Connection (UTC)"}></AgGridColumn>
                                     <AgGridColumn field="userRole" sortable={true} filter={true} cellEditor="agSelectCellEditor" cellEditorParams={{
@@ -990,6 +1161,55 @@ export const ListUsers = (props) => {
                                             setCancelButtonEnabled(true);
                                         }} disabled={disableDeleteButton}>
                                             {deleteLabel}
+                                        </Button>
+                                    </Modal.Footer>
+                                </Modal>
+                                <Modal scrollable="true" show={showMassSend} onHide={handleClose} contentClassName={"modal"} size="lg" backdrop="static">
+                                    <Modal.Header closeButton>
+                                        <Modal.Title>Send Registration Reminder {loader2}
+                                            <a dangerouslySetInnerHTML={{ __html: titleWarning }} />
+                                        </Modal.Title>
+                                    </Modal.Header>
+                                    <Modal.Body>
+                                        <div dangerouslySetInnerHTML={{ __html: deleteUsersLabel }} />
+                                    </Modal.Body>
+                                    {
+                                        showDeleteProgressBar
+                                            ?
+                                            <ProgressBar variant="danger" animated now={deleteProgressBarCount} />
+                                            :
+                                            <></>
+                                    }
+                                    <div dangerouslySetInnerHTML={{ __html: statusText }} />
+
+                                    <Modal.Footer>
+                                        {
+                                            cancelButtonEnabled
+                                                ?
+                                                <Button variant="warning" size="sm" onClick={e => {
+                                                    abort.current = 1;
+                                                    setCancelButtonEnabled(false);
+                                                    //setGridDeleteButtonEnabled(true);
+                                                }
+                                                }>
+                                                    Abort
+                                                </Button>
+                                                :
+                                                <></>
+                                        }
+                                        <Button variant="secondary" disabled={closeDisabled} size="sm" onClick={e => {
+                                            handleClose();
+                                            setCancelButtonEnabled(false);
+
+                                        }}>
+                                            Close
+                                        </Button>
+
+                                        <Button variant="info" size="sm" onClick={e => {
+                                            sendMassHandler(e);
+                                            setCancelButtonEnabled(true);
+                                        }} disabled={disableSendButton}>
+                                            {sendMassLabel}
                                         </Button>
                                     </Modal.Footer>
                                 </Modal>
