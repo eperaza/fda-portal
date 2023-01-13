@@ -25,6 +25,7 @@ import { Airlines } from './airlinemanagement/Airlines';
 import { OptimalCI } from './fdalite/OptimalCI';
 import CircularProgress from '@mui/material/CircularProgress';
 import { FaWindows } from 'react-icons/fa';
+import { Onboarding } from './airlinemanagement/Onboarding';
 
 const App = () => {
 
@@ -319,6 +320,34 @@ const App = () => {
     }
   }
 
+  const renderOnboarding = () => {
+    if (membership == "airline-fda") {
+      return (
+        <Route path="/airlinemanagement/Onboarding" exact component={() => {
+          return (
+            <div>
+              <div className="container-scroller">
+              <Sidebar account={accounts[0].name} airline={airline} setAirline={setAirline} membership={membership} role={role} token={token} />
+                <div className="container-fluid page-body-wrapper">
+                  {<Navbar account={accounts[0].name} graphData={graphData}/>}
+                  <div className="main-panel">
+                    <div className="content-wrapper">
+                      <Onboarding airline={airline} token={token} graphData={graphData} />
+                    </div>
+                    {<Footer />
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          );
+        }}
+        />
+      );
+    }
+  }
+
   const renderOptimalCI = () => {
     return (
       <Route path="/fdalite/OptimalCI" exact component={() => {
@@ -428,6 +457,7 @@ const App = () => {
                   {renderFDR()}
                   {renderPreferences()}
                   {renderAirlines()}
+                  {renderOnboarding()}
                   {renderOptimalCI()}
 
                   <Route path="*" exact component={() => {

@@ -241,6 +241,9 @@ class Sidebar extends Component {
                     <ul className="nav flex-column sub-menu">
                       <li className="nav-item"> <Link className={this.isPathActive('/airlinemanagement/Airlines') ? 'nav-link active' : 'nav-link'} to="/airlinemanagement/Airlines"><Trans>Create Airline</Trans></Link></li>
                     </ul>
+                    <ul className="nav flex-column sub-menu">
+                      <li className="nav-item"> <Link className={this.isPathActive('/airlinemanagement/Onboarding') ? 'nav-link active' : 'nav-link'} to="/airlinemanagement/Onboarding"><Trans>Airlines Onboarding</Trans></Link></li>
+                    </ul>
                   </div>
                 </Collapse>
               </li>
